@@ -1,16 +1,24 @@
 package com.delfood.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.delfood.service.MemberService;
+import com.delfood.vo.MemberVO;
 
 @RestController
 @RequestMapping("/member/")
 public class MemberController {
 	
-	@PostMapping("signin")
-	public Object signIn() {
-		
-		return null;
+	@Autowired
+	MemberService memberService;
+	
+	@GetMapping("list")
+	public List<MemberVO> list() {
+		return memberService.getAll();
 	}
 }
