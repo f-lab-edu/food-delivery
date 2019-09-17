@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  
 @Configuration
 @MapperScan(basePackages="com.delfood.dao")
-@EnableTransactionManagement
+@EnableTransactionManagement	// DataSourceTransactionManager Bean을 Transaction Manager로 사용
 public class DatabaseConfig {
  
     @Bean

@@ -12,6 +12,7 @@ target/
 .settings
 .springBeans
 .sts4-cache
+.log
 
 ### IntelliJ IDEA ###
 .idea
@@ -29,3 +30,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### application profile ###
+**/application-local.properties
+
