@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
-import com.delfood.vo.MemberVO;
+import com.delfood.dto.MemberDTO;
 
 @Repository
 public interface MemberDao {

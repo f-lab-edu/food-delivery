@@ -49,6 +49,7 @@
 			<artifactId>mariadb-java-client</artifactId>
 		</dependency>
 
+		<!-- LOMBOK -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
