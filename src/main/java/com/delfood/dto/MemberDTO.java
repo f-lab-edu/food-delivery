@@ -1,6 +1,7 @@
 package com.delfood.dto;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 import org.apache.ibatis.type.Alias;
 
@@ -24,9 +25,9 @@ public class MemberDTO {
 	    // 상태 
 	    private String status;
 	    // 회원가입일 
-	    private LocalDateTime regDate;
+	    private Date regDate;
 	    // 최종 수정일 
-	    private LocalDateTime lastUpdateDate;
+	    private Date lastUpdateDate;
 	    
 	    // Member 모델 복사
 	    public void CopyData(MemberDTO param)
