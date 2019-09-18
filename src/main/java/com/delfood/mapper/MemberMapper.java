@@ -1,4 +1,4 @@
-package com.delfood.dao;
+package com.delfood.mapper;
 
 import java.util.List;
 import java.util.Map;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.delfood.dto.MemberDTO;
 
 @Repository
-public interface MemberDao {
+public interface MemberMapper {
 
-	MemberDTO findById(Map<String, String> params);
+	MemberDTO getMemberInfo(String memberId);
 
 }

@@ -1,11 +1,9 @@
 package com.delfood.controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,20 +17,11 @@ public class MemberController {
 	@Autowired
 	private MemberService memberService;
 	
-	@GetMapping("{id}")
-	public Map<String, Object> memberInfo(@PathVariable("id") String id){
-		Map<String, String> params = new HashMap<>();
-		params.put("id", id);
-		MemberDTO memberInfo = memberService.findById(params);
-		
-		Map<String, Object> result = new HashMap<>();
-		if(memberInfo == null) {
-			result.put("flag", "false");
-		}else {
-			result.put("flag", "true");
-			result.put("memberInfo", memberInfo);
-		}
-		
-		return result;
+	@GetMapping("myInfo")
+	public MemberDTO memberInfo(HttpSession session){
+		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+		MemberDTO memberInfo = memberService.getMemberInfo(id);
+		return memberInfo;
 	}
+	
 }

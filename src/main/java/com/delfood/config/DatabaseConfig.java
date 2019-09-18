@@ -12,7 +12,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
  
 @Configuration
-@MapperScan(basePackages="com.delfood.dao")
+@MapperScan(basePackages="com.delfood.mapper")
 @EnableTransactionManagement	// DataSourceTransactionManager Bean을 Transaction Manager로 사용
 public class DatabaseConfig {
  
