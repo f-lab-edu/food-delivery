@@ -1,14 +1,13 @@
 package com.delfood.dto;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
-import org.apache.ibatis.type.Alias;
-
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 // 고객 
-@Data
+@Getter @Setter @ToString
 public class MemberDTO {
 	    // 아이디 
 	    private String id;
@@ -30,7 +29,7 @@ public class MemberDTO {
 	    private Date lastUpdateDate;
 	    
 	    // Member 모델 복사
-	    public void CopyData(MemberDTO param)
+	    public void copyData(MemberDTO param)
 	    {
 	        this.id = param.getId();
 	        this.password = param.getPassword();

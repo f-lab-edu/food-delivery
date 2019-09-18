@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.delfood.dao.MemberDao">
+<mapper namespace="com.delfood.mapper.MemberMapper">
 	
 	
-    <select id="findById" resultType="com.delfood.dto.MemberDTO">
+    <select id="getMemberInfo" resultType="com.delfood.dto.MemberDTO">
         SELECT id, password, name, tel, mail, login_type loginType, status, reg_date regDate, last_update_date lastUpdateDate
         FROM MEMBER
         WHERE id = #{id}
