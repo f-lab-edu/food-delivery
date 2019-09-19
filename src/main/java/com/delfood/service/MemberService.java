@@ -14,7 +14,7 @@ public class MemberService {
 	private MemberMapper memberMapper;
 	
 	public MemberDTO getMemberInfo(String memberId) {
-		return memberMapper.getMemberInfo(memberId);
+		return memberMapper.findById(memberId);
 	}
 	
 	

@@ -17,6 +17,11 @@ public class MemberController {
 	@Autowired
 	private MemberService memberService;
 	
+	/**
+	 * 로그인한 사용자가 마이페이지를 눌렀을 때 보여줄 사용자 정보를 반환한다.
+	 * @param session
+	 * @return MemberDTO
+	 */
 	@GetMapping("myInfo")
 	public MemberDTO memberInfo(HttpSession session){
 		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
