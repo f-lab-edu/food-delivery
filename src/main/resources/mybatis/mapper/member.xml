@@ -3,10 +3,22 @@
 <mapper namespace="com.delfood.mapper.MemberMapper">
 	
 	
-    <select id="getMemberInfo" resultType="com.delfood.dto.MemberDTO">
-        SELECT id, password, name, tel, mail, login_type loginType, status, reg_date regDate, last_update_date lastUpdateDate
+    <select id="findById" resultType="com.delfood.dto.MemberDTO">
+        SELECT id, password, name, tel, mail, status, reg_date regDate, last_update_date lastUpdateDate
         FROM MEMBER
         WHERE id = #{id}
+    </select>
+    
+    <insert id="insertMember" parameterType="com.delfood.dto.MemberDTO">
+    	INSERT INTO MEMBER(id, password, name, tel, mail)
+    	VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail})
+    </insert>
+    
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.MemberDTO">
+    	SELECT id, password, name, tel, mail, status, created_at, updated_at, address, address_detail
+    	FROM   MEMBER
+    	WHERE  id = #{id}
+    	AND	   password = #{password}
     </select>
     
 </mapper>

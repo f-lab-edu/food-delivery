@@ -1,6 +1,6 @@
 package com.delfood.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,14 +19,16 @@ public class MemberDTO {
 	    private String tel;
 	    // 이메일 
 	    private String mail;
-	    // 로그인타입 (Kakao, Facebook...)
-	    private String loginType;
 	    // 상태 
 	    private String status;
 	    // 회원가입일 
-	    private Date regDate;
+	    private LocalDateTime createdAt;
 	    // 최종 수정일 
-	    private Date lastUpdateDate;
+	    private LocalDateTime updatedAt;
+	    // 주소
+	    private String address;
+	    // 상세 주소
+	    private String addressDetail;
 	    
 	    // Member 모델 복사
 	    public void copyData(MemberDTO param)
@@ -36,9 +38,8 @@ public class MemberDTO {
 	        this.name = param.getName();
 	        this.tel = param.getTel();
 	        this.mail = param.getMail();
-	        this.loginType = param.getLoginType();
 	        this.status = param.getStatus();
-	        this.regDate = param.getRegDate();
-	        this.lastUpdateDate = param.getLastUpdateDate();
+	        this.createdAt = param.getCreatedAt();
+	        this.updatedAt = param.getUpdatedAt();
 	    }
 }

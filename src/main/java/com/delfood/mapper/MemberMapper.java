@@ -10,6 +10,10 @@ import com.delfood.dto.MemberDTO;
 @Repository
 public interface MemberMapper {
 
-	MemberDTO findById(String memberId);
+	MemberDTO findById(String id);
+	
+	int insertMember(MemberDTO memberInfo);
+	
+	MemberDTO findByIdAndPassword(String id, String password);
 
 }

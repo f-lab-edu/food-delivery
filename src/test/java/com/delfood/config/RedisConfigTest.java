@@ -34,13 +34,8 @@ public class RedisConfigTest {
 		member.setId("eric");
 		member.setPassword("asdfasdf");
 		member.setTel("123-1234-1234");
-		member.setLastUpdateDate(new Date());
-		member.setRegDate(new Date());
-		member.setStatus("default");
-		member.setLoginType("default");
 		member.setMail("yyy9942@naver.com");
 		member.setName("eric Jeong");
-		member.setStatus("default");
 		
 		return member;
 	}
