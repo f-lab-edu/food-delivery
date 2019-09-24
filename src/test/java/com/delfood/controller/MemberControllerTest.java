@@ -2,10 +2,12 @@ package com.delfood.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
@@ -46,25 +48,52 @@ public class MemberControllerTest {
 	@Test
 	public void signUpTest() throws Exception {
 		mockMvc.perform(post("/members/signUp")	
-				.param("id", "testID")
-				.param("password", "testPassword")
-				.param("mail", "testMail@test.com")
-				.param("name", "testName")
+				.param("id", "testID2")
+				.param("password", "testPassword3")
+				.param("mail", "testMail@test.com2")
+				.param("name", "testName2")
 				.param("tel", "010-1234-4567"))
-			.andDo(print())
-			.andExpect(status().isOk());
+			.andDo(print()) 
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result", is("success")));
 	}
 
 	
 	@Test
 	public void signInTest() throws Exception {
-		mockSession = new MockHttpSession();
 		mockMvc.perform(post("/members/signIn")
 				.param("id", "testID")
-				.param("password", "testPassword")
-				.session(mockSession))
+				.param("password", "testPassword"))
 			.andDo(print())
 			.andExpect(status().isOk());
+		
+		mockMvc.perform(post("/members/signIn")
+				.param("id", "testID")
+				.param("password",  "failPassword"))
+			.andDo(print())
+			.andExpect(status().is(401));
 	}
-
+	
+	@Test
+	public void idDuplTest() throws Exception {
+		mockMvc.perform(get("/members/testID"))
+			.andDo(print())
+			.andExpect(jsonPath("$.result", is("duplicated")))
+			.andExpect(status().isOk());
+	}
+	
+	
+	@Test
+	public void signUpDuplTest() throws Exception {
+		mockMvc.perform(post("/members/signUp")	
+				.param("id", "testID2")
+				.param("password", "testPassword")
+				.param("mail", "testMail@test.com")
+				.param("name", "testName2")
+				.param("tel", "010-1234-4567"))
+			.andDo(print()) 
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result", is("duplicated")));
+	}
+	
 }

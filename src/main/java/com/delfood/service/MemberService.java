@@ -43,5 +43,16 @@ public class MemberService {
 		return memberInfo;
 	}	
 	
+	/**
+	 * 회원가입시 아이디 중복 체크를 진행한다.
+	 * @param id
+	 * @return
+	 * true : 중복된 아이디
+	 * false : 중복되지 않은 아이디(생성 가능한 아이디)
+	 */
+	public boolean checkIdDuplicated(String id) {
+		return memberMapper.findById(id)!=null;
+	}
+	
 	
 }

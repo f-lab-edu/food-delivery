@@ -4,7 +4,7 @@
 	
 	
     <select id="findById" resultType="com.delfood.dto.MemberDTO">
-        SELECT id, password, name, tel, mail, status, reg_date regDate, last_update_date lastUpdateDate
+        SELECT id, password, name, tel, mail, status, created_at, updated_at, address, address_detail
         FROM MEMBER
         WHERE id = #{id}
     </select>
