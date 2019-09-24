@@ -2,13 +2,11 @@ package com.delfood.dto;
 
 import java.util.Date;
 
-import org.apache.ibatis.type.Alias;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Alias("owner")
 @Getter @Setter @ToString
 public class OwnerDTO {
 	
