@@ -6,7 +6,7 @@
 		SELECT id, password, name, mail, tel, created_at creadtedAt, updated_at updatedAt, status
 		FROM OWNER
 		WHERE ID = #{id}
-		AND PASSWORD = #{password}
+		AND PASSWORD = #{password} 
 	</select>
     
 </mapper>
