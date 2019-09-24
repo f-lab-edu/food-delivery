@@ -5,7 +5,8 @@
 	<select id="findByIdAndPassword" resultType="owner">
 		SELECT ID, PASSWORD, NAME, MAIL, TEL, CREATED_AT creadtedAt, UPDATED_AT updatedAt, status
 		FROM OWNER
-		WHERE
+		WHERE ID = #{id}
+		AND PASSWORD = #{password}
 	</select>
     
 </mapper>
