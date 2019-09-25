@@ -15,5 +15,6 @@ public interface MemberMapper {
 	int insertMember(MemberDTO memberInfo);
 	
 	MemberDTO findByIdAndPassword(String id, String password);
-
+	
+	int updateMemberPassword(String id, String password);
 }

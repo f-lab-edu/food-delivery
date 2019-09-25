@@ -24,7 +24,7 @@ public class MemberService {
 	 */
 	public boolean insertMember(MemberDTO memberInfo) {
 		memberInfo.setPassword(SHA256Util.encryptSHA256(memberInfo.getPassword()));
-		return memberMapper.insertMember(memberInfo) == 1 ? true : false;
+		return memberMapper.insertMember(memberInfo) == 1;
 	}
 	
 	/**
@@ -52,6 +52,18 @@ public class MemberService {
 	 */
 	public boolean checkIdDuplicated(String id) {
 		return memberMapper.findById(id)!=null;
+	}
+	
+	/**
+	 * 회원 비밀번호를 변경한다.
+	 * @param id
+	 * @param password
+	 * @return
+	 * 변경 성공시 true
+	 * 변경 실패시 false
+	 */
+	public boolean updateMemberPassword(String id, String password) {
+		return memberMapper.updateMemberPassword(id, password) == 1;
 	}
 	
 	

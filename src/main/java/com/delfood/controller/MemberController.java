@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -119,6 +120,35 @@ public class MemberController {
 		return loginResponse;
 	}
 	
+	/**
+	 * 회원 비밀번호 변경
+	 * @param session
+	 * @return
+	 */
+	@PutMapping("myInfo")
+	public UpdateMemberPasswordResponse updateMemberInfo(HttpSession session, String password) {
+		UpdateMemberPasswordResponse response;
+		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+		if(id == null) {
+			response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.no_login);
+		}else if(password == null){
+			response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.empty_password);
+		}else {
+			boolean result = memberService.updateMemberPassword(id, password);
+			if(result) {
+				response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.success);
+			}else {
+				response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.error);
+			}
+		}
+		
+		return response;
+	}
+	
+	
+	
+	// response 객체
+	
 	@Getter @Setter @ToString @AllArgsConstructor @RequiredArgsConstructor
 	private static class SignInResponse{
 		enum LogInStatus{success, fail, deleted, error}
@@ -139,6 +169,13 @@ public class MemberController {
 		enum DuplStatus{success, duplicated, error}
 		@NonNull
 		private DuplStatus result;
+	}
+	
+	@Getter @Setter @ToString @RequiredArgsConstructor
+	private static class UpdateMemberPasswordResponse{
+		enum UpdateStatus{success, no_login, empty_password, error}
+		@NonNull
+		private UpdateStatus result;
 	}
 	
 }

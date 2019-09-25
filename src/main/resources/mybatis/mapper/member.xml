@@ -4,7 +4,7 @@
 	
 	
     <select id="findById" resultType="com.delfood.dto.MemberDTO">
-        SELECT id, password, name, tel, mail, status, created_at, updated_at, address, address_detail
+        SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
         FROM MEMBER
         WHERE id = #{id}
     </select>
@@ -15,10 +15,16 @@
     </insert>
     
     <select id="findByIdAndPassword" resultType="com.delfood.dto.MemberDTO">
-    	SELECT id, password, name, tel, mail, status, created_at, updated_at, address, address_detail
+    	SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
     	FROM   MEMBER
     	WHERE  id = #{id}
     	AND	   password = #{password}
     </select>
+    
+    <update id="updateMemberPassword">
+    	UPDATE MEMBER
+    	SET password = ${password}
+    	WHERE id=#{id}
+    </update>
     
 </mapper>
