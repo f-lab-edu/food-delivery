@@ -17,4 +17,6 @@ public interface MemberMapper {
 	MemberDTO findByIdAndPassword(String id, String password);
 	
 	int updateMemberPassword(String id, String password);
+	
+	int deleteMember(String id);
 }

@@ -4,10 +4,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,8 +37,11 @@ public class MemberController {
 	 * @return MemberDTO
 	 */
 	@GetMapping("myInfo")
-	public MemberDTO memberInfo(HttpSession session){
+	public MemberDTO memberInfo(HttpSession session, HttpServletResponse httpResponse){
 		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+		if(id == null) {
+			httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+		}
 		MemberDTO memberInfo = memberService.getMemberInfo(id);
 		return memberInfo;
 	}
@@ -49,11 +55,12 @@ public class MemberController {
 	 * @return
 	 */
 	@GetMapping("{id}")
-	public MemberIdDuplResponse idCheck(@PathVariable String id) {
+	public MemberIdDuplResponse idCheck(@PathVariable String id, HttpServletResponse httpResponse) {
 		MemberIdDuplResponse duplResponse;
 		if(memberService.checkIdDuplicated(id)) {
 			// 아이디가 중복되어있을 때
 			duplResponse = new MemberIdDuplResponse(MemberIdDuplResponse.DuplStatus.duplicated);
+			httpResponse.setStatus(HttpStatus.LOCKED.value());
 		}else {
 			// 아이디가 중복되어있지 않을 때
 			duplResponse = new MemberIdDuplResponse(MemberIdDuplResponse.DuplStatus.success);
@@ -70,7 +77,7 @@ public class MemberController {
 	 *  
 	 */
 	@PostMapping
-	public SignUpResponse signUp(MemberDTO memberInfo, HttpServletResponse response) {
+	public SignUpResponse signUp(@RequestBody MemberDTO memberInfo, HttpServletResponse httpResponse) {
 		SignUpResponse result;
 		
 		String id = memberInfo.getId();
@@ -78,6 +85,7 @@ public class MemberController {
 		if(checkIdDuplicated) {
 			// 중복 아이디일 때
 			result = new SignUpResponse(SignUpResponse.SignUpStatus.id_duplicated);
+			httpResponse.setStatus(HttpStatus.LOCKED.value());
 		}else {
 			// 중복 아이디가 아닐 때
 			boolean insertResponse = memberService.insertMember(memberInfo);
@@ -85,6 +93,7 @@ public class MemberController {
 				result = new SignUpResponse(SignUpResponse.SignUpStatus.success);
 			}else {
 				result = new SignUpResponse(SignUpResponse.SignUpStatus.error);
+				httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			}
 		}
 		return result;
@@ -97,24 +106,26 @@ public class MemberController {
 	 * error : 그 밖에 오류가 난 경우
 	 */
 	@PostMapping("signIn")
-	public SignInResponse signIn(String id,String password, HttpSession session, HttpServletResponse response) {
+	public SignInResponse signIn(@RequestBody MemberDTO memberDTO, HttpSession session, HttpServletResponse httpResponse) {
+		String id = memberDTO.getId();
+		String password = memberDTO.getPassword();
 		SignInResponse loginResponse;
 		MemberDTO memberInfo = memberService.signIn(id, password);
 		if(memberInfo == null) {
 			// id 또는 password 확인 필요(DB에서 가져온 정보가 없을 때)
 			loginResponse = new SignInResponse(SignInResponse.LogInStatus.fail);
-			response.setStatus(401);
+			httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
 		}else if("default".equals(memberInfo.getStatus())) {
 			// 성공시 세션에 ID를 저장
 			loginResponse = new SignInResponse(SignInResponse.LogInStatus.success, memberInfo);
 			session.setAttribute("LOGIN_MEMBER_ID", memberInfo.getId());
 		}else if("deleted".equals(memberInfo.getStatus())) {
 			// 삭제된 경우
-			response.setStatus(401);
+			httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
 			loginResponse = new SignInResponse(SignInResponse.LogInStatus.deleted);
 		}else {
 			// 예상하지 못한 오류일 경우
-			response.setStatus(500);
+			httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			loginResponse = new SignInResponse(SignInResponse.LogInStatus.error);
 		}
 		return loginResponse;
@@ -126,28 +137,57 @@ public class MemberController {
 	 * @return
 	 */
 	@PutMapping("myInfo")
-	public UpdateMemberPasswordResponse updateMemberInfo(HttpSession session, String password) {
-		UpdateMemberPasswordResponse response;
+	public UpdateMemberPasswordResponse updateMemberInfo(HttpSession session, String password, HttpServletResponse response) {
+		UpdateMemberPasswordResponse updateResponse;
 		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
 		if(id == null) {
-			response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.no_login);
+			updateResponse = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.no_login);
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		}else if(password == null){
-			response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.empty_password);
+			updateResponse = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.empty_password);
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}else {
 			boolean result = memberService.updateMemberPassword(id, password);
 			if(result) {
-				response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.success);
+				updateResponse = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.success);
 			}else {
-				response = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.error);
+				updateResponse = new UpdateMemberPasswordResponse(UpdateMemberPasswordResponse.UpdateStatus.error);
+				response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			}
 		}
 		
-		return response;
+		return updateResponse;
+	}
+	
+	/**
+	 * 회원을 삭제 상태로 변환시킨다.
+	 * delete 쿼리가 아닌 update 쿼리가 진행된다.
+	 * MEMBER 테이블의 status 컬럼을 delete로 바꾸어 비활성 상태로 만든다.
+	 * @param session
+	 * @param httpResponse
+	 * @return
+	 */
+	@DeleteMapping("myInfo")
+	public DeleteMemberResponse deleteMemberInfo(HttpSession session, HttpServletResponse httpResponse) {
+		DeleteMemberResponse deleteResponse;
+		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+		if(id == null) {
+			deleteResponse = new DeleteMemberResponse(DeleteMemberResponse.DeleteStatus.no_login);
+			httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+		}else {
+			if(memberService.deleteMember(id)) {
+				deleteResponse = new DeleteMemberResponse(DeleteMemberResponse.DeleteStatus.success);
+			}else {
+				deleteResponse = new DeleteMemberResponse(DeleteMemberResponse.DeleteStatus.error);
+				httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			}
+		}
+		return deleteResponse;
 	}
 	
 	
 	
-	// response 객체
+	// -------------- response 객체 --------------
 	
 	@Getter @Setter @ToString @AllArgsConstructor @RequiredArgsConstructor
 	private static class SignInResponse{
@@ -178,4 +218,10 @@ public class MemberController {
 		private UpdateStatus result;
 	}
 	
+	@Getter @Setter @ToString @RequiredArgsConstructor
+	private static class DeleteMemberResponse{
+		enum DeleteStatus{success, no_login, error}
+		@NonNull
+		private DeleteStatus result;
+	}
 }

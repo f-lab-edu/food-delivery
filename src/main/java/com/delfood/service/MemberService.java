@@ -66,5 +66,9 @@ public class MemberService {
 		return memberMapper.updateMemberPassword(id, password) == 1;
 	}
 	
+	public boolean deleteMember(String id) {
+		return memberMapper.deleteMember(id) == 1;
+	}
+	
 	
 }
