@@ -2,12 +2,14 @@ package com.delfood.dto;
 
 import java.util.Date;
 
+import org.apache.ibatis.type.Alias;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter @Setter @ToString
+@Getter @Setter @ToString 
+@Alias("owner") // 지정한 이름으로 typeAlias를 등록
 public class OwnerDTO {
 	
 	private String id;

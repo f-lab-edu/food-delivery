@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OwnerMapper">
 
-	<select id="findByIdAndPassword" resultType="com.delfood.dto.OwnerDTO">
+	<select id="findByIdAndPassword" resultType="owner">
 		SELECT id, password, name, mail, tel, created_at creadtedAt, updated_at updatedAt, status
 		FROM OWNER
 		WHERE ID = #{id}
