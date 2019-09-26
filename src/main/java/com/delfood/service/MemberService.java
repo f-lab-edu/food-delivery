@@ -73,5 +73,9 @@ public class MemberService {
 		return memberMapper.deleteMember(id) == 1;
 	}
 	
+	public boolean updateMemberAddress(String id, String address, String addressDetail){
+		return memberMapper.updateMemberAddress(id, address, addressDetail) == 1;
+	}
+	
 	
 }

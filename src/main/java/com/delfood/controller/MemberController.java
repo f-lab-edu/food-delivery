@@ -202,6 +202,41 @@ public class MemberController {
 		}
 		return responseEntity;
 	}
+	/**
+	 * 회원 주소 변경
+	 * @param memberInfo
+	 * @param session
+	 */
+	@PutMapping("address")
+	public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(@RequestBody MemberDTO memberInfo, HttpSession session) {
+		ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
+		String address = memberInfo.getAddress();
+		String addressDetail = memberInfo.getAddressDetail();
+		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+		
+		if(address == null) {
+			// 요청한 주소가 null일 때
+			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.emptyAddress(), HttpStatus.BAD_REQUEST);
+		}else if(addressDetail == null) {
+			// 요청한 상세 주소가 null일 때
+			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.emptyAddressDetail(), HttpStatus.BAD_REQUEST);
+		}else if(id == null) {
+			// 로그인을 안했을 때
+			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.noLogin(), HttpStatus.UNAUTHORIZED);
+		}else {
+			if(memberService.updateMemberAddress(id, address, addressDetail)) {
+				// 성공시
+				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.success(), HttpStatus.OK);
+			}else {
+				// 알수없는 오류 발생시
+				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.success(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			
+		}
+		
+		return responseEntity;
+		
+	}
 	
 	
 	
@@ -288,5 +323,24 @@ public class MemberController {
 		public static final DeleteMemberResponse success() {return SUCCESS;}
 		public static final DeleteMemberResponse noLogin() {return NO_LOGIN;}
 		public static final DeleteMemberResponse error() {return ERROR;}
+	}
+	
+	@Getter @RequiredArgsConstructor
+	private static class UpdateMemberAddressResponse{
+		enum UpdateStatus{success, no_login, empty_address, empty_address_detail, error}
+		@NonNull
+		private UpdateStatus result;
+		
+		private static final UpdateMemberAddressResponse SUCCESS = new UpdateMemberAddressResponse(UpdateStatus.success);
+		private static final UpdateMemberAddressResponse NO_LOGIN = new UpdateMemberAddressResponse(UpdateStatus.no_login);
+		private static final UpdateMemberAddressResponse EMPTY_ADDRESS = new UpdateMemberAddressResponse(UpdateStatus.empty_address);
+		private static final UpdateMemberAddressResponse EMPTY_ADDRESS_DETAIL = new UpdateMemberAddressResponse(UpdateStatus.empty_address_detail);
+		private static final UpdateMemberAddressResponse ERROR = new UpdateMemberAddressResponse(UpdateStatus.error);
+		
+		public static final UpdateMemberAddressResponse success() {return SUCCESS;}
+		public static final UpdateMemberAddressResponse noLogin() {return NO_LOGIN;}
+		public static final UpdateMemberAddressResponse emptyAddress() {return EMPTY_ADDRESS;}
+		public static final UpdateMemberAddressResponse emptyAddressDetail() {return EMPTY_ADDRESS_DETAIL;}
+		public static final UpdateMemberAddressResponse error() {return ERROR;}
 	}
 }

@@ -19,4 +19,6 @@ public interface MemberMapper {
 	int updateMemberPassword(String id, String password);
 	
 	int deleteMember(String id);
+	
+	int updateMemberAddress(String id, String address, String addressDetail);
 }

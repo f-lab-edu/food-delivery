@@ -7,7 +7,7 @@
         SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
         FROM MEMBER
         WHERE id = #{id}
-        AND status != 'delete'
+        AND status != 'DELETE'
     </select>
     
     <insert id="insertMember" parameterType="com.delfood.dto.MemberDTO">
@@ -20,7 +20,7 @@
     	FROM   MEMBER
     	WHERE  id = #{id}
     	AND	   password = #{password}
-    	AND	   status != 'delete'
+    	AND	   status != 'DELETE'
     </select>
     
     <update id="updateMemberPassword">
@@ -31,7 +31,14 @@
     
     <update id="deleteMember">
     	UPDATE MEMBER
-    	SET status = 'delete'
+    	SET status = 'DELETE'
     	WHERE id=#{id}
+    </update>
+    
+    <update id="updateMemberAddress">
+    	UPDATE MEMBER
+    	SET address = #{address},
+    	    address_detail = #{addressDetail}
+    	WHERE id = #{id}
     </update>
 </mapper>
