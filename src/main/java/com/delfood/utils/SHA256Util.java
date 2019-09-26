@@ -16,9 +16,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class SHA256Util {
 	public static final String ENCRYPTION_TYPE = "SHA-256";
-	public static String encryptSHA256(String str) {
+	/*
+	 * NoSuchAlgorithmException : 잘못된 알고리즘을 입력하여 키를 생성할 경우 발생할 수 있다.
+	 * 		개발시 키 생성을 정상적으로 할 수 있다면 발생하지 않는 Exception이므로 Runtime Exception으로 사용한다. 
+	 */
+	public static String encryptSHA256(String str) throws NoSuchAlgorithmException {
 		String SHA = null;
-		try {	
+			
 			MessageDigest sh = MessageDigest.getInstance(ENCRYPTION_TYPE);
 			sh.update(str.getBytes());
 			byte byteData[] = sh.digest();
@@ -27,9 +31,6 @@ public class SHA256Util {
 				sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
 			}
 			SHA = sb.toString();
-		} catch (NoSuchAlgorithmException e) {
-			log.log(Level.ERROR, "SHA256Util Error! Please check SHA256Util");
-		}
 		return SHA;
 	}
 }

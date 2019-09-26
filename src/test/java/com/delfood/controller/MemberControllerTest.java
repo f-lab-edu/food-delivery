@@ -6,9 +6,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,60 +60,90 @@ public class MemberControllerTest {
 	private MockMvc mockMvc;
 	@Autowired
 	private MockHttpSession mockSession;
+	@Autowired
+	private ObjectMapper mapper;
 	
 	
 
 	@Test
+	@Transactional // 테스트 종료 후 롤백한다.
 	public void signUpTest() throws Exception {
-		mockMvc.perform(post("/members/signUp")	
-				.param("id", "testID2")
-				.param("password", "testPassword3")
-				.param("mail", "testMail@test.com2")
-				.param("name", "testName2")
-				.param("tel", "010-1234-4567"))
+		MemberDTO memberInfo = new MemberDTO();
+		memberInfo.setId("testID001");
+		memberInfo.setPassword("testPassword001");
+		memberInfo.setMail("testMail@mail.com");
+		memberInfo.setName("testName");
+		memberInfo.setTel("010-1234-1234");
+		
+		mockMvc.perform(post("/members/")	
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.content(mapper.writeValueAsString(memberInfo)))
 			.andDo(print()) 
-			.andExpect(status().isOk())
+			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.result", is("success")));
 	}
 
 	
 	@Test
 	public void signInTest() throws Exception {
+		MemberDTO memberInfo = new MemberDTO();
+		memberInfo.setId("testID");
+		memberInfo.setPassword("testPassword");
+		
 		mockMvc.perform(post("/members/signIn")
-				.param("id", "testID")
-				.param("password", "testPassword")
-				.session(mockSession))
+				.session(mockSession)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(memberInfo)))
 			.andDo(print())
 			.andExpect(status().isOk());
 		
+		memberInfo.setPassword("failPassword");
 		mockMvc.perform(post("/members/signIn")
-				.param("id", "testID")
-				.param("password",  "failPassword"))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(memberInfo)))
 			.andDo(print())
-			.andExpect(status().is(401));
+			.andExpect(status().isUnauthorized());
 	}
 	
 	
 	@Test
 	public void idDuplTest() throws Exception {
-		mockMvc.perform(get("/members/testID"))
+		mockMvc.perform(get("/members/idCheck/testID"))
 			.andDo(print())
 			.andExpect(jsonPath("$.result", is("duplicated")))
-			.andExpect(status().isOk());
+			.andExpect(status().isLocked());
 	}
 	
 	
 	@Test
+	@Transactional
 	public void signUpDuplTest() throws Exception {
-		mockMvc.perform(post("/members/signUp")	
-				.param("id", "testID2")
-				.param("password", "testPassword")
-				.param("mail", "testMail@test.com")
-				.param("name", "testName2")
-				.param("tel", "010-1234-4567"))
+		MemberDTO memberInfo = new MemberDTO();
+		memberInfo.setId("testID"); // 이미 있는 아이디
+		memberInfo.setPassword("testPassword");
+		memberInfo.setMail("testMail@mail.com");
+		memberInfo.setName("testName");
+		memberInfo.setTel("010-1234-1234");
+		
+		mockMvc.perform(post("/members/")	
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(memberInfo)))
 			.andDo(print()) 
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result", is("duplicated")));
+			.andExpect(status().isLocked())
+			.andExpect(jsonPath("$.result", is("id_duplicated")));
+	}
+	
+	@Test
+	@Transactional
+	public void passwordUpdateTest() throws Exception{
+		Map<String, Object> sessionAttr = new HashMap<>();
+		sessionAttr.put("LOGIN_MEMBER_ID", "testID");
+		mockMvc.perform(put("/members/password")
+				.param("password", "updatePassword")
+				.sessionAttrs(sessionAttr))
+		.andDo(print())
+		.andExpect(jsonPath("$.result", is("success")))
+		.andExpect(status().isOk());
 	}
 	
 	
