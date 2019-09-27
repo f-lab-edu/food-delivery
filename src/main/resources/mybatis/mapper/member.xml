@@ -25,7 +25,7 @@
     
     <update id="updateMemberPassword">
     	UPDATE MEMBER
-    	SET password = ${password}
+    	SET password = #{password}
     	WHERE id=#{id}
     </update>
     
@@ -41,4 +41,10 @@
     	    address_detail = #{addressDetail}
     	WHERE id = #{id}
     </update>
+    
+    <select id="idCheck" resultType="int">
+    	SELECT COUNT(id)
+    	  FROM MEMBER
+    	 WHERE id = #{id}
+    </select>
 </mapper>

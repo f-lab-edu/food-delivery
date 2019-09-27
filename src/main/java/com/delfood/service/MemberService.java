@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.delfood.dto.MemberDTO;
+import com.delfood.mapper.MapperDMLResponse;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;
 
@@ -24,9 +25,13 @@ public class MemberService {
 	 * MyBatis에서 insert return값은 성공시 1이 리턴된다.
 	 * return값은 검사하여 null값이면 true, null이 아닐시 insert에 실패한 것이니 false를 반환한다
 	 */
-	public boolean insertMember(MemberDTO memberInfo) throws NoSuchAlgorithmException {
+	public void insertMember(MemberDTO memberInfo){
 		memberInfo.setPassword(SHA256Util.encryptSHA256(memberInfo.getPassword()));
-		return memberMapper.insertMember(memberInfo) == 1;
+		int insertCount = memberMapper.insertMember(memberInfo);
+		
+		if(insertCount != 1)
+			throw new RuntimeException("insertMember ERROR! 회원가입 메서드를 확인해주세요\n"
+					+ "Params : " + memberInfo);
 	}
 	
 	/**
@@ -40,7 +45,7 @@ public class MemberService {
 	 * error : 그 밖에 오류가 난 경우
 	 * @throws NoSuchAlgorithmException 
 	 */
-	public MemberDTO signIn(String id, String password) throws NoSuchAlgorithmException {
+	public MemberDTO signIn(String id, String password){
 		String cryptoPassword = SHA256Util.encryptSHA256(password);
 		MemberDTO memberInfo = memberMapper.findByIdAndPassword(id, cryptoPassword);
 		return memberInfo;
@@ -53,8 +58,8 @@ public class MemberService {
 	 * true : 중복된 아이디
 	 * false : 중복되지 않은 아이디(생성 가능한 아이디)
 	 */
-	public boolean checkIdDuplicated(String id) {
-		return memberMapper.findById(id) != null;
+	public int idCheck(String id) {
+		return memberMapper.idCheck(id);
 	}
 	
 	/**
@@ -62,19 +67,48 @@ public class MemberService {
 	 * @param id
 	 * @param password
 	 * @return
-	 * 변경 성공시 true
-	 * 변경 실패시 false
 	 */
-	public boolean updateMemberPassword(String id, String password) {
-		return memberMapper.updateMemberPassword(id, password) == 1;
+	public MapperDMLResponse updateMemberPassword(String id, String password){
+		String cryptoPassword = SHA256Util.encryptSHA256(password);
+		int result = memberMapper.updateMemberPassword(id, cryptoPassword);
+		if(result == 1) 
+			return MapperDMLResponse.SUCCESS;	// 원하는 1개의 데이터만 수정
+		else if(result == 0) 
+			return MapperDMLResponse.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
+		else 
+			return MapperDMLResponse.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
+		
+	}
+	/**
+	 * 회원 status를 'DELETED'로 변경한다
+	 * @param id
+	 * @return
+	 */
+	public MapperDMLResponse deleteMember(String id){
+		int result = memberMapper.deleteMember(id);
+		if(result == 1) 
+			return MapperDMLResponse.SUCCESS;	// 원하는 1개의 데이터만 수정
+		else if(result == 0) 
+			return MapperDMLResponse.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
+		else 
+			return MapperDMLResponse.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
 	}
 	
-	public boolean deleteMember(String id) {
-		return memberMapper.deleteMember(id) == 1;
-	}
-	
-	public boolean updateMemberAddress(String id, String address, String addressDetail){
-		return memberMapper.updateMemberAddress(id, address, addressDetail) == 1;
+	/**
+	 * 회원 address를 update한다.
+	 * @param id
+	 * @param address
+	 * @param addressDetail
+	 * @return
+	 */
+	public MapperDMLResponse updateMemberAddress(String id, String address, String addressDetail){
+		int result = memberMapper.updateMemberAddress(id, address, addressDetail);
+		if(result == 1) 
+			return MapperDMLResponse.SUCCESS;	// 원하는 1개의 데이터만 수정
+		else if(result == 0) 
+			return MapperDMLResponse.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
+		else 
+			return MapperDMLResponse.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
 	}
 	
 	

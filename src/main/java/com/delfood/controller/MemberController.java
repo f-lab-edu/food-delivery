@@ -1,8 +1,6 @@
 package com.delfood.controller;
 
-import java.security.NoSuchAlgorithmException;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.delfood.dto.MemberDTO;
+import com.delfood.mapper.MapperDMLResponse;
 import com.delfood.service.MemberService;
 
 import lombok.AllArgsConstructor;
@@ -25,10 +24,11 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
+import lombok.extern.log4j.Log4j2;
 
 @RestController
 @RequestMapping("/members/")
+@Log4j2
 public class MemberController {
 	@Autowired
 	private MemberService memberService;
@@ -63,13 +63,14 @@ public class MemberController {
 	public ResponseEntity<MemberIdDuplResponse> idCheck(@PathVariable String id) {
 		ResponseEntity<MemberIdDuplResponse> responseEntity = null;
 		MemberIdDuplResponse duplResponse;
-		if(memberService.checkIdDuplicated(id)) {
+		int cnt = memberService.idCheck(id);
+		if(cnt != 0) {
 			// 아이디가 중복되어있을 때
-			duplResponse = MemberIdDuplResponse.duplicated();
+			duplResponse = MemberIdDuplResponse.DUPLICATED;
 			responseEntity = new ResponseEntity<>(duplResponse, HttpStatus.LOCKED);
 		}else {
 			// 아이디가 중복되어있지 않을 때
-			duplResponse = MemberIdDuplResponse.success();
+			duplResponse = MemberIdDuplResponse.SUCCESS;
 			responseEntity = new ResponseEntity<>(duplResponse, HttpStatus.OK);
 		}
 		return responseEntity;
@@ -78,45 +79,45 @@ public class MemberController {
 	
 	/**
 	 * 고객이 입력한 정보로 회원가입을 진행한다.
-	 * 회원가입 요청을 보내기 전 먼저 ID 중복체크를 진행한다
+	 * 보낸 값들 중 NULL값이 있으면 "NULL_ARGUMENT" 를 리턴한다.
+	 * 회원가입 요청을 보내기 전 먼저 ID 중복체크를 진행한다.
 	 * @param memberInfo
 	 * @return 
-	 * @throws NoSuchAlgorithmException 
 	 *  
 	 */
 	@PostMapping
-	public ResponseEntity<SignUpResponse> signUp(@RequestBody MemberDTO memberInfo) throws NoSuchAlgorithmException {
+	public ResponseEntity<SignUpResponse> signUp(@RequestBody MemberDTO memberInfo) {
 		ResponseEntity<SignUpResponse> responseEntity = null;
 		SignUpResponse result;
+		MemberDTO.NullColumn checkNull = memberInfo.checkNull(memberInfo);
+		
+		// 전달된 인수중 NULL값이 있으면 오류를 낸다
+		if(!checkNull.equals(MemberDTO.NullColumn.NOT_NULL)) {
+			log.error(checkNull + " IS NULL!");
+			return responseEntity = new ResponseEntity<>(SignUpResponse.NULL_ARGUMENT,HttpStatus.BAD_REQUEST);
+		}
+		
 		
 		String id = memberInfo.getId();
-		boolean checkIdDuplicated = memberService.checkIdDuplicated(id);
-		if(checkIdDuplicated) {
+		int cnt = memberService.idCheck(id);
+		if(cnt != 0) {
 			// 중복 아이디일 때
-			result = SignUpResponse.idDuplicated();
+			result = SignUpResponse.ID_DUPLICATED;
 			responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.LOCKED);
 		}else {
 			// 중복 아이디가 아닐 때
-			boolean insertResponse = memberService.insertMember(memberInfo);
-			if(insertResponse) {
-				result = SignUpResponse.success();
-				responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.CREATED);
-			}else {
-				result = SignUpResponse.error();
-				responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			memberService.insertMember(memberInfo);
+			result = SignUpResponse.SUCCESS;
+			responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.CREATED);
 		}
 		return responseEntity;
 	}
 	
 	/*
-	 * success : 로그인 성공
-	 * fail : id 또는 password가 일치하지 않음
-	 * deleted : 삭제된 아이디(로그인 불가)
-	 * error : 그 밖에 오류가 난 경우
+	 * 회원 로그인을 진행한다.
 	 */
-	@PostMapping("signIn")
-	public ResponseEntity<SignInResponse> signIn(@RequestBody MemberDTO memberDTO, HttpSession session) throws NoSuchAlgorithmException {
+	@PostMapping("logIn")
+	public ResponseEntity<SignInResponse> signIn(@RequestBody MemberDTO memberDTO, HttpSession session){
 		ResponseEntity<SignInResponse> responseEntity = null;
 		String id = memberDTO.getId();
 		String password = memberDTO.getPassword();
@@ -125,21 +126,22 @@ public class MemberController {
 		
 		if(memberInfo == null) {
 			// id 또는 password 확인 필요(DB에서 가져온 정보가 없을 때)
-			loginResponse = SignInResponse.fail();
+			loginResponse = SignInResponse.FAIL;
 			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
-		}else if("default".equals(memberInfo.getStatus())) {
+		}else if("DEFAULT".equals(memberInfo.getStatus())) {
 			// 성공시 세션에 ID를 저장
-			loginResponse = new SignInResponse(SignInResponse.LogInStatus.success, memberInfo);
+			loginResponse = SignInResponse.success(memberInfo);
 			session.setAttribute("LOGIN_MEMBER_ID", memberInfo.getId());
 			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.OK);
-		}else if("deleted".equals(memberInfo.getStatus())) {
+		}else if("DELETED".equals(memberInfo.getStatus())) {
 			// 삭제된 경우
-			loginResponse = SignInResponse.deleted();
+			loginResponse = SignInResponse.DELETED;
 			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
 		}else {
 			// 예상하지 못한 오류일 경우
-			loginResponse = SignInResponse.error();
+			loginResponse = SignInResponse.ERROR;
 			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+			log.error(responseEntity);
 		}
 		
 		return responseEntity;
@@ -151,24 +153,34 @@ public class MemberController {
 	 * @return
 	 */
 	@PutMapping("password")
-	public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session, String password) {
+	public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session,@RequestBody UpdateMemberPasswordRequest passwordRequest){
+		String password = passwordRequest.getPassword();
+		String newPassword = passwordRequest.getNewPassword();
+		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
 		ResponseEntity<UpdateMemberPasswordResponse> responseEntity = null;
 		UpdateMemberPasswordResponse updateResponse;
-		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+
+		
 		if(id == null) {
-			updateResponse = UpdateMemberPasswordResponse.noLogin();
+			// 로그인하지 않았을 때
+			updateResponse = UpdateMemberPasswordResponse.NO_LOGIN;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.UNAUTHORIZED);
-		}else if(password == null){
-			updateResponse = UpdateMemberPasswordResponse.emptyPassword();
+		}else if(memberService.signIn(id, password) == null){
+			// 원래 패스워드가 일치하지 않음
+			updateResponse = UpdateMemberPasswordResponse.PASSWORD_MISMATCH;
+			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.UNAUTHORIZED);
+		}else if(newPassword == null){
+			updateResponse = UpdateMemberPasswordResponse.EMPTY_PASSWORD;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.BAD_REQUEST);
 		}else {
-			boolean result = memberService.updateMemberPassword(id, password);
-			if(result) {
-				updateResponse = UpdateMemberPasswordResponse.success();
+			MapperDMLResponse dmlResponse = memberService.updateMemberPassword(id, newPassword);
+			if(dmlResponse == MapperDMLResponse.SUCCESS) {
+				updateResponse = UpdateMemberPasswordResponse.SUCCESS;
 				responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.OK);
 			}else {
-				updateResponse = UpdateMemberPasswordResponse.error();
+				updateResponse = UpdateMemberPasswordResponse.ERROR;
 				responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+				log.error(dmlResponse + " - ERROR! \n" + responseEntity);
 			}
 		}
 		
@@ -189,15 +201,17 @@ public class MemberController {
 		DeleteMemberResponse deleteResponse;
 		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
 		if(id == null) {
-			deleteResponse= DeleteMemberResponse.noLogin();
+			deleteResponse= DeleteMemberResponse.NO_LOGIN;
 			responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.UNAUTHORIZED);
 		}else {
-			if(memberService.deleteMember(id)) {
-				deleteResponse = DeleteMemberResponse.success();
+			MapperDMLResponse dmlResponse = memberService.deleteMember(id);
+			if(dmlResponse == MapperDMLResponse.SUCCESS) {
+				deleteResponse = DeleteMemberResponse.SUCCESS;
 				responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.OK);
 			}else {
-				deleteResponse = DeleteMemberResponse.error();
+				deleteResponse = DeleteMemberResponse.ERROR;
 				responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+				log.error(dmlResponse + " - ERROR! \n" + responseEntity);
 			}
 		}
 		return responseEntity;
@@ -214,22 +228,24 @@ public class MemberController {
 		String addressDetail = memberInfo.getAddressDetail();
 		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
 		
-		if(address == null) {
+		if(address == null || addressDetail == null) {
 			// 요청한 주소가 null일 때
-			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.emptyAddress(), HttpStatus.BAD_REQUEST);
-		}else if(addressDetail == null) {
-			// 요청한 상세 주소가 null일 때
-			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.emptyAddressDetail(), HttpStatus.BAD_REQUEST);
+			if(address==null)
+				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.EMPTY_ADDRESS, HttpStatus.BAD_REQUEST);
+			else if(addressDetail==null)
+				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.EMPTY_ADDRESS_DETAIL, HttpStatus.BAD_REQUEST);
 		}else if(id == null) {
 			// 로그인을 안했을 때
-			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.noLogin(), HttpStatus.UNAUTHORIZED);
+			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
 		}else {
-			if(memberService.updateMemberAddress(id, address, addressDetail)) {
+			MapperDMLResponse dmlResponse = memberService.updateMemberAddress(id, address, addressDetail);
+			if(dmlResponse == MapperDMLResponse.SUCCESS) {
 				// 성공시
-				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.success(), HttpStatus.OK);
+				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
 			}else {
 				// 알수없는 오류 발생시
-				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.success(), HttpStatus.INTERNAL_SERVER_ERROR);
+				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+				log.error(dmlResponse + " - ERROR! \n" + responseEntity);
 			}
 			
 		}
@@ -244,103 +260,95 @@ public class MemberController {
 	
 	@Getter @AllArgsConstructor @RequiredArgsConstructor
 	private static class SignInResponse{
-		enum LogInStatus{success, fail, deleted, error}
+		enum LogInStatus{SUCCESS, FAIL, DELETED, ERROR}
 		@NonNull
 		private LogInStatus result;
 		private MemberDTO memberInfo;
 		
 		// success의 경우 memberInfo의 값을 set해줘야 하기 때문에 new 하도록 해준다.
 		
-		private static final SignInResponse FAIL = new SignInResponse(LogInStatus.fail);
-		private static final SignInResponse DELETED = new SignInResponse(LogInStatus.deleted);
-		private static final SignInResponse ERROR = new SignInResponse(LogInStatus.error);
+		private static final SignInResponse FAIL = new SignInResponse(LogInStatus.FAIL);
+		private static final SignInResponse DELETED = new SignInResponse(LogInStatus.DELETED);
+		private static final SignInResponse ERROR = new SignInResponse(LogInStatus.ERROR);
 		
-		public static final SignInResponse fail() {return FAIL;}
-		public static final SignInResponse deleted() {return DELETED;}
-		public static final SignInResponse error() {return ERROR;}
+		private static SignInResponse success(MemberDTO memberInfo) {
+			return new SignInResponse(LogInStatus.SUCCESS, memberInfo);
+		}
+		
 		
 	}
 	
 	@Getter  @RequiredArgsConstructor
 	private static class SignUpResponse{
-		enum SignUpStatus{success, id_duplicated, error}
+		enum SignUpStatus{SUCCESS, DUPLICATED, ERROR, NULL_ARGUMENT}
 		@NonNull
 		private SignUpStatus result;
 		
-		private static final SignUpResponse SUCCESS = new SignUpResponse(SignUpStatus.success);
-		private static final SignUpResponse ID_DUPLICATED = new SignUpResponse(SignUpStatus.id_duplicated);
-		private static final SignUpResponse ERROR = new SignUpResponse(SignUpStatus.error);
+		private static final SignUpResponse SUCCESS = new SignUpResponse(SignUpStatus.SUCCESS);
+		private static final SignUpResponse ID_DUPLICATED = new SignUpResponse(SignUpStatus.DUPLICATED);
+		private static final SignUpResponse ERROR = new SignUpResponse(SignUpStatus.ERROR);
+		private static final SignUpResponse NULL_ARGUMENT = new SignUpResponse(SignUpStatus.NULL_ARGUMENT);
 		
-		public static final SignUpResponse success() {return SUCCESS;}
-		public static final SignUpResponse idDuplicated() {return ID_DUPLICATED;}
-		public static final SignUpResponse error() {return ERROR;}
 		
 	}
 	
 	@Getter  @RequiredArgsConstructor
 	private static class MemberIdDuplResponse{
-		enum DuplStatus{success, duplicated, error}
+		enum DuplStatus{SUCCESS, DUPLICATED, ERROR}
 		@NonNull
 		private DuplStatus result;
 		
-		private static final MemberIdDuplResponse SUCCESS = new MemberIdDuplResponse(DuplStatus.success);
-		private static final MemberIdDuplResponse DUPLICATED = new MemberIdDuplResponse(DuplStatus.duplicated);
-		private static final MemberIdDuplResponse ERROR = new MemberIdDuplResponse(DuplStatus.error);
+		private static final MemberIdDuplResponse SUCCESS = new MemberIdDuplResponse(DuplStatus.SUCCESS);
+		private static final MemberIdDuplResponse DUPLICATED = new MemberIdDuplResponse(DuplStatus.DUPLICATED);
+		private static final MemberIdDuplResponse ERROR = new MemberIdDuplResponse(DuplStatus.ERROR);
 		
-		public static final MemberIdDuplResponse success() {return SUCCESS;}
-		public static final MemberIdDuplResponse duplicated() {return DUPLICATED;}
-		public static final MemberIdDuplResponse error() {return ERROR;}
 		
 	}
 	
 	@Getter  @RequiredArgsConstructor
 	private static class UpdateMemberPasswordResponse{
-		enum UpdateStatus{success, no_login, empty_password, error}
+		enum UpdateStatus{SUCCESS, NO_LOGIN, EMPTY_PASSWORD, PASSWORD_MISMATCH, ERROR}
 		@NonNull
 		private UpdateStatus result;
 		
-		private static final UpdateMemberPasswordResponse SUCCESS = new UpdateMemberPasswordResponse(UpdateStatus.success);
-		private static final UpdateMemberPasswordResponse NO_LOGIN = new UpdateMemberPasswordResponse(UpdateStatus.success);
-		private static final UpdateMemberPasswordResponse EMPTY_PASSWORD = new UpdateMemberPasswordResponse(UpdateStatus.success);
-		private static final UpdateMemberPasswordResponse ERROR = new UpdateMemberPasswordResponse(UpdateStatus.success);
+		private static final UpdateMemberPasswordResponse SUCCESS = new UpdateMemberPasswordResponse(UpdateStatus.SUCCESS);
+		private static final UpdateMemberPasswordResponse NO_LOGIN = new UpdateMemberPasswordResponse(UpdateStatus.NO_LOGIN);
+		private static final UpdateMemberPasswordResponse EMPTY_PASSWORD = new UpdateMemberPasswordResponse(UpdateStatus.EMPTY_PASSWORD);
+		private static final UpdateMemberPasswordResponse PASSWORD_MISMATCH = new UpdateMemberPasswordResponse(UpdateStatus.PASSWORD_MISMATCH);
+		private static final UpdateMemberPasswordResponse ERROR = new UpdateMemberPasswordResponse(UpdateStatus.ERROR);
 		
-		public static final UpdateMemberPasswordResponse success() {return SUCCESS;}
-		public static final UpdateMemberPasswordResponse noLogin() {return NO_LOGIN;}
-		public static final UpdateMemberPasswordResponse emptyPassword() {return EMPTY_PASSWORD;}
-		public static final UpdateMemberPasswordResponse error() {return ERROR;}
 	}
 	
 	@Getter @RequiredArgsConstructor
 	private static class DeleteMemberResponse{
-		enum DeleteStatus{success, no_login, error}
+		enum DeleteStatus{SUCCESS, NO_LOGIN, ERROR}
 		@NonNull
 		private DeleteStatus result;
 		
-		private static final DeleteMemberResponse SUCCESS = new DeleteMemberResponse(DeleteStatus.success);
-		private static final DeleteMemberResponse NO_LOGIN = new DeleteMemberResponse(DeleteStatus.no_login);
-		private static final DeleteMemberResponse ERROR = new DeleteMemberResponse(DeleteStatus.error);
+		private static final DeleteMemberResponse SUCCESS = new DeleteMemberResponse(DeleteStatus.SUCCESS);
+		private static final DeleteMemberResponse NO_LOGIN = new DeleteMemberResponse(DeleteStatus.NO_LOGIN);
+		private static final DeleteMemberResponse ERROR = new DeleteMemberResponse(DeleteStatus.ERROR);
 		
-		public static final DeleteMemberResponse success() {return SUCCESS;}
-		public static final DeleteMemberResponse noLogin() {return NO_LOGIN;}
-		public static final DeleteMemberResponse error() {return ERROR;}
 	}
 	
 	@Getter @RequiredArgsConstructor
 	private static class UpdateMemberAddressResponse{
-		enum UpdateStatus{success, no_login, empty_address, empty_address_detail, error}
+		enum UpdateStatus{SUCCESS, NO_LOGIN, EMPTY_ADDRESS, EMPTY_ADDRESS_DETAIL, ERROR}
 		@NonNull
 		private UpdateStatus result;
 		
-		private static final UpdateMemberAddressResponse SUCCESS = new UpdateMemberAddressResponse(UpdateStatus.success);
-		private static final UpdateMemberAddressResponse NO_LOGIN = new UpdateMemberAddressResponse(UpdateStatus.no_login);
-		private static final UpdateMemberAddressResponse EMPTY_ADDRESS = new UpdateMemberAddressResponse(UpdateStatus.empty_address);
-		private static final UpdateMemberAddressResponse EMPTY_ADDRESS_DETAIL = new UpdateMemberAddressResponse(UpdateStatus.empty_address_detail);
-		private static final UpdateMemberAddressResponse ERROR = new UpdateMemberAddressResponse(UpdateStatus.error);
-		
-		public static final UpdateMemberAddressResponse success() {return SUCCESS;}
-		public static final UpdateMemberAddressResponse noLogin() {return NO_LOGIN;}
-		public static final UpdateMemberAddressResponse emptyAddress() {return EMPTY_ADDRESS;}
-		public static final UpdateMemberAddressResponse emptyAddressDetail() {return EMPTY_ADDRESS_DETAIL;}
-		public static final UpdateMemberAddressResponse error() {return ERROR;}
+		private static final UpdateMemberAddressResponse SUCCESS = new UpdateMemberAddressResponse(UpdateStatus.SUCCESS);
+		private static final UpdateMemberAddressResponse NO_LOGIN = new UpdateMemberAddressResponse(UpdateStatus.NO_LOGIN);
+		private static final UpdateMemberAddressResponse EMPTY_ADDRESS = new UpdateMemberAddressResponse(UpdateStatus.EMPTY_ADDRESS);
+		private static final UpdateMemberAddressResponse EMPTY_ADDRESS_DETAIL = new UpdateMemberAddressResponse(UpdateStatus.EMPTY_ADDRESS_DETAIL);
+		private static final UpdateMemberAddressResponse ERROR = new UpdateMemberAddressResponse(UpdateStatus.ERROR);
+	}
+	
+	// --------------------------------- request 객체 ---------------------------------
+	
+	@Setter @Getter
+	private static class UpdateMemberPasswordRequest{
+		private String password;
+		private String newPassword;
 	}
 }
