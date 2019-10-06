@@ -2,7 +2,12 @@ package com.delfood.dto;
 
 import java.time.LocalDateTime;
 
+import javax.validation.constraints.NotNull;
+
+import org.springframework.lang.Nullable;
+
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,29 +16,37 @@ import lombok.ToString;
 @Setter
 @ToString
 public class MemberDTO {
+	public enum Status{DEFAULT, DELETED}; 
+	
 	// 아이디
+	@NonNull
 	private String id;
 	// 패스워드
+	@NonNull
 	private String password;
 	// 이름
+	@NonNull
 	private String name;
 	// 핸드폰번호
+	@NonNull
 	private String tel;
 	// 이메일
+	@NonNull
 	private String mail;
 	// 상태
-	private String status;
+	private Status status;
 	// 회원가입일
 	private LocalDateTime createdAt;
 	// 최종 수정일
 	private LocalDateTime updatedAt;
 	// 주소
+	@Nullable
 	private String address;
 	// 상세 주소
+	@Nullable
 	private String addressDetail;
 	
-	public enum NullColumn{ID, PASSWORD, NAME, TEL, MAIL, NOT_NULL}
-
+	
 	// Member 모델 복사
 	public void copyData(MemberDTO param) {
 		this.id = param.getId();
@@ -46,17 +59,16 @@ public class MemberDTO {
 		this.updatedAt = param.getUpdatedAt();
 	}
 	
-	public NullColumn checkNull(MemberDTO memberInfo) {
-		if(memberInfo.getId() == null) 
-			return NullColumn.ID;
-		else if(memberInfo.getPassword() == null)
-			return NullColumn.PASSWORD;
-		else if(memberInfo.getName() == null)
-			return NullColumn.NAME;
-		else if(memberInfo.getTel() == null)
-			return NullColumn.TEL;
-		else if(memberInfo.getMail() == null)
-			return NullColumn.MAIL;
-		return NullColumn.NOT_NULL;
+	public static boolean hasNullDataBeforeSignup(MemberDTO memberInfo) {
+		if(memberInfo.getId()==null
+				|| memberInfo.getPassword()==null
+				|| memberInfo.getName() == null
+				|| memberInfo.getTel() == null
+				|| memberInfo.getMail() == null)
+			return false;
+		
+		return true;
 	}
+	
+
 }

@@ -1,7 +1,10 @@
 package com.delfood.controller;
 
 
+import java.rmi.UnexpectedException;
+
 import javax.servlet.http.HttpSession;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,9 +17,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import com.delfood.dto.MemberDTO;
-import com.delfood.mapper.MapperDMLResponse;
+import com.delfood.mapper.DMLOperationError;
 import com.delfood.service.MemberService;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +30,38 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Java Logging
+ * 
+ * Log4j
+ * 속도와  유연성을 고려하여 디자인되어있어 속도에 최적화 되어있다.
+ * 멀티 스레드 환경에서 안전하다.
+ * 
+ * SLF4J
+ * 로깅에 대한 추상 레이어를 제공한다. 로깅의 인터페이스 역할을 한다.
+ * 공통 인터페이스 역할을 하기 때문에 구현체의 종류와 상관 없이 일관된 로깅코드를 작성할 수 있다.
+ * slf4j만으로는 로깅을 실행할 수 없어서 commons logging, log4j, logback 등의 로깅 구현체를 적용해야 한다.
+ * 
+ * Logback
+ * Log4j를 토대로 만든 새로운 Logging 라이브러리이다.
+ * SLF4J를 통해 다른 로깅 프레임워크를 logback으로 통합할 수 있다.
+ * Log4j보다 10배 높은 속도 퍼포먼스를 보이도록 설계되어있으며 메모리 효율을 개선하였다.
+ * 설정 파일 변경시 서버 재가동 없이도 자동 변경 갱신이 이루어진다.
+ * 로깅 I/O시 	Failure에 대한 복구를 서버 중지 없이도 지원하고있다.
+ * Logback사용을 위해서는 SLF4J와 함께 사용해야 한다.(Logback은 SLF4J의 구현체이다)
+ * 
+ * Log4j2
+ * 멀티 스레드 환경에서 Logback보다 10배 높은 성능 퍼포먼스를 기대할 수 있다.
+ * Log4j, Logback에 존재하는 동기화 이슈 문제를 해결하였다. 멀티 스레드 환경 로깅이 필요하다면 Log4j2를 사용하는 것이 성능면에서 유리하다. 
+ * 사용자 정의 로그레벨과 람다 표현식을 지원한다.
+ * Log4j2 자체적으로 직접 사용할 수는 있지만 일반적으로는 SLF4J와 함께 사용한다.
+ * 
+ * @Log, @Slf4j, @Log4j2 등 어노테이션 적용시
+ * 자동으로 log 필드를 만들고 해당 클래스의 이름으로 로거 객체를 생성하여 할당한다.
+ *  
+ * @author 정준
+ *
+ */
 @RestController
 @RequestMapping("/members/")
 @Log4j2
@@ -63,11 +99,11 @@ public class MemberController {
 	public ResponseEntity<MemberIdDuplResponse> idCheck(@PathVariable String id) {
 		ResponseEntity<MemberIdDuplResponse> responseEntity = null;
 		MemberIdDuplResponse duplResponse;
-		int cnt = memberService.idCheck(id);
-		if(cnt != 0) {
+		boolean idDuplicated = memberService.isDuplicatedId(id);
+		if(idDuplicated) {
 			// 아이디가 중복되어있을 때
 			duplResponse = MemberIdDuplResponse.DUPLICATED;
-			responseEntity = new ResponseEntity<>(duplResponse, HttpStatus.LOCKED);
+			responseEntity = new ResponseEntity<>(duplResponse, HttpStatus.CONFLICT);
 		}else {
 			// 아이디가 중복되어있지 않을 때
 			duplResponse = MemberIdDuplResponse.SUCCESS;
@@ -76,34 +112,35 @@ public class MemberController {
 		return responseEntity;
 	}
 	
-	
+	/*
+	 * @NotNull
+	 * 메서드의 파라미터, 리턴값에 사용할 수 있다.
+	 * 파라미터가 null로 전달되면 예외를 던진다.
+	 * 클래스 멤버에도 적용할 수 있는데 이 경우 setter, constructor를 사용할 때 null 주입 시 NullPointerException을 발생시킨다.
+	 */
 	/**
 	 * 고객이 입력한 정보로 회원가입을 진행한다.
 	 * 보낸 값들 중 NULL값이 있으면 "NULL_ARGUMENT" 를 리턴한다.
 	 * 회원가입 요청을 보내기 전 먼저 ID 중복체크를 진행한다.
+	 * ID 중복시 403 상태코드를 반환한다.
+	 * 회원가입 성공시 201 상태코드를 반환한다.
 	 * @param memberInfo
 	 * @return 
 	 *  
 	 */
 	@PostMapping
-	public ResponseEntity<SignUpResponse> signUp(@RequestBody MemberDTO memberInfo) {
+	public ResponseEntity<SignUpResponse> signUp(@RequestBody @NotNull MemberDTO memberInfo) {
 		ResponseEntity<SignUpResponse> responseEntity = null;
 		SignUpResponse result;
-		MemberDTO.NullColumn checkNull = memberInfo.checkNull(memberInfo);
-		
-		// 전달된 인수중 NULL값이 있으면 오류를 낸다
-		if(!checkNull.equals(MemberDTO.NullColumn.NOT_NULL)) {
-			log.error(checkNull + " IS NULL!");
-			return responseEntity = new ResponseEntity<>(SignUpResponse.NULL_ARGUMENT,HttpStatus.BAD_REQUEST);
+		if(MemberDTO.hasNullDataBeforeSignup(memberInfo)) {
+			throw new NullPointerException("회원가입시 필수 데이터를 모두 입력해야 합니다.");
 		}
-		
-		
 		String id = memberInfo.getId();
-		int cnt = memberService.idCheck(id);
-		if(cnt != 0) {
+		boolean idDuplicated = memberService.isDuplicatedId(id);
+		if(idDuplicated) {
 			// 중복 아이디일 때
 			result = SignUpResponse.ID_DUPLICATED;
-			responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.LOCKED);
+			responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.CONFLICT);
 		}else {
 			// 중복 아이디가 아닐 때
 			memberService.insertMember(memberInfo);
@@ -115,33 +152,35 @@ public class MemberController {
 	
 	/*
 	 * 회원 로그인을 진행한다.
+	 * Login 요청시 id, password가 NULL일 경우 NullPointerException을 throw한다.
 	 */
-	@PostMapping("logIn")
-	public ResponseEntity<SignInResponse> signIn(@RequestBody MemberDTO memberDTO, HttpSession session){
-		ResponseEntity<SignInResponse> responseEntity = null;
-		String id = memberDTO.getId();
-		String password = memberDTO.getPassword();
-		SignInResponse loginResponse;
-		MemberDTO memberInfo = memberService.signIn(id, password);
+	@PostMapping("login")
+	public ResponseEntity<LoginResponse> login(@RequestBody @NonNull MemberLoginRequest loginRequest, HttpSession session){
+		ResponseEntity<LoginResponse> responseEntity = null;
+		String id = loginRequest.getId();
+		String password = loginRequest.getPassword();
+		LoginResponse loginResponse;
+		MemberDTO memberInfo = memberService.login(id, password);
 		
 		if(memberInfo == null) {
-			// id 또는 password 확인 필요(DB에서 가져온 정보가 없을 때)
-			loginResponse = SignInResponse.FAIL;
-			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
-		}else if("DEFAULT".equals(memberInfo.getStatus())) {
+			// ID, Password에 맞는 정보가 없을 때 
+			loginResponse = LoginResponse.FAIL;
+			responseEntity = new ResponseEntity<MemberController.LoginResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
+		}else if(MemberDTO.Status.DEFAULT.equals(memberInfo.getStatus())) {
 			// 성공시 세션에 ID를 저장
-			loginResponse = SignInResponse.success(memberInfo);
+			loginResponse = LoginResponse.success(memberInfo);
 			session.setAttribute("LOGIN_MEMBER_ID", memberInfo.getId());
-			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.OK);
-		}else if("DELETED".equals(memberInfo.getStatus())) {
+			responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
+		}else if(MemberDTO.Status.DELETED.equals(memberInfo.getStatus())) {
 			// 삭제된 경우
-			loginResponse = SignInResponse.DELETED;
-			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
+			loginResponse = LoginResponse.DELETED;
+			responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
 		}else {
 			// 예상하지 못한 오류일 경우
-			loginResponse = SignInResponse.ERROR;
-			responseEntity = new ResponseEntity<SignInResponse>(loginResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-			log.error(responseEntity);
+			loginResponse = LoginResponse.ERROR;
+			responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+			log.error("login ERROR",responseEntity);
+			throw new RuntimeException("login ERROR!");
 		}
 		
 		return responseEntity;
@@ -165,7 +204,7 @@ public class MemberController {
 			// 로그인하지 않았을 때
 			updateResponse = UpdateMemberPasswordResponse.NO_LOGIN;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.UNAUTHORIZED);
-		}else if(memberService.signIn(id, password) == null){
+		}else if(memberService.login(id, password) == null){
 			// 원래 패스워드가 일치하지 않음
 			updateResponse = UpdateMemberPasswordResponse.PASSWORD_MISMATCH;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.UNAUTHORIZED);
@@ -173,14 +212,15 @@ public class MemberController {
 			updateResponse = UpdateMemberPasswordResponse.EMPTY_PASSWORD;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.BAD_REQUEST);
 		}else {
-			MapperDMLResponse dmlResponse = memberService.updateMemberPassword(id, newPassword);
-			if(dmlResponse == MapperDMLResponse.SUCCESS) {
+			DMLOperationError dmlResponse = memberService.updateMemberPassword(id, newPassword);
+			if(dmlResponse == DMLOperationError.SUCCESS) {
 				updateResponse = UpdateMemberPasswordResponse.SUCCESS;
 				responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.OK);
 			}else {
 				updateResponse = UpdateMemberPasswordResponse.ERROR;
 				responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-				log.error(dmlResponse + " - ERROR! \n" + responseEntity);
+				log.error("Member Password Update - ERROR!");
+				throw new RuntimeException("Password update ERROR");
 			}
 		}
 		
@@ -204,14 +244,14 @@ public class MemberController {
 			deleteResponse= DeleteMemberResponse.NO_LOGIN;
 			responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.UNAUTHORIZED);
 		}else {
-			MapperDMLResponse dmlResponse = memberService.deleteMember(id);
-			if(dmlResponse == MapperDMLResponse.SUCCESS) {
+			DMLOperationError dmlResponse = memberService.deleteMember(id);
+			if(dmlResponse == DMLOperationError.SUCCESS) {
 				deleteResponse = DeleteMemberResponse.SUCCESS;
 				responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.OK);
 			}else {
 				deleteResponse = DeleteMemberResponse.ERROR;
 				responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-				log.error(dmlResponse + " - ERROR! \n" + responseEntity);
+				log.error("Member Delete ERROR! \n" + responseEntity);
 			}
 		}
 		return responseEntity;
@@ -238,14 +278,15 @@ public class MemberController {
 			// 로그인을 안했을 때
 			responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
 		}else {
-			MapperDMLResponse dmlResponse = memberService.updateMemberAddress(id, address, addressDetail);
-			if(dmlResponse == MapperDMLResponse.SUCCESS) {
+			DMLOperationError dmlResponse = memberService.updateMemberAddress(id, address, addressDetail);
+			if(dmlResponse == DMLOperationError.SUCCESS) {
 				// 성공시
 				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
 			}else {
-				// 알수없는 오류 발생시
+				// 알수없는 오류 발생시 Exception을 던진다.
 				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-				log.error(dmlResponse + " - ERROR! \n" + responseEntity);
+				log.error("Member Address Update ERROR");
+				throw new RuntimeException("Member Address Update ERROR");
 			}
 			
 		}
@@ -259,7 +300,7 @@ public class MemberController {
 	// -------------- response 객체 --------------
 	
 	@Getter @AllArgsConstructor @RequiredArgsConstructor
-	private static class SignInResponse{
+	private static class LoginResponse{
 		enum LogInStatus{SUCCESS, FAIL, DELETED, ERROR}
 		@NonNull
 		private LogInStatus result;
@@ -267,12 +308,12 @@ public class MemberController {
 		
 		// success의 경우 memberInfo의 값을 set해줘야 하기 때문에 new 하도록 해준다.
 		
-		private static final SignInResponse FAIL = new SignInResponse(LogInStatus.FAIL);
-		private static final SignInResponse DELETED = new SignInResponse(LogInStatus.DELETED);
-		private static final SignInResponse ERROR = new SignInResponse(LogInStatus.ERROR);
+		private static final LoginResponse FAIL = new LoginResponse(LogInStatus.FAIL);
+		private static final LoginResponse DELETED = new LoginResponse(LogInStatus.DELETED);
+		private static final LoginResponse ERROR = new LoginResponse(LogInStatus.ERROR);
 		
-		private static SignInResponse success(MemberDTO memberInfo) {
-			return new SignInResponse(LogInStatus.SUCCESS, memberInfo);
+		private static LoginResponse success(MemberDTO memberInfo) {
+			return new LoginResponse(LogInStatus.SUCCESS, memberInfo);
 		}
 		
 		
@@ -350,5 +391,11 @@ public class MemberController {
 	private static class UpdateMemberPasswordRequest{
 		private String password;
 		private String newPassword;
+	}
+	
+	@Setter @Getter
+	private static class MemberLoginRequest{
+		private String id;
+		private String password;
 	}
 }
