@@ -1,10 +1,16 @@
 package com.delfood.controller;
 
-
-import java.rmi.UnexpectedException;
-
+import com.delfood.dto.MemberDTO;
+import com.delfood.mapper.DMLOperationError;
+import com.delfood.service.MemberService;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,18 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpStatusCodeException;
 
-import com.delfood.dto.MemberDTO;
-import com.delfood.mapper.DMLOperationError;
-import com.delfood.service.MemberService;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Java Logging
@@ -66,8 +61,8 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("/members/")
 @Log4j2
 public class MemberController {
-	@Autowired
-	private MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 	
 	/**
 	 * 로그인한 사용자가 마이페이지를 눌렀을 때 보여줄 사용자 정보를 반환한다.
@@ -96,7 +91,7 @@ public class MemberController {
 	 * @return
 	 */
 	@GetMapping("idCheck/{id}")
-	public ResponseEntity<MemberIdDuplResponse> idCheck(@PathVariable String id) {
+	public ResponseEntity<MemberIdDuplResponse> idCheck(@PathVariable @NotNull String id) {
 		ResponseEntity<MemberIdDuplResponse> responseEntity = null;
 		MemberIdDuplResponse duplResponse;
 		boolean idDuplicated = memberService.isDuplicatedId(id);
@@ -177,9 +172,7 @@ public class MemberController {
 			responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
 		}else {
 			// 예상하지 못한 오류일 경우
-			loginResponse = LoginResponse.ERROR;
-			responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-			log.error("login ERROR",responseEntity);
+			log.error("login ERROR" + responseEntity);
 			throw new RuntimeException("login ERROR!");
 		}
 		
@@ -192,7 +185,7 @@ public class MemberController {
 	 * @return
 	 */
 	@PutMapping("password")
-	public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session,@RequestBody UpdateMemberPasswordRequest passwordRequest){
+	public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session,@RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest){
 		String password = passwordRequest.getPassword();
 		String newPassword = passwordRequest.getNewPassword();
 		String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
@@ -209,16 +202,18 @@ public class MemberController {
 			updateResponse = UpdateMemberPasswordResponse.PASSWORD_MISMATCH;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.UNAUTHORIZED);
 		}else if(newPassword == null){
+			// 새로운 패스워드를 입력하지 않음
+			// 이 오류는 발생시 throw NullpointerException을 발생시킵니다.(@NonNull로 인해)
 			updateResponse = UpdateMemberPasswordResponse.EMPTY_PASSWORD;
 			responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.BAD_REQUEST);
 		}else {
+			// 성공시
 			DMLOperationError dmlResponse = memberService.updateMemberPassword(id, newPassword);
 			if(dmlResponse == DMLOperationError.SUCCESS) {
 				updateResponse = UpdateMemberPasswordResponse.SUCCESS;
 				responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.OK);
 			}else {
-				updateResponse = UpdateMemberPasswordResponse.ERROR;
-				responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+				// 정상적인 상황에서는 발생하지 않는 에러
 				log.error("Member Password Update - ERROR!");
 				throw new RuntimeException("Password update ERROR");
 			}
@@ -247,11 +242,13 @@ public class MemberController {
 			DMLOperationError dmlResponse = memberService.deleteMember(id);
 			if(dmlResponse == DMLOperationError.SUCCESS) {
 				deleteResponse = DeleteMemberResponse.SUCCESS;
+				// 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
+				session.invalidate();
 				responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.OK);
 			}else {
-				deleteResponse = DeleteMemberResponse.ERROR;
-				responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+				// 정상적인 상황에서는 발생하지 않는 에러
 				log.error("Member Delete ERROR! \n" + responseEntity);
+				throw new RuntimeException("Member Delete ERROR! " + responseEntity);
 			}
 		}
 		return responseEntity;
@@ -262,7 +259,7 @@ public class MemberController {
 	 * @param session
 	 */
 	@PutMapping("address")
-	public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(@RequestBody MemberDTO memberInfo, HttpSession session) {
+	public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(@RequestBody @NotNull UpdateMemberAddressRequest memberInfo, HttpSession session) {
 		ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
 		String address = memberInfo.getAddress();
 		String addressDetail = memberInfo.getAddressDetail();
@@ -282,10 +279,13 @@ public class MemberController {
 			if(dmlResponse == DMLOperationError.SUCCESS) {
 				// 성공시
 				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
+			}else if(dmlResponse == DMLOperationError.NONE_CHANGED){
+				// 주소 변경이 되지 않았을 때
+				log.error("Member Address Update ERROR " + dmlResponse);
+				throw new RuntimeException("Member Address Update ERROR");
 			}else {
-				// 알수없는 오류 발생시 Exception을 던진다.
-				responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(UpdateMemberAddressResponse.ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-				log.error("Member Address Update ERROR");
+				// 너무 많은 주소가 변경되었을 때. 정상적인 상황에서는 발생하지 않는다.
+				log.error("Member Address Update ERROR " + dmlResponse);
 				throw new RuntimeException("Member Address Update ERROR");
 			}
 			
@@ -310,7 +310,6 @@ public class MemberController {
 		
 		private static final LoginResponse FAIL = new LoginResponse(LogInStatus.FAIL);
 		private static final LoginResponse DELETED = new LoginResponse(LogInStatus.DELETED);
-		private static final LoginResponse ERROR = new LoginResponse(LogInStatus.ERROR);
 		
 		private static LoginResponse success(MemberDTO memberInfo) {
 			return new LoginResponse(LogInStatus.SUCCESS, memberInfo);
@@ -321,27 +320,22 @@ public class MemberController {
 	
 	@Getter  @RequiredArgsConstructor
 	private static class SignUpResponse{
-		enum SignUpStatus{SUCCESS, DUPLICATED, ERROR, NULL_ARGUMENT}
+		enum SignUpStatus{SUCCESS, ID_DUPLICATED, ERROR, NULL_ARGUMENT}
 		@NonNull
 		private SignUpStatus result;
 		
 		private static final SignUpResponse SUCCESS = new SignUpResponse(SignUpStatus.SUCCESS);
-		private static final SignUpResponse ID_DUPLICATED = new SignUpResponse(SignUpStatus.DUPLICATED);
-		private static final SignUpResponse ERROR = new SignUpResponse(SignUpStatus.ERROR);
-		private static final SignUpResponse NULL_ARGUMENT = new SignUpResponse(SignUpStatus.NULL_ARGUMENT);
-		
-		
+		private static final SignUpResponse ID_DUPLICATED = new SignUpResponse(SignUpStatus.ID_DUPLICATED);
 	}
 	
 	@Getter  @RequiredArgsConstructor
 	private static class MemberIdDuplResponse{
-		enum DuplStatus{SUCCESS, DUPLICATED, ERROR}
+		enum DuplStatus{SUCCESS, ID_DUPLICATED, ERROR}
 		@NonNull
 		private DuplStatus result;
 		
 		private static final MemberIdDuplResponse SUCCESS = new MemberIdDuplResponse(DuplStatus.SUCCESS);
-		private static final MemberIdDuplResponse DUPLICATED = new MemberIdDuplResponse(DuplStatus.DUPLICATED);
-		private static final MemberIdDuplResponse ERROR = new MemberIdDuplResponse(DuplStatus.ERROR);
+		private static final MemberIdDuplResponse DUPLICATED = new MemberIdDuplResponse(DuplStatus.ID_DUPLICATED);
 		
 		
 	}
@@ -356,7 +350,6 @@ public class MemberController {
 		private static final UpdateMemberPasswordResponse NO_LOGIN = new UpdateMemberPasswordResponse(UpdateStatus.NO_LOGIN);
 		private static final UpdateMemberPasswordResponse EMPTY_PASSWORD = new UpdateMemberPasswordResponse(UpdateStatus.EMPTY_PASSWORD);
 		private static final UpdateMemberPasswordResponse PASSWORD_MISMATCH = new UpdateMemberPasswordResponse(UpdateStatus.PASSWORD_MISMATCH);
-		private static final UpdateMemberPasswordResponse ERROR = new UpdateMemberPasswordResponse(UpdateStatus.ERROR);
 		
 	}
 	
@@ -368,7 +361,6 @@ public class MemberController {
 		
 		private static final DeleteMemberResponse SUCCESS = new DeleteMemberResponse(DeleteStatus.SUCCESS);
 		private static final DeleteMemberResponse NO_LOGIN = new DeleteMemberResponse(DeleteStatus.NO_LOGIN);
-		private static final DeleteMemberResponse ERROR = new DeleteMemberResponse(DeleteStatus.ERROR);
 		
 	}
 	
@@ -382,20 +374,31 @@ public class MemberController {
 		private static final UpdateMemberAddressResponse NO_LOGIN = new UpdateMemberAddressResponse(UpdateStatus.NO_LOGIN);
 		private static final UpdateMemberAddressResponse EMPTY_ADDRESS = new UpdateMemberAddressResponse(UpdateStatus.EMPTY_ADDRESS);
 		private static final UpdateMemberAddressResponse EMPTY_ADDRESS_DETAIL = new UpdateMemberAddressResponse(UpdateStatus.EMPTY_ADDRESS_DETAIL);
-		private static final UpdateMemberAddressResponse ERROR = new UpdateMemberAddressResponse(UpdateStatus.ERROR);
 	}
 	
 	// --------------------------------- request 객체 ---------------------------------
 	
 	@Setter @Getter
 	private static class UpdateMemberPasswordRequest{
+		@NonNull
 		private String password;
+		@NonNull
 		private String newPassword;
 	}
 	
 	@Setter @Getter
 	private static class MemberLoginRequest{
+		@NonNull
 		private String id;
+		@NonNull
 		private String password;
+	}
+	
+	@Setter @Getter
+	private class UpdateMemberAddressRequest{
+		@NonNull
+		private String address;
+		@NonNull
+		private String addressDetail;
 	}
 }

@@ -2,8 +2,6 @@ package com.delfood.dto;
 
 import java.time.LocalDateTime;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.lang.Nullable;
 
 import lombok.Getter;

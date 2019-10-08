@@ -103,7 +103,7 @@ public class MemberService {
 		else if(result == 0) 
 			return DMLOperationError.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
 		else 
-			return DMLOperationError.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
+			return DMLOperationError.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요. 정상적인 상황에서는 발생하지 않음.
 	}
 	
 	
