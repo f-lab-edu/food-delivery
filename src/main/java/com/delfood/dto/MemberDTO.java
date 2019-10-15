@@ -71,10 +71,10 @@ public class MemberDTO {
     if (memberInfo.getId() == null || memberInfo.getPassword() == null
         || memberInfo.getName() == null || memberInfo.getTel() == null
         || memberInfo.getMail() == null) {
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
 
