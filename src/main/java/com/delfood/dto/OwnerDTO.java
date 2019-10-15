@@ -6,14 +6,14 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter 
+@Getter
 @Setter
 @ToString
 public class OwnerDTO {
   public enum Status {
     DEFAULT, DELETED
   }
-  
+
   @NonNull
   private String id;
   @NonNull
@@ -27,6 +27,6 @@ public class OwnerDTO {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private Status status;
-  
-  
+
+
 }
