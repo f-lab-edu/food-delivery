@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.mapper.DMLOperationError;
 import com.delfood.mapper.OwnerMapper;
+import com.delfood.utils.SHA256Util;
 
 @Service
 public class OwnerService {
@@ -18,6 +19,8 @@ public class OwnerService {
    * @return 가입후 성공 여부. 실패한다면 throw Exception된다.
    */
   public DMLOperationError signUp(OwnerDTO ownerInfo) {
+    String cryptoPassword = SHA256Util.encryptSHA256(ownerInfo.getPassword());
+    ownerInfo.setPassword(cryptoPassword);
     int insertOwnerResult = ownerMapper.insertOwner(ownerInfo);
     if (insertOwnerResult == 1) {
       return DMLOperationError.SUCCESS;
