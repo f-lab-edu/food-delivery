@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.ShopMapper">
+    <sql id="selectOwner">
+         SELECT id,
+               name, 
+               delivery_type deliveryType, 
+               signature_menu signatureMenu, 
+               tel,
+               zipcode, 
+               address, 
+               address_detail addressDetail, 
+               biz_number bizNumber,
+               info, 
+               min_order_price minOrderPrice, 
+               notice, 
+               operating_time operatingTime,
+               delivery_location deliveryLocation, 
+               owner_id ownerId, 
+               created_at createdAt,
+               updated_at updatedAt, 
+               status, 
+               oreder_type orderType, 
+               origin_info originInfo,
+               work_condition workCondition
+        FROM OWNER
+    </sql>
+
+
+    <insert id="insertShop" parameterType="com.delfood.dto.ShopDTO">
+        INSERT INTO SHOP
+        VALUES(
+            name = #{name},
+            delivery_type = #{deliveryType},
+            signature_menu = #{signatureMenu},
+            tel = #{tel},
+            zipcode = #{zipcode},
+            address = #{address},
+            address_detail = #{addressDetail},
+            biz_number = #{bizNumber},
+            info = #{info},
+            min_order_price = #{minOrderPrice},
+            notice = #{notice},
+            operating_time = #{operatingTime},
+            delivery_location = #{deliveryLocation},
+            owner_id = #{ownerId},
+            order_type = #{orderType},
+            origin_info = #{originInfo},
+        )
+    </insert>
+    
+    <update id="deleteShop">
+        UPDATE SHOP
+        SET status = 'DELETED',
+            updatedAt = NOW()
+        WHERE id = #{id}
+    </update>
+    
+    <select id="findByOwnerId">
+        <include refid="selectOwner"></include>
+        WHERE ownerId = #{ownerId}
+    </select>
+    
+    
+    <select id="findById">
+        <include refid="selectOwner"></include>
+        WHERE id = #{id}
+    </select>
+</mapper>
