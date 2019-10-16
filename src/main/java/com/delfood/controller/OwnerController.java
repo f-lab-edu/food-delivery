@@ -75,7 +75,7 @@ public class OwnerController {
   @RequiredArgsConstructor
   private static class SignUpResponse {
     enum SignUpStatus {
-      SUCCESS, ID_DUPLICATED, ERROR, NULL_ARGUMENT
+      SUCCESS, ID_DUPLICATED
     }
 
     @NonNull
