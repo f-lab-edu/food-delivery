@@ -73,11 +73,11 @@ public class OwnerController {
     String id = (String) session.getAttribute("LOGIN_OWNER_ID");
     if (id != null) {
       session.invalidate();
-      return new ResponseEntity<OwnerController.logoutResponse>(
-          logoutResponse.SUCCESS, HttpStatus.OK);
+      return new ResponseEntity<OwnerController.logoutResponse>(logoutResponse.SUCCESS,
+          HttpStatus.OK);
     } else {
-      return new ResponseEntity<OwnerController.logoutResponse>(
-          logoutResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<OwnerController.logoutResponse>(logoutResponse.NO_LOGIN,
+          HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -242,7 +242,7 @@ public class OwnerController {
   @RequiredArgsConstructor
   private static class UpdateOwnerMailAndTelResponse {
     enum UpdateStatus {
-      SUCCESS, NO_LOGIN, EMPTY_MAIL, EMPTY_TEL
+      SUCCESS, NO_LOGIN, EMPTY_CONTENT
     }
 
     @NonNull
@@ -252,10 +252,8 @@ public class OwnerController {
         new UpdateOwnerMailAndTelResponse(UpdateStatus.SUCCESS);
     private static final UpdateOwnerMailAndTelResponse NO_LOGIN =
         new UpdateOwnerMailAndTelResponse(UpdateStatus.NO_LOGIN);
-    private static final UpdateOwnerMailAndTelResponse EMPTY_MAIL =
-        new UpdateOwnerMailAndTelResponse(UpdateStatus.EMPTY_MAIL);
-    private static final UpdateOwnerMailAndTelResponse EMPTY_TEL =
-        new UpdateOwnerMailAndTelResponse(UpdateStatus.EMPTY_TEL);
+    private static final UpdateOwnerMailAndTelResponse EMPTY_CONTENT =
+        new UpdateOwnerMailAndTelResponse(UpdateStatus.EMPTY_CONTENT);
   }
 
   @Getter

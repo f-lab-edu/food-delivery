@@ -1,14 +1,18 @@
 package com.delfood.dto;
 
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
+import org.apache.ibatis.type.Alias;
+
 @Getter
 @Setter
 @ToString
+@Alias("Owner")
 public class OwnerDTO {
   public enum Status {
     DEFAULT, DELETED

@@ -2,14 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OwnerMapper">
 
-<select id="findByIdAndPassword" resultType="com.delfood.dto.OwnerDTO">
+<select id="findByIdAndPassword" resultType="Owner">
   SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
   FROM OWNER
   WHERE id = #{id}
    AND password = #{password}
 </select>
 
-<select id="findById" resultType="com.delfood.dto.OwnerDTO">
+<select id="findById" resultType="Owner">
   SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
   FROM OWNER
   WHERE id = #{id}
@@ -23,8 +23,13 @@
 
 <update id="updateMailAndTel">
   UPDATE OWNER
-  SET mail = #{mail},
+  SET
+  <if test="mail != null">
+  mail = #{mail},
+  </if>
+  <if test="tel != null">
   tel = #{tel},
+  </if>
   updated_at = NOW()
   WHERE id = #{id}
 </update>

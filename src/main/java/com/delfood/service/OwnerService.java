@@ -4,8 +4,11 @@ import com.delfood.dto.OwnerDTO;
 import com.delfood.mapper.DMLOperationError;
 import com.delfood.mapper.OwnerMapper;
 import com.delfood.utils.SHA256Util;
+import javax.management.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 
 
 @Service
@@ -45,6 +48,7 @@ public class OwnerService {
    * 
    * @return
    */
+  @Transactional(rollbackFor = RuntimeException.class)
   public DMLOperationError updateOwnerMailAndTel(String id, String mail, String tel) {
     int result = ownerMapper.updateMailAndTel(id, mail, tel);
     if (result == 1) {
@@ -52,7 +56,7 @@ public class OwnerService {
     } else if (result == 0) {
       return DMLOperationError.NONE_CHANGED; // 데이터가 변경되지 않음
     } else {
-      return DMLOperationError.TOO_MANY_CHANGED; // 반복된 요청
+      throw new RuntimeException("password update error : " + DMLOperationError.TOO_MANY_CHANGED);
     }
   }
 
@@ -63,6 +67,7 @@ public class OwnerService {
    * @param password 변경할 비밀번호
    * @return
    */
+  @Transactional(rollbackFor = RuntimeException.class) // runtimeException이 발생하면 rollback을 수행한다.
   public DMLOperationError updateOwnerPassword(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     int result = ownerMapper.updatePassword(id, cryptoPassword);
@@ -71,7 +76,7 @@ public class OwnerService {
     } else if (result == 0) {
       return DMLOperationError.NONE_CHANGED;
     } else {
-      return DMLOperationError.TOO_MANY_CHANGED;
+      throw new RuntimeException("password update error : " + DMLOperationError.TOO_MANY_CHANGED);
     }
 
   }
