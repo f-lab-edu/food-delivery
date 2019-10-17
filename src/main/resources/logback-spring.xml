@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	Logging Level
+	OFF로 설정시 출력하지 않는다.
+	ALL로 설정시 TRACE와 같은 설정을 제공.
+	
+	trace < debug < info < warn < error
+	낮음 		-		보통		-		위험
+	하위단계의 로깅 레벨은 상위단계의 로그를 포함한다.
+	ex) info로 설정할 시 info, warn, error 로그를 포함하여 출력
+ -->
+
+<!-- 30초마다 설정 파일의 변경을 확인한다. 파일이 변경되면 다시 로딩한다 -->
+<configuration scan="true" scanPeriod="30 seconds">
+
+	<!-- setting -->
+	<springProfile name="local">
+		<property resource="application-local.properties" />
+	</springProfile>
+	<springProfile name="dev">
+		<property resource="application-dev.properties" />
+	</springProfile>
+	<springProfile name="release">
+		<property resource="application-release.properties" />
+	</springProfile>
+	
+	<!-- property를 통해 key-value 형식의 변수를 설정할 수 있다. -->
+	<!-- log packagename -->
+	<property name="LOG_PACKAGE_NAME"
+		value="${log.config.packagename}" />
+	<!-- log file path -->
+	<property name="LOG_PATH" value="${log.config.path}" />
+	<!-- log file name -->
+	<property name="LOG_FILE_NAME" value="${log.config.filename}" />
+	<!-- log days -->
+	<property name="LOG_DAYS" value="${log.config.days}" />
+	<!-- log filesize log -->
+	<property name="LOG_FILESIZE_LOG"
+		value="${log.config.filesizelog}" />
+	<!-- log filesize zip -->
+	<property name="LOG_FILESIZE_ZIP"
+		value="${log.config.filesizezip}" />
+	<!-- log filesize total -->
+	<property name="LOG_TOTAL_FILESIZE"
+		value="${log.config.totalfilesize}" />
+	<!-- log min count -->
+	<property name="LOG_FILE_MIN" value="${log.config.min}" />
+	<!-- log max count -->
+	<property name="LOG_FILE_MAX" value="${log.config.max}" />
+	<!-- pattern -->
+	<property name="LOG_PATTERN"
+		value="%-5level %d{yy-MM-dd HH:mm:ss} [%logger{0}:%line] - %msg%n" />
+	<property name="LOG_PATTERN_LIVE"
+		value="%-5level %d{yy-MM-dd HH:mm:ss} [%method:%line] - %msg%n" />
+
+	
+
+	<!-- console log -->
+	<!-- 
+		appender은 로그의 출력 설정을 담당한다.
+		파일 - RollingFileAppender
+		콘솔 - ConsoleAppender
+		DB - DBAppender
+	 -->
+	<appender name="console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder
+			class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 로그 파일 생성 관련 -->
+	<!-- 로그 모드 -->
+	<!-- log file -->
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- 파일경로/파일의 이름을 설정한다. -->
+		<file>${LOG_PATH}/${LOG_FILE_NAME}.log</file>
+		<!-- 일자별로 로그 파일을 정리한다. -->
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+		<encoder
+			class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- MyBatis 쿼리 정렬 및 테이블 출력 -->
+	<logger name="jdbc.resultsettable" additivity="false">  
+    	<level value="INFO"/>  
+        <appender-ref ref="console"/>  
+		<appender-ref ref="FILE" />
+    </logger>
+	<logger name="jdbc.resultset" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="FILE" />
+	</logger>
+	<logger name="jdbc.sqlonly" additivity="false">  
+    	<level value="INFO"/>  
+        <appender-ref ref="console"/>  
+		<appender-ref ref="FILE" />
+    </logger>
+	
+	<!-- 
+		profile에 따라 다른 로깅 설정을 할 수 있음
+		release일경우와 release가 아닐 경우로 나누어서 배포시에 필요한 로그와 테스트시 필요한 로그를 구분
+	 -->
+	<if condition='property("log.config.mode").equals("release")'>
+		<then>
+			<logger name="${LOG_PACKAGE_NAME}" level="INFO" />
+
+			<logger name="org.springframework" additivity="false">
+				<level value="WARN" />
+				<appender-ref ref="console" />
+			</logger>
+
+			<root level="INFO">
+				<appender-ref ref="console" />
+				<appender-ref ref="FILE" />
+			</root>
+		</then>
+		<else>
+			<logger name="${LOG_PACKAGE_NAME}" level="DEBUG" />
+			<!-- 
+			additivity는 상위 로거의 내용을 상속받을지 결정함.
+			default로 true설정이 되어있음.
+			additivity를 true로 하면 같은 로그가 여러번 찍힐 수 있으니 주의가 필요하다.
+			 -->
+			
+			
+			<!-- spring framework에서 생산하는 로그 -->
+			<logger name="org.springframework" additivity="false">
+				<level value="INFO" />
+				<appender-ref ref="console" />
+				<appender-ref ref="FILE" />
+			</logger>
+			
+			<!-- root : 최상위 로거. 프로젝트의 모든 로그가 기록된다.
+				root 로깅을 debug로 설정하면 필요없는 정보까지 모두 기록될 수 있으므로 상황에 따라 로깅 레벨을 조정하여야 함
+				logger name=""와 같다. -->
+			<root level="INFO">
+				<appender-ref ref="console" />
+				<appender-ref ref="FILE" />
+			</root>
+		</else>
+	</if>
+
+</configuration>
+
+
+
+

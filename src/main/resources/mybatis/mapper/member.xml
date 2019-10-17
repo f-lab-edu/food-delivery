@@ -1,9 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.delfood.dao.MemberMapper">
-
-    <select id="getAll" resultType="com.delfood.vo.MemberVO">
-        SELECT * FROM TB_MEMBER
+<mapper namespace="com.delfood.mapper.MemberMapper">
+	
+	
+    <select id="findById" resultType="com.delfood.dto.MemberDTO">
+        SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
+        FROM MEMBER
+        WHERE id = #{id}
+        AND status != 'DELETE'
     </select>
     
+    <insert id="insertMember" parameterType="com.delfood.dto.MemberDTO">
+    	INSERT INTO MEMBER(id, password, name, tel, mail)
+    	VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail})
+    </insert>
+    
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.MemberDTO">
+    	SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
+    	FROM   MEMBER
+    	WHERE  id = #{id}
+    	AND	   password = #{password}
+    	AND	   status != 'DELETE'
+    </select>
+    
+    <update id="updateMemberPassword">
+    	UPDATE MEMBER
+    	SET password = #{password},
+    	    updated_at = NOW()
+    	WHERE id=#{id}
+    </update>
+    
+    <update id="deleteMember">
+    	UPDATE MEMBER
+    	SET status = 'DELETE',
+    	    updated_at = NOW()
+    	WHERE id=#{id}
+    </update>
+    
+    <update id="updateMemberAddress">
+    	UPDATE MEMBER
+    	SET address = #{address},
+    	    address_detail = #{addressDetail},
+    	    updated_at = NOW()
+    	WHERE id = #{id}
+    </update>
+    
+    <select id="idCheck" resultType="int">
+    	SELECT COUNT(id)
+    	  FROM MEMBER
+    	 WHERE id = #{id}
+    </select>
 </mapper>
