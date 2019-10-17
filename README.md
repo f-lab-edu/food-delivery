@@ -4,11 +4,14 @@ DelFood
 고객 - 매장, 매장 - 라이더를 중개하는 기능을 구현할 예정입니다.
 
 
-### 프로젝트 화면 설계
+## 프로젝트 포스팅
+Tistory - <https://deveric.tistory.com/category/Project/DelFood>   
+
+## 프로젝트 화면 설계
 
 kakao oven - <https://ovenapp.io/view/OI44WSGwSZRSMcyiveGcSWGvw38YKizI/bco8b\>   
+![image](https://user-images.githubusercontent.com/46917538/66744438-6b694e00-eeb7-11e9-82b7-246f569a74a6.png)
 
 ## 프로젝트 DB ERD
 
-aquerytool - <http://aquerytool.com:80/aquerymain/index/?rurl=e98cd618-c212-4d0e-ae40-866e1a0cb4b5&> <br>
-Password : yxjr01
+![image](https://user-images.githubusercontent.com/46917538/66743258-78d10900-eeb4-11e9-9949-8d7ceb81469a.png)
