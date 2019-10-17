@@ -16,17 +16,7 @@ public class ShopDTO {
     SELF_DELIVERY, COMPANY_DELIVERY
   }
 
-  // 주력 메뉴
-  // 한식, 분식, 카페, 일식,
-  // 치킨, 피자, 아시안, 양식,
-  // 중국집, 족발보쌈, 야식, 찜탕,
-  // 도시락, 패스트푸드, 프렌차이즈
-  enum SignatureMenu {
-    KOREAN, SCHOOL_FOOD, CAFE, JAPANESE, 
-    CHICKEN, PIZZA, ASIAN, WESTERN,
-    CHINESE, BOSSAM, MIDNIGHT_MEAL, SOUP,
-    LUNCHBOX, FAST_FOOD, FRANCHISE
-  }
+  
 
   enum Status {
     DEFAULT, DELETED
@@ -56,7 +46,7 @@ public class ShopDTO {
 
   // 주력메뉴 치킨, 피자, 분식 등
   @NonNull
-  private SignatureMenu signatureMenu;
+  private Long signatureMenuId;
 
   // 가게 전화번호
   private String tel;
@@ -122,7 +112,7 @@ public class ShopDTO {
   public static boolean hasNullDataBeforeCreate(ShopDTO shopInfo) {
     if (shopInfo.getName() == null
         || shopInfo.getDeliveryType() == null
-        || shopInfo.getSignatureMenu() == null
+        || shopInfo.getSignatureMenuId() == null
         || shopInfo.getBizNumber() == null
         || shopInfo.getInfo() == null
         || shopInfo.getMinOrderPrice() == null

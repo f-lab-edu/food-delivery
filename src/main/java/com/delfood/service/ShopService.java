@@ -19,11 +19,9 @@ public class ShopService {
    * @param shopInfo 삽입할 매장의 데이터
    * @return
    */
-  public DMLOperationError newShop(ShopDTO shopInfo) {
+  public void newShop(ShopDTO shopInfo) {
     int insertShop = shopMapper.insertShop(shopInfo);
-    if (insertShop == 1) {
-      return DMLOperationError.SUCCESS;
-    } else {
+    if (insertShop != 1) {
       log.error("insert ERROR - {}", shopInfo);
       throw new RuntimeException("Shop insert ERROR");
     }

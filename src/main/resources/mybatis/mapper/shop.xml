@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.ShopMapper">
-    <sql id="selectOwner">
+    <sql id="selectShop">
          SELECT id,
                name, 
                delivery_type deliveryType, 
-               signature_menu signatureMenu, 
+               signature_menu_id signatureMenuId, 
                tel,
                zipcode, 
                address, 
@@ -23,7 +23,7 @@
                oreder_type orderType, 
                origin_info originInfo,
                work_condition workCondition
-        FROM OWNER
+        FROM SHOP
     </sql>
 
 
@@ -32,7 +32,7 @@
         VALUES(
             name = #{name},
             delivery_type = #{deliveryType},
-            signature_menu = #{signatureMenu},
+            signature_menu_id = #{signatureMenuId},
             tel = #{tel},
             zipcode = #{zipcode},
             address = #{address},
@@ -66,4 +66,28 @@
         <include refid="selectOwner"></include>
         WHERE id = #{id}
     </select>
+    
+    <!-- 
+        변경할 수 있는 정보
+        이름, 배달 형태, 주력 메뉴, 전화번호, 가게 소개,
+        최소 주문금액, 안내 및 혜택, 운영시간, 배달 지역, 
+        주문 타입, 원산지 정보
+     -->
+    <update id="updateShop">
+        UPDATE SHOP
+        SET <if test="name != null">name = #{name},</if>
+            <if test="deliveryType != null">delivery_type = #{deliveryType},</if>
+            <if test="signatureMenuId != null">signature_menu_id = #{signatureMenuId},</if>
+            <if test="tel != null">tel = #{tel},</if>
+            <if test="info != null">info = #{info},</if>
+            <if test="minOrderPrice != null">min_order_price = #{minOrderPrice},</if>
+            <if test="notice != null">notice = #{notice},</if>
+            <if test="operatingTime != null">operating_time = #{operatingTime},</if>
+            <if test="deliveryLocation != null">delivery_location = #{deliveryLocation},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="originInfo != null">origin_info = #{originInfo},</if>
+            updated_at = NOW()
+        
+        WHERE id = #{id}
+    </update>
 </mapper>
