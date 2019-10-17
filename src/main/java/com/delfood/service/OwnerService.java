@@ -18,13 +18,13 @@ public class OwnerService {
   private OwnerMapper ownerMapper;
 
   /**
-   * 사장님 로그인.
+   * 사장 정보 조회.
    * 
    * @param id 아이디
    * @param password 패스워드
-   * @return
+   * @return  id, name, mail, tel, createAt, updatedAt, status
    */
-  public OwnerDTO login(String id, String password) {
+  public OwnerDTO getOwner(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     OwnerDTO ownerInfo = ownerMapper.findByIdAndPassword(id, cryptoPassword);
     return ownerInfo;
@@ -33,9 +33,10 @@ public class OwnerService {
   /**
    * 사장 정보 조회.
    * 
+   * @param id 아이디
    * @return id, name, mail, tel, createAt, updatedAt, status
    */
-  public OwnerDTO ownerInfo(String id) {
+  public OwnerDTO getOwner(String id) {
     return ownerMapper.findById(id);
   }
 

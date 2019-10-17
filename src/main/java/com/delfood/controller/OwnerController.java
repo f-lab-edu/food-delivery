@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,7 +39,7 @@ public class OwnerController {
   @PostMapping("login")
   public ResponseEntity<OwnerLoginResponse> login(@RequestBody OwnerLoginRequest loginRequest,
       HttpSession session) {
-    OwnerDTO ownerInfo = ownerService.login(loginRequest.getId(), loginRequest.getPassword());
+    OwnerDTO ownerInfo = ownerService.getOwner(loginRequest.getId(), loginRequest.getPassword());
     OwnerLoginResponse ownerLoginResponse;
     ResponseEntity<OwnerLoginResponse> responseEntity;
 
@@ -46,17 +47,17 @@ public class OwnerController {
       ownerLoginResponse = OwnerLoginResponse.FAIL;
       responseEntity =
           new ResponseEntity<OwnerLoginResponse>(ownerLoginResponse, HttpStatus.UNAUTHORIZED);
-    } else if (Status.DEFAULT.equals(ownerInfo.getStatus())) { // 성공
-      ownerLoginResponse = OwnerLoginResponse.success(ownerInfo);
-      session.setAttribute("LOGIN_OWNER_ID", ownerInfo.getId());
-      responseEntity = new ResponseEntity<OwnerLoginResponse>(ownerLoginResponse, HttpStatus.OK);
-    } else if (Status.DELETED.equals(ownerInfo.getStatus())) { // 삭제된 계정일 때
-      ownerLoginResponse = OwnerLoginResponse.DELETED;
-      responseEntity = new ResponseEntity<OwnerController.OwnerLoginResponse>(ownerLoginResponse,
-          HttpStatus.UNAUTHORIZED);
-    } else { // 예상치 못한 에러처리
-      log.error("login error {} ", loginRequest);
-      throw new RuntimeException("login error");
+    } else { // 회원 정보가 존재
+      Status ownerStatus = ownerInfo.getStatus();
+      if (ownerStatus == Status.DEFAULT) { 
+        ownerLoginResponse = OwnerLoginResponse.success(ownerInfo);
+        session.setAttribute("LOGIN_OWNER_ID", ownerInfo.getId());
+        responseEntity = new ResponseEntity<OwnerLoginResponse>(ownerLoginResponse, HttpStatus.OK);
+      } else {
+        ownerLoginResponse = OwnerLoginResponse.DELETED;
+        responseEntity = new ResponseEntity<OwnerController.OwnerLoginResponse>(ownerLoginResponse,
+            HttpStatus.UNAUTHORIZED);
+      }
     }
     return responseEntity;
   }
@@ -95,7 +96,7 @@ public class OwnerController {
     if (id == null) {
       responseEntity = new ResponseEntity<OwnerDTO>(HttpStatus.UNAUTHORIZED);
     } else {
-      OwnerDTO ownerInfo = ownerService.ownerInfo(id);
+      OwnerDTO ownerInfo = ownerService.getOwner(id);
       responseEntity = new ResponseEntity<OwnerDTO>(ownerInfo, HttpStatus.OK);
     }
     return responseEntity;
@@ -108,36 +109,38 @@ public class OwnerController {
    * @param session 현재 사용자 세션
    * @return
    */
-  @PutMapping
-  public ResponseEntity<UpdateOwnerMailAndTelResponse> updateOwnerInfo(
+  @PatchMapping
+  public ResponseEntity<UpdateOwnerResponse> updateOwnerInfo(
       @RequestBody UpdateOwnerMailAndTelRequest updateRequest, HttpSession session) {
 
     String mail = updateRequest.getMail();
     String tel = updateRequest.getTel();
+    String password = updateRequest.getPassword();
     String id = (String) session.getAttribute("LOGIN_OWNER_ID");
-    ResponseEntity<UpdateOwnerMailAndTelResponse> responseEntity;
 
-    if (mail == null) {
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerMailAndTelResponse>(
-          UpdateOwnerMailAndTelResponse.EMPTY_MAIL, HttpStatus.BAD_REQUEST);
-    } else if (tel == null) {
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerMailAndTelResponse>(
-          UpdateOwnerMailAndTelResponse.EMPTY_TEL, HttpStatus.BAD_REQUEST);
-    } else if (id == null) {
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerMailAndTelResponse>(
-          UpdateOwnerMailAndTelResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
-    } else {
-      DMLOperationError dmlOperationError = ownerService.updateOwnerMailAndTel(id, mail, tel);
-
-      if (dmlOperationError == DMLOperationError.SUCCESS) {
-        responseEntity = new ResponseEntity<OwnerController.UpdateOwnerMailAndTelResponse>(
-            UpdateOwnerMailAndTelResponse.SUCCESS, HttpStatus.OK);
-      } else {
-        log.error("Member mail and tel update ERROR : {}", updateRequest);
-        throw new RuntimeException("Member mail and tel update ERROR");
-      }
+    if (id == null) { // 로그인 상태가 아닌 경우
+      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
     }
-    return responseEntity;
+    
+    if (ownerService.getOwner(id, password) == null) {
+      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
+    }
+    
+    if (mail == null && tel == null) { // 변경하려는 정보가 둘 다 null일 경우
+      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.EMPTY_CONTENT, HttpStatus.BAD_REQUEST);
+    }
+
+    DMLOperationError dmlOperationError = ownerService.updateOwnerMailAndTel(id, mail, tel);
+    if (dmlOperationError == DMLOperationError.SUCCESS) {
+      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
+    } else {
+      log.error("Member mail and tel update ERROR : {}", updateRequest);
+      throw new RuntimeException("Member mail and tel update ERROR");
+    }
   }
 
   /**
@@ -147,38 +150,39 @@ public class OwnerController {
    * @param session 현재 사용자의 세션
    * @return
    */
-  @PutMapping("password")
-  public ResponseEntity<UpdateOwnerPasswordResponse> updatePassword(
+  @PatchMapping("password")
+  public ResponseEntity<UpdateOwnerResponse> updatePassword(
       @RequestBody UpdateOwnerPasswordRequest passwordResquest, HttpSession session) {
     String id = (String) session.getAttribute("LOGIN_OWNER_ID");
     String password = passwordResquest.getPassword();
     String newPassword = passwordResquest.getNewPassword();
 
-    ResponseEntity<UpdateOwnerPasswordResponse> responseEntity;
+    ResponseEntity<UpdateOwnerResponse> responseEntity;
 
 
     if (id == null) { // 비 로그인 상태
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerPasswordResponse>(
-          UpdateOwnerPasswordResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
-    } else if (ownerService.login(id, password) == null) { // 아이디와 비밀번호 불일치
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerPasswordResponse>(
-          UpdateOwnerPasswordResponse.PASSWORD_MISMATCH, HttpStatus.BAD_REQUEST);
-    } else if (newPassword == null) {
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerPasswordResponse>(
-          UpdateOwnerPasswordResponse.EMPTY_PASSOWRD, HttpStatus.BAD_REQUEST);
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
+    } else if (password == null || newPassword == null) { // 비밀번호나 새 비밀번호를 입력하지 않은 경우
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.EMPTY_PASSOWRD, HttpStatus.BAD_REQUEST);
+    } else if (ownerService.getOwner(id, password) == null) { // 아이디와 비밀번호 불일치
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
     } else if (password.equals(newPassword)) { // 이전 패스워드와 동일한 경우
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerPasswordResponse>(
-          UpdateOwnerPasswordResponse.PASSWORD_DUPLICATED, HttpStatus.CONFLICT);
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.PASSWORD_DUPLICATED, HttpStatus.CONFLICT);
     } else {
       DMLOperationError dmlOperationError = ownerService.updateOwnerPassword(id, newPassword);
 
       if (DMLOperationError.SUCCESS.equals(dmlOperationError)) {
-        responseEntity = new ResponseEntity<OwnerController.UpdateOwnerPasswordResponse>(
-            UpdateOwnerPasswordResponse.SUCCESS, HttpStatus.OK);
+        responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+            UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
       } else {
         log.error("Password Update Error {}", passwordResquest);
         throw new RuntimeException("Password Update Error");
       }
+      
     }
     return responseEntity;
   }
@@ -199,6 +203,8 @@ public class OwnerController {
   @Setter
   @Getter
   private static class UpdateOwnerMailAndTelRequest {
+    @NonNull
+    private String password;
     @NonNull
     private String mail;
     @NonNull
@@ -240,42 +246,26 @@ public class OwnerController {
 
   @Getter
   @RequiredArgsConstructor
-  private static class UpdateOwnerMailAndTelResponse {
+  private static class UpdateOwnerResponse {
     enum UpdateStatus {
-      SUCCESS, NO_LOGIN, EMPTY_CONTENT
+      SUCCESS, NO_LOGIN, EMPTY_CONTENT, EMPTY_PASSOWRD, PASSWORD_MISMATCH, PASSWORD_DUPLICATED
     }
 
     @NonNull
     private UpdateStatus result;
 
-    private static final UpdateOwnerMailAndTelResponse SUCCESS =
-        new UpdateOwnerMailAndTelResponse(UpdateStatus.SUCCESS);
-    private static final UpdateOwnerMailAndTelResponse NO_LOGIN =
-        new UpdateOwnerMailAndTelResponse(UpdateStatus.NO_LOGIN);
-    private static final UpdateOwnerMailAndTelResponse EMPTY_CONTENT =
-        new UpdateOwnerMailAndTelResponse(UpdateStatus.EMPTY_CONTENT);
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class UpdateOwnerPasswordResponse {
-    enum UpdateStatus {
-      SUCCESS, NO_LOGIN, EMPTY_PASSOWRD, PASSWORD_MISMATCH, PASSWORD_DUPLICATED
-    }
-
-    @NonNull
-    private UpdateStatus result;
-
-    private static final UpdateOwnerPasswordResponse SUCCESS =
-        new UpdateOwnerPasswordResponse(UpdateStatus.SUCCESS);
-    private static final UpdateOwnerPasswordResponse NO_LOGIN =
-        new UpdateOwnerPasswordResponse(UpdateStatus.NO_LOGIN);
-    private static final UpdateOwnerPasswordResponse EMPTY_PASSOWRD =
-        new UpdateOwnerPasswordResponse(UpdateStatus.EMPTY_PASSOWRD);
-    private static final UpdateOwnerPasswordResponse PASSWORD_MISMATCH =
-        new UpdateOwnerPasswordResponse(UpdateStatus.PASSWORD_MISMATCH);
-    private static final UpdateOwnerPasswordResponse PASSWORD_DUPLICATED =
-        new UpdateOwnerPasswordResponse(UpdateStatus.PASSWORD_DUPLICATED);
+    private static final UpdateOwnerResponse SUCCESS =
+        new UpdateOwnerResponse(UpdateStatus.SUCCESS);
+    private static final UpdateOwnerResponse NO_LOGIN =
+        new UpdateOwnerResponse(UpdateStatus.NO_LOGIN);
+    private static final UpdateOwnerResponse EMPTY_CONTENT =
+        new UpdateOwnerResponse(UpdateStatus.EMPTY_CONTENT);
+    private static final UpdateOwnerResponse EMPTY_PASSOWRD =
+        new UpdateOwnerResponse(UpdateStatus.EMPTY_PASSOWRD);
+    private static final UpdateOwnerResponse PASSWORD_MISMATCH =
+        new UpdateOwnerResponse(UpdateStatus.PASSWORD_MISMATCH);
+    private static final UpdateOwnerResponse PASSWORD_DUPLICATED =
+        new UpdateOwnerResponse(UpdateStatus.PASSWORD_DUPLICATED);
   }
 
 
