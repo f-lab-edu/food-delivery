@@ -40,13 +40,9 @@ public class OwnerController {
           HttpStatus.CONFLICT);
     }
 
-    DMLOperationError signUpResult = ownerService.signUp(ownerInfo);
-    if (signUpResult == DMLOperationError.SUCCESS) {
-      return new ResponseEntity<OwnerController.SignUpResponse>(SignUpResponse.SUCCESS,
-          HttpStatus.CREATED);
-    } else {
-      throw new RuntimeException("알 수 없는 오류 발생 :" + ownerInfo);
-    }
+    ownerService.signUp(ownerInfo);
+    return new ResponseEntity<OwnerController.SignUpResponse>(SignUpResponse.SUCCESS,
+        HttpStatus.CREATED);
   }
 
   /**

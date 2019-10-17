@@ -35,14 +35,11 @@ public class OwnerDTO {
    * @return null이 존재할 시 true
    */
   public static boolean hasNullDataBeforeSignUp(OwnerDTO ownerInfo) {
-    if (ownerInfo.getId() == null
+    return ownerInfo.getId() == null
         || ownerInfo.getPassword() == null
         || ownerInfo.getName() == null
         || ownerInfo.getTel() == null
-        || ownerInfo.getTel() == null)
-      return true;
-    
-    return false;
+        || ownerInfo.getTel() == null;
   }
   
   
