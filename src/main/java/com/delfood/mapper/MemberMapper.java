@@ -21,4 +21,5 @@ public interface MemberMapper {
   int updateMemberAddress(String id, String address, String addressDetail);
 
   int idCheck(String id);
+  
 }

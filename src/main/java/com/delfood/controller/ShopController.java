@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/owner/shops/")
+@RequestMapping("/owners/shops/")
 @Log4j2
 public class ShopController {
   @Autowired
@@ -40,6 +40,8 @@ public class ShopController {
       return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.NO_LOGIN,
           HttpStatus.UNAUTHORIZED);
     }
+    
+    shopInfo.setOwnerId(ownerId);
 
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
