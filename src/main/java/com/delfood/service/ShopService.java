@@ -1,7 +1,7 @@
 package com.delfood.service;
 
 import com.delfood.dto.ShopDTO;
-import com.delfood.mapper.DMLOperationError;
+import com.delfood.mapper.DMLOperationResult;
 import com.delfood.mapper.ShopMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

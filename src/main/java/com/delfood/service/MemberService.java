@@ -1,7 +1,7 @@
 package com.delfood.service;
 
 import com.delfood.dto.MemberDTO;
-import com.delfood.mapper.DMLOperationError;
+import com.delfood.mapper.DMLOperationResult;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,15 +62,15 @@ public class MemberService {
    * @param password 변경할 비밀번호
    * @return
    */
-  public DMLOperationError updateMemberPassword(String id, String password) {
+  public DMLOperationResult updateMemberPassword(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     int result = memberMapper.updateMemberPassword(id, cryptoPassword);
     if (result == 1) {
-      return DMLOperationError.SUCCESS; // 원하는 1개의 데이터만 수정
+      return DMLOperationResult.SUCCESS; // 원하는 1개의 데이터만 수정
     } else if (result == 0) {
-      return DMLOperationError.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
+      return DMLOperationResult.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
     } else {
-      return DMLOperationError.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
+      return DMLOperationResult.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
     }
 
   }
@@ -81,14 +81,14 @@ public class MemberService {
    * @param id 탈퇴할 회원의 아이디
    * @return
    */
-  public DMLOperationError deleteMember(String id) {
+  public DMLOperationResult deleteMember(String id) {
     int result = memberMapper.deleteMember(id);
     if (result == 1) {
-      return DMLOperationError.SUCCESS; // 원하는 1개의 데이터만 수정
+      return DMLOperationResult.SUCCESS; // 원하는 1개의 데이터만 수정
     } else if (result == 0) {
-      return DMLOperationError.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
+      return DMLOperationResult.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
     } else {
-      return DMLOperationError.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
+      return DMLOperationResult.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
     }
   }
 
@@ -100,14 +100,14 @@ public class MemberService {
    * @param addressDetail 변경할 상세 주소
    * @return
    */
-  public DMLOperationError updateMemberAddress(String id, String address, String addressDetail) {
+  public DMLOperationResult updateMemberAddress(String id, String address, String addressDetail) {
     int result = memberMapper.updateMemberAddress(id, address, addressDetail);
     if (result == 1) {
-      return DMLOperationError.SUCCESS; // 원하는 1개의 데이터만 수정
+      return DMLOperationResult.SUCCESS; // 원하는 1개의 데이터만 수정
     } else if (result == 0) {
-      return DMLOperationError.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
+      return DMLOperationResult.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
     } else {
-      return DMLOperationError.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요. 정상적인 상황에서는 발생하지
+      return DMLOperationResult.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요. 정상적인 상황에서는 발생하지
                                                  // 않음.
     }
   }
