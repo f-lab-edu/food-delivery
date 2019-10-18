@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 스레드 환경 로깅이 필요하다면 Log4j2를 사용하는 것이 성능면에서 유리하다. 사용자 정의 로그레벨과 람다 표현식을 지원한다. Log4j2 자체적으로 직접 사용할 수는
  * 있지만 일반적으로는 SLF4J와 함께 사용한다.
  * </p>
+ * 
  * @Log @Slf4j @Log4j2 등 어노테이션 적용시 자동으로 log 필드를 만들고 해당 클래스의 이름으로 로거 객체를 생성하여 할당한다.
  * 
  * @author 정준
@@ -166,6 +167,25 @@ public class MemberController {
   }
 
   /**
+   * 회원 로그아웃 메서드.
+   * @author jun
+   * @param session 현제 접속한 세션
+   * @return    로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환
+   *            로그아웃 성공시 200 코드를 반환하고 result:SUCCESS 반환
+   */
+  public ResponseEntity<LogoutResponse> logout(HttpSession session) {
+    String memberId = (String) session.getAttribute("LOGIN_MEMBER_ID");
+    if (memberId == null) {
+      return new ResponseEntity<MemberController.LogoutResponse>(LogoutResponse.NO_LOGIN,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    session.invalidate();
+    return new ResponseEntity<MemberController.LogoutResponse>(LogoutResponse.SUCCESS,
+        HttpStatus.OK);
+  }
+
+  /**
    * 회원 비밀번호 변경
    * 
    * @param session 현재 로그인한 사용자의 세션
@@ -274,7 +294,8 @@ public class MemberController {
       responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
     } else {
-      DMLOperationResult dmlResponse = memberService.updateMemberAddress(id, address, addressDetail);
+      DMLOperationResult dmlResponse =
+          memberService.updateMemberAddress(id, address, addressDetail);
       if (dmlResponse == DMLOperationResult.SUCCESS) {
         // 성공시
         responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
@@ -303,22 +324,44 @@ public class MemberController {
   @AllArgsConstructor
   @RequiredArgsConstructor
   private static class LoginResponse {
-    enum LogInStatus {
+    enum LoginStatus {
       SUCCESS, FAIL, DELETED, ERROR
     }
 
     @NonNull
-    private LogInStatus result;
+    private LoginStatus result;
     private MemberDTO memberInfo;
 
     // success의 경우 memberInfo의 값을 set해줘야 하기 때문에 new 하도록 해준다.
 
-    private static final LoginResponse FAIL = new LoginResponse(LogInStatus.FAIL);
-    private static final LoginResponse DELETED = new LoginResponse(LogInStatus.DELETED);
+    private static final LoginResponse FAIL = new LoginResponse(LoginStatus.FAIL);
+    private static final LoginResponse DELETED = new LoginResponse(LoginStatus.DELETED);
 
     private static LoginResponse success(MemberDTO memberInfo) {
-      return new LoginResponse(LogInStatus.SUCCESS, memberInfo);
+      return new LoginResponse(LoginStatus.SUCCESS, memberInfo);
     }
+
+
+  }
+
+  @Getter
+  @AllArgsConstructor
+  @RequiredArgsConstructor
+  private static class LogoutResponse {
+    enum LogoutStatus {
+      SUCCESS, FAIL, NO_LOGIN, ERROR
+    }
+
+    @NonNull
+    private LogoutStatus result;
+    private MemberDTO memberInfo;
+
+    // success의 경우 memberInfo의 값을 set해줘야 하기 때문에 new 하도록 해준다.
+
+    private static final LogoutResponse FAIL = new LogoutResponse(LogoutStatus.FAIL);
+    private static final LogoutResponse NO_LOGIN = new LogoutResponse(LogoutStatus.NO_LOGIN);
+    private static final LogoutResponse SUCCESS = new LogoutResponse(LogoutStatus.SUCCESS);
+
 
 
   }
