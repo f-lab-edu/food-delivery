@@ -40,7 +40,7 @@ public class ShopController {
       return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.NO_LOGIN,
           HttpStatus.UNAUTHORIZED);
     }
-    
+
     shopInfo.setOwnerId(ownerId);
 
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
@@ -49,7 +49,7 @@ public class ShopController {
           HttpStatus.BAD_REQUEST);
     }
 
-    shopService.newShop(shopInfo);
+    shopService.addShop(shopInfo);
 
 
     return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.SUCCESS,
@@ -68,10 +68,11 @@ public class ShopController {
 
     @NonNull
     Result result;
-    
-    private static OpenShopResponse SUCCESS = new OpenShopResponse(Result.SUCCESS);
-    private static OpenShopResponse NO_LOGIN = new OpenShopResponse(Result.NO_LOGIN);
-    private static OpenShopResponse NULL_ARGUMENTS = new OpenShopResponse(Result.NULL_ARGUMENTS);
+
+    private static final OpenShopResponse SUCCESS = new OpenShopResponse(Result.SUCCESS);
+    private static final OpenShopResponse NO_LOGIN = new OpenShopResponse(Result.NO_LOGIN);
+    private static final OpenShopResponse NULL_ARGUMENTS =
+        new OpenShopResponse(Result.NULL_ARGUMENTS);
   }
 
 }

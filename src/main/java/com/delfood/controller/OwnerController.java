@@ -2,7 +2,7 @@ package com.delfood.controller;
 
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
-import com.delfood.mapper.DMLOperationResult;
+import com.delfood.mapper.OperationResult;
 import com.delfood.service.OwnerService;
 import javax.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
@@ -175,8 +175,8 @@ public class OwnerController {
           UpdateOwnerResponse.EMPTY_CONTENT, HttpStatus.BAD_REQUEST);
     }
 
-    DMLOperationResult dmlOperationError = ownerService.updateOwnerMailAndTel(id, mail, tel);
-    if (dmlOperationError == DMLOperationResult.SUCCESS) {
+    OperationResult dmlOperationError = ownerService.updateOwnerMailAndTel(id, mail, tel);
+    if (dmlOperationError == OperationResult.SUCCESS) {
       return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
           UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
     } else {
@@ -215,9 +215,9 @@ public class OwnerController {
       responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
           UpdateOwnerResponse.PASSWORD_DUPLICATED, HttpStatus.CONFLICT);
     } else {
-      DMLOperationResult dmlOperationError = ownerService.updateOwnerPassword(id, newPassword);
+      OperationResult dmlOperationError = ownerService.updateOwnerPassword(id, newPassword);
 
-      if (DMLOperationResult.SUCCESS.equals(dmlOperationError)) {
+      if (OperationResult.SUCCESS.equals(dmlOperationError)) {
         responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
             UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
       } else {

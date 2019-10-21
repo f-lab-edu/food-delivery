@@ -1,7 +1,7 @@
 package com.delfood.service;
 
 import com.delfood.dto.OwnerDTO;
-import com.delfood.mapper.DMLOperationResult;
+import com.delfood.mapper.OperationResult;
 import com.delfood.mapper.OwnerMapper;
 import com.delfood.utils.SHA256Util;
 import lombok.extern.log4j.Log4j2;
@@ -76,14 +76,14 @@ public class OwnerService {
    * @return
    */
   @Transactional(rollbackFor = RuntimeException.class)
-  public DMLOperationResult updateOwnerMailAndTel(String id, String mail, String tel) {
+  public OperationResult updateOwnerMailAndTel(String id, String mail, String tel) {
     int result = ownerMapper.updateMailAndTel(id, mail, tel);
     if (result == 1) {
-      return DMLOperationResult.SUCCESS; // 정상 수행
+      return OperationResult.SUCCESS; // 정상 수행
     } else if (result == 0) {
-      return DMLOperationResult.NONE_CHANGED; // 데이터가 변경되지 않음
+      return OperationResult.NONE_CHANGED; // 데이터가 변경되지 않음
     } else {
-      throw new RuntimeException("password update error : " + DMLOperationResult.TOO_MANY_CHANGED);
+      throw new RuntimeException("password update error : " + OperationResult.TOO_MANY_CHANGED);
     }
   }
 
@@ -95,15 +95,15 @@ public class OwnerService {
    * @return
    */
   @Transactional(rollbackFor = RuntimeException.class) // runtimeException이 발생하면 rollback을 수행한다.
-  public DMLOperationResult updateOwnerPassword(String id, String password) {
+  public OperationResult updateOwnerPassword(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     int result = ownerMapper.updatePassword(id, cryptoPassword);
     if (result == 1) {
-      return DMLOperationResult.SUCCESS;
+      return OperationResult.SUCCESS;
     } else if (result == 0) {
-      return DMLOperationResult.NONE_CHANGED;
+      return OperationResult.NONE_CHANGED;
     } else {
-      throw new RuntimeException("password update error : " + DMLOperationResult.TOO_MANY_CHANGED);
+      throw new RuntimeException("password update error : " + OperationResult.TOO_MANY_CHANGED);
     }
 
   }

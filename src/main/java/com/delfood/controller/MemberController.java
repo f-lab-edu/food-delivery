@@ -1,7 +1,7 @@
 package com.delfood.controller;
 
 import com.delfood.dto.MemberDTO;
-import com.delfood.mapper.DMLOperationResult;
+import com.delfood.mapper.OperationResult;
 import com.delfood.service.MemberService;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
@@ -219,8 +219,8 @@ public class MemberController {
           new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.BAD_REQUEST);
     } else {
       // 성공시
-      DMLOperationResult dmlResponse = memberService.updateMemberPassword(id, newPassword);
-      if (dmlResponse == DMLOperationResult.SUCCESS) {
+      OperationResult dmlResponse = memberService.updateMemberPassword(id, newPassword);
+      if (dmlResponse == OperationResult.SUCCESS) {
         updateResponse = UpdateMemberPasswordResponse.SUCCESS;
         responseEntity =
             new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.OK);
@@ -251,8 +251,8 @@ public class MemberController {
       responseEntity =
           new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.UNAUTHORIZED);
     } else {
-      DMLOperationResult dmlResponse = memberService.deleteMember(id);
-      if (dmlResponse == DMLOperationResult.SUCCESS) {
+      OperationResult dmlResponse = memberService.deleteMember(id);
+      if (dmlResponse == OperationResult.SUCCESS) {
         deleteResponse = DeleteMemberResponse.SUCCESS;
         // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
         session.invalidate();
@@ -294,13 +294,13 @@ public class MemberController {
       responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
     } else {
-      DMLOperationResult dmlResponse =
+      OperationResult dmlResponse =
           memberService.updateMemberAddress(id, address, addressDetail);
-      if (dmlResponse == DMLOperationResult.SUCCESS) {
+      if (dmlResponse == OperationResult.SUCCESS) {
         // 성공시
         responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
             UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
-      } else if (dmlResponse == DMLOperationResult.NONE_CHANGED) {
+      } else if (dmlResponse == OperationResult.NONE_CHANGED) {
         // 주소 변경이 되지 않았을 때
         log.error("Member Address Update ERROR " + dmlResponse);
         throw new RuntimeException("Member Address Update ERROR");
@@ -356,7 +356,6 @@ public class MemberController {
     private LogoutStatus result;
     private MemberDTO memberInfo;
 
-    // success의 경우 memberInfo의 값을 set해줘야 하기 때문에 new 하도록 해준다.
 
     private static final LogoutResponse FAIL = new LogoutResponse(LogoutStatus.FAIL);
     private static final LogoutResponse NO_LOGIN = new LogoutResponse(LogoutStatus.NO_LOGIN);

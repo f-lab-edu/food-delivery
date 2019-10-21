@@ -1,7 +1,7 @@
 package com.delfood.service;
 
 import com.delfood.dto.ShopDTO;
-import com.delfood.mapper.DMLOperationResult;
+import com.delfood.mapper.OperationResult;
 import com.delfood.mapper.ShopMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class ShopService {
    * @param shopInfo 삽입할 매장의 데이터
    * @return
    */
-  public void newShop(ShopDTO shopInfo) {
+  public void addShop(ShopDTO shopInfo) {
     int insertShop = shopMapper.insertShop(shopInfo);
     if (insertShop != 1) {
       log.error("insert ERROR - {}", shopInfo);
