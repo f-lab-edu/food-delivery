@@ -3,6 +3,7 @@ package com.delfood.controller;
 import com.delfood.dto.MemberDTO;
 import com.delfood.mapper.OperationResult;
 import com.delfood.service.MemberService;
+import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -63,7 +64,7 @@ public class MemberController {
   @GetMapping("myInfo")
   public ResponseEntity<MemberDTO> memberInfo(HttpSession session) {
     ResponseEntity<MemberDTO> responseEntity = null;
-    String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+    String id = SessionUtil.getLoginMemberId(session);
     if (id == null) {
       responseEntity = new ResponseEntity<MemberDTO>(HttpStatus.UNAUTHORIZED);
     } else {
@@ -131,8 +132,9 @@ public class MemberController {
     return responseEntity;
   }
 
-  /*
-   * 회원 로그인을 진행한다. Login 요청시 id, password가 NULL일 경우 NullPointerException을 throw한다.
+  /**
+   * 회원 로그인을 진행한다. 
+   * Login 요청시 id, password가 NULL일 경우 NullPointerException을 throw한다.
    */
   @PostMapping("login")
   public ResponseEntity<LoginResponse> login(@RequestBody @NonNull MemberLoginRequest loginRequest,
@@ -151,7 +153,7 @@ public class MemberController {
     } else if (MemberDTO.Status.DEFAULT.equals(memberInfo.getStatus())) {
       // 성공시 세션에 ID를 저장
       loginResponse = LoginResponse.success(memberInfo);
-      session.setAttribute("LOGIN_MEMBER_ID", memberInfo.getId());
+      SessionUtil.setLoginMemberId(session, id);
       responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
     } else if (MemberDTO.Status.DELETED.equals(memberInfo.getStatus())) {
       // 삭제된 경우
@@ -173,20 +175,23 @@ public class MemberController {
    * @return    로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환
    *            로그아웃 성공시 200 코드를 반환하고 result:SUCCESS 반환
    */
+  @GetMapping("logout")
   public ResponseEntity<LogoutResponse> logout(HttpSession session) {
     String memberId = (String) session.getAttribute("LOGIN_MEMBER_ID");
     if (memberId == null) {
       return new ResponseEntity<MemberController.LogoutResponse>(LogoutResponse.NO_LOGIN,
           HttpStatus.UNAUTHORIZED);
+    } else {
+      SessionUtil.logoutMember(session);
     }
+    
 
-    session.invalidate();
     return new ResponseEntity<MemberController.LogoutResponse>(LogoutResponse.SUCCESS,
         HttpStatus.OK);
   }
 
   /**
-   * 회원 비밀번호 변경
+   * 회원 비밀번호 변경.
    * 
    * @param session 현재 로그인한 사용자의 세션
    * @return
@@ -196,7 +201,7 @@ public class MemberController {
       @RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest) {
     String password = passwordRequest.getPassword();
     String newPassword = passwordRequest.getNewPassword();
-    String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+    String id = SessionUtil.getLoginMemberId(session);
     ResponseEntity<UpdateMemberPasswordResponse> responseEntity = null;
     UpdateMemberPasswordResponse updateResponse;
 
@@ -245,7 +250,7 @@ public class MemberController {
   public ResponseEntity<DeleteMemberResponse> deleteMemberInfo(HttpSession session) {
     ResponseEntity<DeleteMemberResponse> responseEntity = null;
     DeleteMemberResponse deleteResponse;
-    String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
+    String id = SessionUtil.getLoginMemberId(session);
     if (id == null) {
       deleteResponse = DeleteMemberResponse.NO_LOGIN;
       responseEntity =
@@ -267,7 +272,7 @@ public class MemberController {
   }
 
   /**
-   * 회원 주소 변경
+   * 회원 주소 변경.
    * 
    * @param memberInfo 회원 주소 정보
    * @param session 현재 로그인한 고객의 세션
@@ -278,8 +283,8 @@ public class MemberController {
     ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
     String address = memberInfo.getAddress();
     String addressDetail = memberInfo.getAddressDetail();
-    String id = (String) session.getAttribute("LOGIN_MEMBER_ID");
-
+    String id = SessionUtil.getLoginMemberId(session);
+    
     if (address == null || addressDetail == null) {
       // 요청한 주소가 null일 때
       if (address == null) {
@@ -345,19 +350,16 @@ public class MemberController {
   }
 
   @Getter
-  @AllArgsConstructor
   @RequiredArgsConstructor
   private static class LogoutResponse {
     enum LogoutStatus {
-      SUCCESS, FAIL, NO_LOGIN, ERROR
+      SUCCESS, NO_LOGIN, ERROR
     }
 
     @NonNull
     private LogoutStatus result;
-    private MemberDTO memberInfo;
 
 
-    private static final LogoutResponse FAIL = new LogoutResponse(LogoutStatus.FAIL);
     private static final LogoutResponse NO_LOGIN = new LogoutResponse(LogoutStatus.NO_LOGIN);
     private static final LogoutResponse SUCCESS = new LogoutResponse(LogoutStatus.SUCCESS);
 

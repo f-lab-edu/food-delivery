@@ -2,6 +2,7 @@ package com.delfood.controller;
 
 import com.delfood.dto.ShopDTO;
 import com.delfood.service.ShopService;
+import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.NonNull;
@@ -33,7 +34,7 @@ public class ShopController {
   @PostMapping
   public ResponseEntity<OpenShopResponse> openShop(HttpSession session,
       @RequestBody ShopDTO shopInfo) {
-    String ownerId = (String) session.getAttribute("LOGIN_OWNER_ID");
+    String ownerId = SessionUtil.getLoginOwnerId(session);
 
     // 로그인 하지 않았을 시 401코드를 반환한다.
     if (ownerId == null) {
