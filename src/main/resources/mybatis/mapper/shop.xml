@@ -20,7 +20,7 @@
                created_at createdAt,
                updated_at updatedAt, 
                status, 
-               oreder_type orderType, 
+               order_type orderType, 
                origin_info originInfo,
                work_condition workCondition
         FROM SHOP
@@ -58,13 +58,15 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findByOwnerId">
+    <select id="findByOwnerId" resultType="com.delfood.dto.ShopDTO">
         <include refid="selectShop"></include>
-        WHERE ownerId = #{ownerId}
+        WHERE owner_id = #{ownerId}
+        LIMIT <if test="page == null">0,10</if>
+              <if test="page != null">#{page*10 + 1}, #{page*10 + 10}</if>
     </select>
     
     
-    <select id="findById">
+    <select id="findById" resultType="com.delfood.dto.ShopDTO">
         <include refid="selectShop"></include>
         WHERE id = #{id}
     </select>
@@ -92,4 +94,11 @@
         
         WHERE id = #{id}
     </update>
+    
+    
+    <select id="countByOwnerId" resultType="long">
+        SELECT COUNT(*)
+        FROM SHOP
+        WHERE owner_id = #{ownerId}
+    </select>
 </mapper>
