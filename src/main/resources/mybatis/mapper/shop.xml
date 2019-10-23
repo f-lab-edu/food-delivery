@@ -61,8 +61,8 @@
     <select id="findByOwnerId" resultType="com.delfood.dto.ShopDTO">
         <include refid="selectShop"></include>
         WHERE owner_id = #{ownerId}
-        LIMIT <if test="page == null">0,10</if>
-              <if test="page != null">#{page*10 + 1}, #{page*10 + 10}</if>
+        <if test="lastId != null">AND id > #{lastId}</if>
+        LIMIT 10
     </select>
     
     

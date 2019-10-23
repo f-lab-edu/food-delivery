@@ -77,7 +77,7 @@ public class ShopController {
       return new ResponseEntity<MyShopsResponse>(MyShopsResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
     }
 
-    List<ShopDTO> myShops = shopService.getMyShops(id, myShopsRequest.getPage());
+    List<ShopDTO> myShops = shopService.getMyShops(id, myShopsRequest.getLastId());
     long myShopCount = shopService.getMyShopCount(id);
     return new ResponseEntity<MyShopsResponse>(MyShopsResponse.success(myShops, myShopCount),
         HttpStatus.OK);
@@ -129,7 +129,7 @@ public class ShopController {
   @Setter
   private static class MyShopsRequest {
     @Nullable
-    private Long page;
+    private Long lastId;
   }
 
 }
