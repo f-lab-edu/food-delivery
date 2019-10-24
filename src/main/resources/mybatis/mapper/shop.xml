@@ -79,17 +79,15 @@
      -->
     <update id="updateShop">
         UPDATE SHOP
-        SET <if test="name != null">name = #{name},</if>
-            <if test="deliveryType != null">delivery_type = #{deliveryType},</if>
-            <if test="signatureMenuId != null">signature_menu_id = #{signatureMenuId},</if>
+        SET
             <if test="tel != null">tel = #{tel},</if>
-            <if test="info != null">info = #{info},</if>
-            <if test="minOrderPrice != null">min_order_price = #{minOrderPrice},</if>
-            <if test="notice != null">notice = #{notice},</if>
+            <if test="deliveryType != null">delivery_type = #{deliveryType},</if>
             <if test="operatingTime != null">operating_time = #{operatingTime},</if>
-            <if test="deliveryLocation != null">delivery_location = #{deliveryLocation},</if>
-            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="info != null">info = #{info},</if>
             <if test="originInfo != null">origin_info = #{originInfo},</if>
+            <if test="notice != null">notice = #{notice},</if>
+            <if test="minOrderPrice != null">min_order_price = #{minOrderPrice},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
             updated_at = NOW()
         
         WHERE id = #{id}
@@ -100,5 +98,12 @@
         SELECT COUNT(*)
         FROM SHOP
         WHERE owner_id = #{ownerId}
+    </select>
+    
+    <select id="countByShopIdAndOwnerId" resultType="int">
+        SELECT COUNT(*)
+        FROM SHOP
+        WHERE id = #{shopId}
+        AND   owner_id = #{ownerId}
     </select>
 </mapper>

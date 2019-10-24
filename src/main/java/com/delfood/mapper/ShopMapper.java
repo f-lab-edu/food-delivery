@@ -1,6 +1,7 @@
 package com.delfood.mapper;
 
 import com.delfood.dto.ShopDTO;
+import com.delfood.dto.ShopUpdateDTO;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -33,10 +34,10 @@ public interface ShopMapper {
    * 주문 타입, 원산지 정보
    * 
    * @author jun
-   * @param shopInfo 변경할 매장의 정보
+   * @param updateInfo 변경할 매장의 정보
    * @return
    */
-  public int updateShop(ShopDTO shopInfo);
+  public int updateShop(ShopUpdateDTO updateInfo);
   
   /**
    * 매장 id로 매장 정보를 조회한다.
@@ -63,4 +64,12 @@ public interface ShopMapper {
    */
   public long countByOwnerId(String ownerId);
 
+  
+  /**
+   * 매장 주인이 사장님이 맞는지 확인한다.
+   * @param shopId 매장 id
+   * @param ownerId 사장님 id
+   * @return
+   */
+  int countByShopIdAndOwnerId(Long shopId, String ownerId);
 }

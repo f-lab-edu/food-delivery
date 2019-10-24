@@ -7,11 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.ShopDTO;
+import com.delfood.dto.ShopUpdateDTO;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
 import lombok.AllArgsConstructor;
@@ -83,6 +87,38 @@ public class ShopController {
         HttpStatus.OK);
   }
 
+  /**
+   * 매장 정보 업데이트.
+   * 
+   * @author jun
+   * @param updateInfo 변경할 정보를 담은 DTO
+   * @param session 사용자의 세션
+   * @return
+   */
+  @PatchMapping("{id}")
+  public ResponseEntity<UpdateShopResponse> updateShop(
+      @RequestBody(required = true) ShopUpdateDTO updateInfo, HttpSession session,
+      @PathVariable(required = true) Long id) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    if (ownerId == null) {
+      return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.NO_LOGIN,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    updateInfo.setId(id);
+
+    if (shopService.isShopOwner(updateInfo.getId(), ownerId) == false) {
+      return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.UNAUTHORIZED,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    shopService.updateShop(updateInfo);
+
+
+    return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.SUCCESS,
+        HttpStatus.OK);
+  }
+
 
 
   // Response 객체
@@ -124,6 +160,21 @@ public class ShopController {
     }
   }
 
+  @Getter
+  @RequiredArgsConstructor
+  private static class UpdateShopResponse {
+    enum Result {
+      SUCCESS, NO_LOGIN, UNAUTHORIZED
+    }
+
+    @NonNull
+    private Result result;
+    private static final UpdateShopResponse SUCCESS = new UpdateShopResponse(Result.SUCCESS);
+    private static final UpdateShopResponse NO_LOGIN = new UpdateShopResponse(Result.NO_LOGIN);
+    private static final UpdateShopResponse UNAUTHORIZED =
+        new UpdateShopResponse(Result.UNAUTHORIZED);
+  }
+
   // Request 객체
   @Getter
   @Setter
@@ -131,5 +182,6 @@ public class ShopController {
     @Nullable
     private Long lastId;
   }
+
 
 }

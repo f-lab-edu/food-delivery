@@ -12,22 +12,22 @@ import lombok.ToString;
 public class ShopDTO {
   
   // 배달 타입. 자체배달, 라이더 매칭 배달
-  enum DeliveeryType {
+  public enum DeliveryType {
     SELF_DELIVERY, COMPANY_DELIVERY
   }
 
   
 
-  enum Status {
+  public enum Status {
     DEFAULT, DELETED
   }
 
   // 즉시 결제, 만나서 결제
-  enum OrderType {
+  public enum OrderType {
     THIS_PAYMENT, MEET_PAYMENT
   }
 
-  enum WorkCondition {
+  public enum WorkCondition {
     OPEN, CLOSE
   }
 
@@ -42,7 +42,7 @@ public class ShopDTO {
 
   // 배달형태
   @NonNull
-  private DeliveeryType deliveryType;
+  private DeliveryType deliveryType;
 
   // 주력메뉴 치킨, 피자, 분식 등
   @NonNull
