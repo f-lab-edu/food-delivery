@@ -8,18 +8,18 @@ import com.delfood.dto.MemberDTO;
 @Repository
 public interface MemberMapper {
 
-  MemberDTO findById(String id);
+  public MemberDTO findById(String id);
 
-  int insertMember(MemberDTO memberInfo);
+  public int insertMember(MemberDTO memberInfo);
 
-  MemberDTO findByIdAndPassword(String id, String password);
+  public MemberDTO findByIdAndPassword(String id, String password);
 
-  int updateMemberPassword(String id, String password);
+  public int updateMemberPassword(String id, String password);
 
-  int deleteMember(String id);
+  public int deleteMember(String id);
 
-  int updateMemberAddress(String id, String address, String addressDetail);
+  public int updateMemberAddress(String id, String address, String addressDetail);
 
-  int idCheck(String id);
+  public int idCheck(String id);
   
 }

@@ -10,13 +10,13 @@ public interface OwnerMapper {
   
   public int idCheck(String id);
   
-  OwnerDTO findByIdAndPassword(String id, String password);
+  public OwnerDTO findByIdAndPassword(String id, String password);
 
-  OwnerDTO findById(String id);
+  public OwnerDTO findById(String id);
 
-  int updatePassword(String id, String password);
+  public int updatePassword(String id, String password);
 
-  int updateMailAndTel(String id, String mail, String tel);
+  public int updateMailAndTel(String id, String mail, String tel);
 
 
 }
