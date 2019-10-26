@@ -50,10 +50,10 @@ public interface ShopMapper {
    * 사장 id로 가지고 있는 매장을 조회한다.<br>
    * @author jun
    * @param ownerId 매장을 가진 사장의 id
-   * @param page 페이지
+   * @param lastId 페이지
    * @return
    */
-  public List<ShopDTO> findByOwnerId(String ownerId, Long page);
+  public List<ShopDTO> findByOwnerId(String ownerId, Long lastId);
 
   /**
    * 사장 id로 가지고 있는 매장의 개수를 조회한다.

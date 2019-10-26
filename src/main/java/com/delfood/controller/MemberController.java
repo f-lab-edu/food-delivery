@@ -1,7 +1,6 @@
 package com.delfood.controller;
 
 import com.delfood.dto.MemberDTO;
-import com.delfood.mapper.OperationResult;
 import com.delfood.service.MemberService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -133,8 +133,7 @@ public class MemberController {
   }
 
   /**
-   * 회원 로그인을 진행한다. 
-   * Login 요청시 id, password가 NULL일 경우 NullPointerException을 throw한다.
+   * 회원 로그인을 진행한다. Login 요청시 id, password가 NULL일 경우 NullPointerException을 throw한다.
    */
   @PostMapping("login")
   public ResponseEntity<LoginResponse> login(@RequestBody @NonNull MemberLoginRequest loginRequest,
@@ -170,10 +169,10 @@ public class MemberController {
 
   /**
    * 회원 로그아웃 메서드.
+   * 
    * @author jun
    * @param session 현제 접속한 세션
-   * @return    로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환
-   *            로그아웃 성공시 200 코드를 반환하고 result:SUCCESS 반환
+   * @return 로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환 로그아웃 성공시 200 코드를 반환하고 result:SUCCESS 반환
    */
   @GetMapping("logout")
   public ResponseEntity<LogoutResponse> logout(HttpSession session) {
@@ -184,7 +183,7 @@ public class MemberController {
     } else {
       SessionUtil.logoutMember(session);
     }
-    
+
 
     return new ResponseEntity<MemberController.LogoutResponse>(LogoutResponse.SUCCESS,
         HttpStatus.OK);
@@ -196,7 +195,7 @@ public class MemberController {
    * @param session 현재 로그인한 사용자의 세션
    * @return
    */
-  @PutMapping("password")
+  @PatchMapping("password")
   public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session,
       @RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest) {
     String password = passwordRequest.getPassword();
@@ -224,16 +223,10 @@ public class MemberController {
           new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.BAD_REQUEST);
     } else {
       // 성공시
-      OperationResult dmlResponse = memberService.updateMemberPassword(id, newPassword);
-      if (dmlResponse == OperationResult.SUCCESS) {
-        updateResponse = UpdateMemberPasswordResponse.SUCCESS;
-        responseEntity =
-            new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.OK);
-      } else {
-        // 정상적인 상황에서는 발생하지 않는 에러
-        log.error("Member Password Update - ERROR!");
-        throw new RuntimeException("Password update ERROR");
-      }
+      memberService.updateMemberPassword(id, newPassword);
+      updateResponse = UpdateMemberPasswordResponse.SUCCESS;
+      responseEntity =
+          new ResponseEntity<UpdateMemberPasswordResponse>(updateResponse, HttpStatus.OK);
     }
 
     return responseEntity;
@@ -256,17 +249,13 @@ public class MemberController {
       responseEntity =
           new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.UNAUTHORIZED);
     } else {
-      OperationResult dmlResponse = memberService.deleteMember(id);
-      if (dmlResponse == OperationResult.SUCCESS) {
-        deleteResponse = DeleteMemberResponse.SUCCESS;
-        // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
-        session.invalidate();
-        responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.OK);
-      } else {
-        // 정상적인 상황에서는 발생하지 않는 에러
-        log.error("Member Delete ERROR! \n" + responseEntity);
-        throw new RuntimeException("Member Delete ERROR! " + responseEntity);
-      }
+      memberService.deleteMember(id);
+      deleteResponse = DeleteMemberResponse.SUCCESS;
+
+      // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
+      SessionUtil.logoutAll(session);
+      responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.OK);
+
     }
     return responseEntity;
   }
@@ -277,14 +266,14 @@ public class MemberController {
    * @param memberInfo 회원 주소 정보
    * @param session 현재 로그인한 고객의 세션
    */
-  @PutMapping("address")
+  @PatchMapping("address")
   public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(
       @RequestBody @NotNull UpdateMemberAddressRequest memberInfo, HttpSession session) {
     ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
     String address = memberInfo.getAddress();
     String addressDetail = memberInfo.getAddressDetail();
     String id = SessionUtil.getLoginMemberId(session);
-    
+
     if (address == null || addressDetail == null) {
       // 요청한 주소가 null일 때
       if (address == null) {
@@ -299,22 +288,10 @@ public class MemberController {
       responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
     } else {
-      OperationResult dmlResponse =
-          memberService.updateMemberAddress(id, address, addressDetail);
-      if (dmlResponse == OperationResult.SUCCESS) {
-        // 성공시
-        responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
-            UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
-      } else if (dmlResponse == OperationResult.NONE_CHANGED) {
-        // 주소 변경이 되지 않았을 때
-        log.error("Member Address Update ERROR " + dmlResponse);
-        throw new RuntimeException("Member Address Update ERROR");
-      } else {
-        // 너무 많은 주소가 변경되었을 때. 정상적인 상황에서는 발생하지 않는다.
-        log.error("Member Address Update ERROR " + dmlResponse);
-        throw new RuntimeException("Member Address Update ERROR");
-      }
-
+      // 모든 조건을 충족할 때
+      memberService.updateMemberAddress(id, address, addressDetail);
+      responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
+          UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
     }
 
     return responseEntity;
@@ -480,7 +457,7 @@ public class MemberController {
 
   @Setter
   @Getter
-  private class UpdateMemberAddressRequest {
+  private static class UpdateMemberAddressRequest {
     @NonNull
     private String address;
     @NonNull

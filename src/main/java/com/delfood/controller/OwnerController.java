@@ -2,7 +2,6 @@ package com.delfood.controller;
 
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
-import com.delfood.mapper.OperationResult;
 import com.delfood.service.OwnerService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
@@ -176,14 +175,9 @@ public class OwnerController {
           UpdateOwnerResponse.EMPTY_CONTENT, HttpStatus.BAD_REQUEST);
     }
 
-    OperationResult dmlOperationError = ownerService.updateOwnerMailAndTel(id, mail, tel);
-    if (dmlOperationError == OperationResult.SUCCESS) {
-      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
-    } else {
-      log.error("Member mail and tel update ERROR : {}", updateRequest);
-      throw new RuntimeException("Member mail and tel update ERROR");
-    }
+    ownerService.updateOwnerMailAndTel(id, mail, tel);
+    return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+        UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
   }
 
   /**
@@ -216,16 +210,9 @@ public class OwnerController {
       responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
           UpdateOwnerResponse.PASSWORD_DUPLICATED, HttpStatus.CONFLICT);
     } else {
-      OperationResult dmlOperationError = ownerService.updateOwnerPassword(id, newPassword);
-
-      if (OperationResult.SUCCESS.equals(dmlOperationError)) {
-        responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-            UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
-      } else {
-        log.error("Password Update Error {}", passwordResquest);
-        throw new RuntimeException("Password Update Error");
-      }
-      
+      ownerService.updateOwnerPassword(id, newPassword);
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
     }
     return responseEntity;
   }
