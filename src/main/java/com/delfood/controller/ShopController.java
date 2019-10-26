@@ -98,7 +98,7 @@ public class ShopController {
    */
   @PatchMapping("{id}")
   public ResponseEntity<UpdateShopResponse> updateShop(
-      @RequestBody(required = true) ShopUpdateDTO updateInfo, HttpSession session,
+      @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session,
       @PathVariable(required = true) Long id) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     if (ownerId == null) {
@@ -106,7 +106,7 @@ public class ShopController {
           HttpStatus.UNAUTHORIZED);
     }
 
-    ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
+    final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
 
 
     if (shopService.isShopOwner(copyData.getId(), ownerId) == false) {
