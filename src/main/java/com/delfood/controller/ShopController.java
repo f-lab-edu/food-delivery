@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -105,17 +106,95 @@ public class ShopController {
           HttpStatus.UNAUTHORIZED);
     }
 
-    updateInfo.setId(id);
+    ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
 
-    if (shopService.isShopOwner(updateInfo.getId(), ownerId) == false) {
+
+    if (shopService.isShopOwner(copyData.getId(), ownerId) == false) {
       return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.UNAUTHORIZED,
           HttpStatus.UNAUTHORIZED);
     }
 
-    shopService.updateShop(updateInfo);
+    shopService.updateShop(copyData);
 
 
     return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.SUCCESS,
+        HttpStatus.OK);
+  }
+
+  /**
+   * 매장을 오픈한다.
+   * 
+   * @author jun
+   * @param id 오픈할 매장의 id
+   * @param session 사용자의 세션
+   * @return
+   */
+  @PatchMapping("open/{id}")
+  public ResponseEntity<OpenShopResponse> openShop(
+      @PathVariable(value = "id", required = true) Long id, HttpSession session) {
+
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+
+    // 로그인 하지 않았을시
+    if (ownerId == null) {
+      return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.NO_LOGIN,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    // 로그인한 사장님이 해당 가게의 사장님이 아닐 시
+    if (shopService.isShopOwner(id, ownerId) == false) {
+      return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.UNAUTHORIZED,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    // 매장이 오픈중일 때
+    if (shopService.notOpenCheck(id) == false) {
+      return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.IS_OPEN,
+          HttpStatus.BAD_REQUEST);
+    }
+
+
+    shopService.openShop(id);
+
+    return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.SUCCESS,
+        HttpStatus.OK);
+  }
+
+  /**
+   * 매장을 닫는다.
+   * 
+   * @author jun
+   * @param id 닫을 매장의 id
+   * @param session 사용자의 세션
+   * @return
+   */
+  @PatchMapping("close/{id}")
+  public ResponseEntity<CloseShopResponse> closeShop(
+      @PathVariable(value = "id", required = true) Long id, HttpSession session) {
+
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+
+    // 로그인 하지 않았을시
+    if (ownerId == null) {
+      return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.NO_LOGIN,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    // 로그인한 사장님이 해당 가게의 사장님이 아닐 시
+    if (shopService.isShopOwner(id, ownerId) == false) {
+      return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.UNAUTHORIZED,
+          HttpStatus.UNAUTHORIZED);
+    }
+
+    // 해당 매장이 영업중이 아닐시
+    if (shopService.notOpenCheck(id) == true) {
+      return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.NOT_OPEN,
+          HttpStatus.BAD_REQUEST);
+    }
+
+    shopService.closeShop(id);
+
+    return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.SUCCESS,
         HttpStatus.OK);
   }
 
@@ -173,6 +252,39 @@ public class ShopController {
     private static final UpdateShopResponse NO_LOGIN = new UpdateShopResponse(Result.NO_LOGIN);
     private static final UpdateShopResponse UNAUTHORIZED =
         new UpdateShopResponse(Result.UNAUTHORIZED);
+  }
+
+  @Getter
+  @RequiredArgsConstructor
+  private static class OpenShopResponse {
+    enum Result {
+      SUCCESS, NO_LOGIN, UNAUTHORIZED, IS_OPEN
+    }
+
+    @NonNull
+    private Result result;
+    private static final OpenShopResponse SUCCESS = new OpenShopResponse(Result.SUCCESS);
+    private static final OpenShopResponse NO_LOGIN = new OpenShopResponse(Result.NO_LOGIN);
+    private static final OpenShopResponse UNAUTHORIZED = new OpenShopResponse(Result.UNAUTHORIZED);
+    private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Result.IS_OPEN);
+  }
+
+  @Getter
+  @RequiredArgsConstructor
+  private static class CloseShopResponse {
+    enum Result {
+      SUCCESS, NO_LOGIN, UNAUTHORIZED, NOT_OPEN
+    }
+
+    @NonNull
+    private Result result;
+    private static final CloseShopResponse SUCCESS = new CloseShopResponse(Result.SUCCESS);
+    private static final CloseShopResponse NO_LOGIN = new CloseShopResponse(Result.NO_LOGIN);
+    private static final CloseShopResponse UNAUTHORIZED =
+        new CloseShopResponse(Result.UNAUTHORIZED);
+    private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Result.NOT_OPEN);
+
+
   }
 
   // Request 객체

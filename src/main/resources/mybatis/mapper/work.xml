@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.WorkMapper">
+    <insert id="insertWorkToOpen">
+        INSERT INTO WORK(shop_id)
+        VALUES (#{shopId})
+    </insert>
+    
+    <update id="updateWorkToClose">
+        UPDATE WORK A
+        SET    A.end_time = NOW()
+        WHERE  A.id = (SELECT * FROM (SELECT id
+            FROM WORK B
+            WHERE B.shop_id = #{shopId}
+            AND   B.end_time IS NULL
+            ORDER BY id DESC
+            LIMIT 1) as B)
+    </update>
+</mapper>

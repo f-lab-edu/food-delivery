@@ -71,5 +71,28 @@ public interface ShopMapper {
    * @param ownerId 사장님 id
    * @return
    */
-  int countByShopIdAndOwnerId(Long shopId, String ownerId);
+  public long countByShopIdAndOwnerId(Long shopId, String ownerId);
+  
+  /**
+   * 매장 상태를 OPEN으로 변경한다.
+   * @param shopId 오픈할 매장의 id
+   * @return
+   */
+  public int updateShopOpenById(Long shopId);
+
+  /**
+   * 매장 상태를 CLOSE로 변경한다.
+   * @author jun
+   * @param shopId 닫을 매장의 id
+   * @return
+   */
+  public int updateShopCloseById(Long shopId);
+  
+  /**
+   * 해당 매장이 오픈상태인지 아닌지 확인하는 메서드.
+   * @author jun
+   * @param shopId 오픈 상태를 확인할 매장의 id
+   * @return workCondition이 OPEN이 아닐 때 1
+   */
+  public long countByIdIsNotOpen(Long shopId);
 }

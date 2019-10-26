@@ -100,10 +100,29 @@
         WHERE owner_id = #{ownerId}
     </select>
     
-    <select id="countByShopIdAndOwnerId" resultType="int">
+    <select id="countByShopIdAndOwnerId" resultType="long">
         SELECT COUNT(*)
         FROM SHOP
         WHERE id = #{shopId}
         AND   owner_id = #{ownerId}
+    </select>
+    
+    <update id="updateShopOpenById">
+        UPDATE SHOP
+        SET work_condition = 'OPEN'
+        WHERE id = #{shopId}
+    </update>
+    
+    <update id="updateShopCloseById">
+        UPDATE SHOP
+        SET work_condition = 'CLOSE'
+        WHERE id=#{shopId}
+    </update>
+    
+    <select id="countByIdIsNotOpen" resultType="long">
+        SELECT COUNT(*) 
+        FROM   SHOP
+        WHERE  id = #{shopId}
+        AND    work_condition != 'OPEN'
     </select>
 </mapper>

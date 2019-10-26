@@ -3,6 +3,7 @@ package com.delfood.service;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
 import com.delfood.mapper.ShopMapper;
+import com.delfood.mapper.WorkMapper;
 import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShopService {
   @Autowired
   private ShopMapper shopMapper;
+
+  @Autowired
+  private WorkService workService;
 
   /**
    * 매장 정보 삽입 메서드.
@@ -64,12 +68,12 @@ public class ShopService {
       log.error("isShopOwner ERROR! id is null. shopId : {}, ownerId : {}", shopId, ownerId);
       throw new NullPointerException("isShopOwner ERROR!");
     }
-    return shopMapper.countByShopIdAndOwnerId(shopId, ownerId) == 1;
+    return shopMapper.countByShopIdAndOwnerId(shopId, ownerId) == 1L;
   }
-  
+
   /**
-   * 매장 정보 변경 메서드.
-   * 변경 오류시 롤백한다.
+   * 매장 정보 변경 메서드. 변경 오류시 롤백한다.
+   * 
    * @author jun
    * @param updateInfo 변경할 정보
    */
@@ -80,5 +84,49 @@ public class ShopService {
       log.error("update shop ERROR! updateInfo : {}", updateInfo);
       throw new RuntimeException("shop update ERROR!");
     }
+  }
+
+  /**
+   * 매장 영업 시작 메서드. 영업 시작을 기록하고 매장의 상태를 OPEN으로 변경한다.
+   * 
+   * @author jun
+   * @param shopId 영업을 시작할 매장 id
+   */
+  @Transactional
+  public void openShop(Long shopId) {
+    workService.addWork(shopId);
+    int openResult = shopMapper.updateShopOpenById(shopId);
+    if (openResult != 1) {
+      log.error("open shop ERROR! shopId : {}, openResult : {}", shopId, openResult);
+      throw new RuntimeException("open shop ERROR!");
+    }
+  }
+
+  /**
+   * 매장 영업 종료 메서드. 영업 종료를 기록하고 매장의 상태를 CLOSE로 변경한다.
+   * 
+   * @author jun
+   * @param shopId 영업을 종료할 매장 id
+   */
+  @Transactional
+  public void closeShop(Long shopId) {
+    workService.closeWork(shopId);
+    int closeResult = shopMapper.updateShopCloseById(shopId);
+    if (closeResult != 1) {
+      log.error("close Shop ERROR! shopId : {}, closeResult : {}", shopId, closeResult);
+    }
+
+  }
+
+  /**
+   * 매장이 OPEN상태가 아닌지 체크하는 메서드. 매장이 OPEN이 아니라면 닫을 수 없기 때문에 체크한다.
+   * 
+   * @author jun
+   * @param shopId 체크할 매장의 id
+   * @return 매장이 오픈상태가 아니라면 true
+   */
+  public boolean notOpenCheck(Long shopId) {
+    long isNotOpenResult = shopMapper.countByIdIsNotOpen(shopId);
+    return isNotOpenResult == 1;
   }
 }
