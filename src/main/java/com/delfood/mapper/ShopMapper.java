@@ -63,4 +63,15 @@ public interface ShopMapper {
    */
   public long countByOwnerId(String ownerId);
 
+  /**
+   * 사장 id와 매장아이디가 일치하는 매장이 존재하는 지 조회한다.
+   * 
+   * @author jinyoung 
+   * 
+   * @param ownerId 사장님 id
+   * @param shopId 매장 아이디
+   * @return
+   */
+  public int countByOwnerIdAndShopId(String ownerId, Long shopId);
+
 }

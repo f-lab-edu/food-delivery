@@ -251,7 +251,7 @@ public class OwnerController {
   }
 
 
-  // ============ resopnse 객체 =====================
+  // ===================== resopnse 객체 =====================
 
   @Getter
   @RequiredArgsConstructor

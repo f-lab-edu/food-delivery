@@ -47,4 +47,34 @@ public class ShopService {
   public long getMyShopCount(String ownerId) {
     return shopMapper.countByOwnerId(ownerId);
   }
+  
+  /**
+   * 한 가게의 정보를 불러오는 메소드
+   * 
+   * @author jinyoung
+   * 
+   * @param id 가게 아이디
+   * @return
+   */
+  public ShopDTO getMyShopInfo(Long id) {
+    return shopMapper.findById(id);
+  }
+  
+  /**
+   * 
+   * 메뉴 그룹 추가 시 검증 메서드.
+   * 
+   * 사장님 아이디와 매장 아이디가 일치하는 매장이 존재하는 지 조회한다.
+   * 
+   * @author jinyoung 
+   * 
+   * @param OwnerId 사장 아이디
+   * @param ShopId 매장 아이디
+   * @return
+   */
+  public boolean checkShopId(String OwnerId, Long shopId) {
+    return shopMapper.countByOwnerIdAndShopId(OwnerId, shopId) == 1
+        || shopId == null;
+  }
+  
 }

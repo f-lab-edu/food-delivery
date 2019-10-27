@@ -101,4 +101,12 @@
         FROM SHOP
         WHERE owner_id = #{ownerId}
     </select>
+    
+    <select id="countByOwnerIdAndShopId" resultType="long">
+    	SELECT COUNT(*)
+    	FROM SHOP
+    	WHERE id = #{shopId},
+    	AND owner_id = #{owner_id}
+    </select>
+    
 </mapper>
