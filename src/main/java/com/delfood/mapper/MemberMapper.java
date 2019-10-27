@@ -18,7 +18,7 @@ public interface MemberMapper {
 
   int deleteMember(String id);
 
-  int updateMemberAddress(String id, String address, String addressDetail);
+  int updateMemberAddress(String id, String addressCode);
 
   int idCheck(String id);
   

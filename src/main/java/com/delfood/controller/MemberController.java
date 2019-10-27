@@ -270,26 +270,20 @@ public class MemberController {
   public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(
       @RequestBody @NotNull UpdateMemberAddressRequest memberInfo, HttpSession session) {
     ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
-    String address = memberInfo.getAddress();
-    String addressDetail = memberInfo.getAddressDetail();
+    String addressCode = memberInfo.getAddressCode();
     String id = SessionUtil.getLoginMemberId(session);
 
-    if (address == null || addressDetail == null) {
+    if (addressCode == null) {
       // 요청한 주소가 null일 때
-      if (address == null) {
-        responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
-            UpdateMemberAddressResponse.EMPTY_ADDRESS, HttpStatus.BAD_REQUEST);
-      } else if (addressDetail == null) {
-        responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
-            UpdateMemberAddressResponse.EMPTY_ADDRESS_DETAIL, HttpStatus.BAD_REQUEST);
-      }
+      responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
+          UpdateMemberAddressResponse.EMPTY_ADDRESS, HttpStatus.BAD_REQUEST);
     } else if (id == null) {
       // 로그인을 안했을 때
       responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
     } else {
       // 모든 조건을 충족할 때
-      memberService.updateMemberAddress(id, address, addressDetail);
+      memberService.updateMemberAddress(id, addressCode);
       responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.SUCCESS, HttpStatus.OK);
     }
@@ -459,8 +453,6 @@ public class MemberController {
   @Getter
   private static class UpdateMemberAddressRequest {
     @NonNull
-    private String address;
-    @NonNull
-    private String addressDetail;
+    private String addressCode;
   }
 }

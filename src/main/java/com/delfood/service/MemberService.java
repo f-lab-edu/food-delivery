@@ -95,16 +95,15 @@ public class MemberService {
    * 회원 address를 update한다.
    * 
    * @param id 주소를 변경할 고객의 아이디
-   * @param address 변경할 주소
-   * @param addressDetail 변경할 상세 주소
+   * @param addressCode 변경할 주소 코드
    * @return
    */
   @Transactional(rollbackFor = RuntimeException.class)
-  public void updateMemberAddress(String id, String address, String addressDetail) {
-    int result = memberMapper.updateMemberAddress(id, address, addressDetail);
+  public void updateMemberAddress(String id, String addressCode) {
+    int result = memberMapper.updateMemberAddress(id, addressCode);
     if (result != 1) {
-      log.error("update Member address ERROR! id : {}, address : {}, addressDetail : {}", id,
-          address, addressDetail);
+      log.error("update Member address ERROR! id : {}, addressCode : {}, addressDetail : {}", id,
+          addressCode);
       throw new RuntimeException("update Member address ERROR!");
     }
   }

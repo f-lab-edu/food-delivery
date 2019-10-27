@@ -7,15 +7,12 @@
                delivery_type deliveryType, 
                signature_menu_id signatureMenuId, 
                tel,
-               zipcode, 
-               address, 
-               address_detail addressDetail, 
+               address_code addressCode, 
                biz_number bizNumber,
                info, 
                min_order_price minOrderPrice, 
                notice, 
                operating_time operatingTime,
-               delivery_location deliveryLocation, 
                owner_id ownerId, 
                created_at createdAt,
                updated_at updatedAt, 
@@ -28,23 +25,32 @@
 
 
     <insert id="insertShop" parameterType="com.delfood.dto.ShopDTO">
-        INSERT INTO SHOP(name, delivery_type, signature_menu_id, tel, zipcode, address,
-        address_detail, biz_number, info, min_order_price, notice, operating_time, delivery_location,
-        owner_id, order_type, origin_info)
+        INSERT INTO SHOP(
+            name,
+            delivery_type, 
+            signature_menu_id, 
+            tel, 
+            address_code,
+            biz_number, 
+            info, 
+            min_order_price, 
+            notice, 
+            operating_time,
+            owner_id, 
+            order_type, 
+            origin_info
+        )
         VALUES(
             #{name},
             #{deliveryType},
             #{signatureMenuId},
             #{tel},
-            #{zipcode},
-            #{address},
-            #{addressDetail},
+            #{addressCode},
             #{bizNumber},
             #{info},
             #{minOrderPrice},
             #{notice},
             #{operatingTime},
-            #{deliveryLocation},
             #{ownerId},
             #{orderType},
             #{originInfo}

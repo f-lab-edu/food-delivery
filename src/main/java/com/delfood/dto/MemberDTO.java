@@ -37,28 +37,11 @@ public class MemberDTO {
   private LocalDateTime createdAt;
   // 최종 수정일
   private LocalDateTime updatedAt;
-  // 주소
+  // 주소 코드
   @Nullable
-  private String address;
-  // 상세 주소
-  @Nullable
-  private String addressDetail;
+  private String addressCode;
 
-
-  /**
-   * Member의 데이터를 방어적으로 복사한다
-   * @param param 복사할 회원의 정보
-   */
-  public void copyData(MemberDTO param) {
-    this.id = param.getId();
-    this.password = param.getPassword();
-    this.name = param.getName();
-    this.tel = param.getTel();
-    this.mail = param.getMail();
-    this.status = param.getStatus();
-    this.createdAt = param.getCreatedAt();
-    this.updatedAt = param.getUpdatedAt();
-  }
+  private AddressDTO addressInfo;
   
   /**
    * 회원가입 전 필수 데이터중 null값이 있는지 검사한다.
