@@ -8,7 +8,10 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter @Setter @ToString @Alias("menuGroup")
+@Getter
+@Setter
+@ToString
+@Alias("menuGroup")
 public class MenuGroupDTO {
   
  // 기본, 삭제

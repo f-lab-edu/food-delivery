@@ -5,7 +5,9 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @RestController
 public class MenuController {
@@ -34,8 +37,8 @@ public class MenuController {
    * - 매장 목록을 보여준다.
    * 
    * @author jinyoung
-   * 
    * @param session
+   * 
    */
   @GetMapping("/menuMng/shops/{lastId}")
   public ResponseEntity<List<ShopDTO>> menuMngInfo(HttpSession session, @PathVariable long lastId ) {
@@ -67,7 +70,7 @@ public class MenuController {
     
     // 샵 정보가 없다면 샵정보가 존재하지 않음을 알려주고 404코드를 리턴한다.
     if(shopInfo == null) {
-        return new ResponseEntity<MenuController.ShopMenuInfoResponse>(ShopMenuInfoResponse.SHOPINFO_NOT_FOUND, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<MenuController.ShopMenuInfoResponse>(HttpStatus.NOT_FOUND);
     }
     
     // id를 통해 메뉴그룹을 불러온다.
@@ -75,7 +78,6 @@ public class MenuController {
     
     // response 객체에 조회한 정보들을 저장
     ShopMenuInfoResponse menuMngInfoResponse = ShopMenuInfoResponse.builder()
-                                                  .result(ShopMenuInfoResponse.ShopMenuInfoStatus.SUCCESS)
                                                   .shopInfo(shopInfo)
                                                   .menuGroups(menuGroups)
                                                  .build();
@@ -94,27 +96,51 @@ public class MenuController {
    * @return
    */
   @PostMapping("/shops/{id}/menuGroups")
-  public ResponseEntity<addMenuGroupResponse> addMenuGroup(HttpSession session, @RequestBody MenuGroupDTO menuGroupInfo){
+  public ResponseEntity<AddMenuGroupResponse> addMenuGroup(HttpSession session, @RequestBody MenuGroupDTO menuGroupInfo){
     
     if(shopService.checkShopId(SessionUtil.getLoginOwnerId(session), menuGroupInfo.getShopId())) {
-      return new ResponseEntity<MenuController.addMenuGroupResponse>(
-          addMenuGroupResponse.EMPTY_SHOP_ID, HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<MenuController.AddMenuGroupResponse>(
+          AddMenuGroupResponse.EMPTY_SHOP_ID, HttpStatus.UNAUTHORIZED);
     }
     
     
     if(menuGroupService.nameCheck(menuGroupInfo.getName())){
-      return new ResponseEntity<MenuController.addMenuGroupResponse>(
-          addMenuGroupResponse.NAME_DUPLICATED, HttpStatus.CONFLICT);
+      return new ResponseEntity<MenuController.AddMenuGroupResponse>(
+          AddMenuGroupResponse.NAME_DUPLICATED, HttpStatus.CONFLICT);
     }
     
     menuGroupService.addMenuGroup(menuGroupInfo);
     
-    return new ResponseEntity<MenuController.addMenuGroupResponse>(
-        addMenuGroupResponse.SUCCESS, HttpStatus.OK);
+    return new ResponseEntity<MenuController.AddMenuGroupResponse>(
+        AddMenuGroupResponse.SUCCESS, HttpStatus.OK);
   }
   
-
-  
+  /**
+   * 메뉴그룹 이름 및 내용 수정
+   * 
+   * @author jinyoung
+   * 
+   * @param UpdateMenuGroupRequest 아이디, 이름, 내용을 담은 요청객체
+   * @return
+   */
+  @PatchMapping("/shops/{id}/menuGroups")
+  public ResponseEntity<UpdateMenuGroupResponse> updateMenuGroup(@RequestBody UpdateMenuGroupRequest request){
+    
+    if(request.getId() == null) {
+      return new ResponseEntity<MenuController.UpdateMenuGroupResponse>(UpdateMenuGroupResponse.EMPTY_ID, HttpStatus.BAD_REQUEST);
+    }
+    
+    if(request.getContent() == null) {
+      return new ResponseEntity<MenuController.UpdateMenuGroupResponse>(UpdateMenuGroupResponse.EMPTY_NAME, HttpStatus.BAD_REQUEST);
+    }
+    
+    Long id = request.getId();
+    String name = request.getName();
+    String content = request.getContent() == null ? "" : request.getContent();
+    
+    menuGroupService.updateMenuGroupNameAndContent(name, content, id);
+    return new ResponseEntity<MenuController.UpdateMenuGroupResponse>(UpdateMenuGroupResponse.SUCCESS, HttpStatus.OK);
+  }
   
   
   
@@ -123,33 +149,55 @@ public class MenuController {
   @Getter
   @Builder
   private static class ShopMenuInfoResponse{
-    enum ShopMenuInfoStatus{
-       SUCCESS, FAIL, SHOPINFO_NOT_FOUND
-    }
-    
-    @NonNull
-    private ShopMenuInfoStatus result;
-    
     private ShopDTO shopInfo;
     private List<MenuGroupDTO> menuGroups;
-
-    
-    private static final ShopMenuInfoResponse FAIL = ShopMenuInfoResponse.builder().result(ShopMenuInfoStatus.FAIL).build();
-    private static final ShopMenuInfoResponse SHOPINFO_NOT_FOUND = ShopMenuInfoResponse.builder().result(ShopMenuInfoStatus.SHOPINFO_NOT_FOUND).build();
   }
 
   @Getter
   @RequiredArgsConstructor
-  private static class addMenuGroupResponse{
-    enum addMenuGroupStatus{
+  private static class AddMenuGroupResponse{
+    enum AddMenuGroupStatus{
       SUCCESS, EMPTY_SHOP_ID, NAME_DUPLICATED
     }
     
     @NonNull
-    private addMenuGroupStatus result;
+    private AddMenuGroupStatus result;
     
-    private static final addMenuGroupResponse SUCCESS = new addMenuGroupResponse(addMenuGroupStatus.SUCCESS);
-    private static final addMenuGroupResponse NAME_DUPLICATED = new addMenuGroupResponse(addMenuGroupStatus.NAME_DUPLICATED);
-    private static final addMenuGroupResponse EMPTY_SHOP_ID = new addMenuGroupResponse(addMenuGroupStatus.EMPTY_SHOP_ID);
+    private static final AddMenuGroupResponse SUCCESS = new AddMenuGroupResponse(AddMenuGroupStatus.SUCCESS);
+    private static final AddMenuGroupResponse NAME_DUPLICATED = new AddMenuGroupResponse(AddMenuGroupStatus.NAME_DUPLICATED);
+    private static final AddMenuGroupResponse EMPTY_SHOP_ID = new AddMenuGroupResponse(AddMenuGroupStatus.EMPTY_SHOP_ID);
   }
+  
+  
+  @Getter
+  @RequiredArgsConstructor
+  private static class UpdateMenuGroupResponse{
+    enum UpdateMenuGroupStatus{
+      SUCCESS, EMPTY_ID, EMPTY_NAME
+    }
+    
+    @NonNull
+    private UpdateMenuGroupStatus result;
+    
+    private static UpdateMenuGroupResponse SUCCESS = new UpdateMenuGroupResponse(UpdateMenuGroupStatus.SUCCESS);
+    private static UpdateMenuGroupResponse EMPTY_ID = new UpdateMenuGroupResponse(UpdateMenuGroupStatus.EMPTY_ID);
+    private static UpdateMenuGroupResponse EMPTY_NAME = new UpdateMenuGroupResponse(UpdateMenuGroupStatus.EMPTY_NAME);
+  }
+  
+  // ===================== request 객체 =====================
+  
+  @Setter
+  @Getter
+  private static class UpdateMenuGroupRequest{
+    
+    @NonNull
+    private Long id;
+    
+    @NonNull
+    private String name;
+    
+    @NonNull
+    private String content;
+  }
+  
 }
