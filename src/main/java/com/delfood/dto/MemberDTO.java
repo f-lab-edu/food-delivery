@@ -40,7 +40,9 @@ public class MemberDTO {
   // 주소 코드
   @Nullable
   private String addressCode;
-
+  // 상세 주소(xxx호)
+  private String addressDetail;
+  
   private AddressDTO addressInfo;
   
   /**

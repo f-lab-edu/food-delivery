@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.AddressMapper">
+    <select id="findByTownCode" resultType="com.delfood.dto.AddressDTO">
+        SELECT DISTINCT
+                A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName
+        FROM    ADDRESS A JOIN DELIVERY_LOCATION B
+        ON      A.town_code = B.town_code
+        WHERE   A.town_code = #{townCode}
+        AND     A.town_code > #{lastTownCode}
+        ORDER BY A.town_code ASC
+        LIMIT   10
+    </select>
+    
+    <select id="findByShopId" resultType="com.delfood.dto.AddressDTO">
+        SELECT DISTINCT
+                A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName
+        FROM    ADDRESS A JOIN DELIVERY_LOCATION B
+        ON      A.town_code = B.town_code
+        WHERE   B.shop_id = #{shopId}
+        AND     A.town_code > #{lastTownCode}
+        ORDER BY A.town_code ASC
+        LIMIT   10
+    </select>
+</mapper>

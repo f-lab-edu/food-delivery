@@ -12,6 +12,7 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="addressCode" column="address_code"/>
+        <result property="addressDetail" column="address_detail"/>
         <association property="addressInfo" column="address_code" javaType="com.delfood.dto.AddressDTO" select="findAddressByAddressCode"></association>
     </resultMap>
     

@@ -1,5 +1,7 @@
 package com.delfood.service;
 
+import com.delfood.dto.AddressDTO;
+import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
 import com.delfood.mapper.ShopMapper;
@@ -18,6 +20,9 @@ public class ShopService {
 
   @Autowired
   private WorkService workService;
+  
+  @Autowired
+  private AddressService addressService;
 
   /**
    * 매장 정보 삽입 메서드.
@@ -128,5 +133,57 @@ public class ShopService {
   public boolean notOpenCheck(Long shopId) {
     long isNotOpenResult = shopMapper.countByIdIsNotOpen(shopId);
     return isNotOpenResult == 1;
+  }
+
+  /**
+   * 배달가능지역 추가 메서드.
+   * 
+   * @author jun
+   * @param shopId 배달 지역을 추가할 매장의 id
+   * @param townCode 읍면동코드. ADDRESS PK의 첫 10자리와 같다
+   */
+  @Transactional
+  public void addDeliveryLocation(Long shopId, String townCode) {
+    int result = shopMapper.insertDeliveryLocation(shopId, townCode);
+    if (result != 1) {
+      log.error("addDelivertLocation ERROR! shopId : {}, townCode : {}, result : {}", shopId,
+          townCode, result);
+      throw new RuntimeException("addDelivertLocation ERROR!");
+    }
+
+  }
+
+  /**
+   * 해당 배달 지역을 삭제할 권한이 사용자에게 있는지 검사하는 메서드.
+   * 
+   * @author jun
+   * @param deliveryLocationId 배달 지역 id
+   * @param ownerId 사장님 id
+   * @return 권한이 있다면 true
+   */
+  public boolean isShopOwnerByDeliveryLocationId(Long deliveryLocationId, String ownerId) {
+    long result = shopMapper.countByOwnerIdAndDeliveryLocationId(deliveryLocationId, ownerId);
+    return result == 1;
+  }
+  
+  /**
+   * 배달 지역을 삭제한다.
+   * @author jun
+   * @param deliveryLocationId 삭제할 배달 지역 id
+   */
+  @Transactional
+  public void deleteDeliveryLocation(Long deliveryLocationId) {
+    int result = shopMapper.deleteDeliveryLocation(deliveryLocationId);
+    if (result != 1) {
+      throw new RuntimeException("delete Deliveery Location ERROR");
+    }
+  }
+
+  public ShopDTO getShop(Long shopId) {
+    return shopMapper.findById(shopId);
+  }
+
+  public List<AddressDTO> getDeliveryLocations(Long shopId) {
+    return addressService.getTownInfoByShopId(shopId);
   }
 }

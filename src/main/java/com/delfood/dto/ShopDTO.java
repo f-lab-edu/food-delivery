@@ -54,6 +54,9 @@ public class ShopDTO {
 
   // 주소 코드
   private String addressCode;
+  
+  // 상세 주소
+  private String addressDetail;
 
   // 사업자번호
   @NonNull

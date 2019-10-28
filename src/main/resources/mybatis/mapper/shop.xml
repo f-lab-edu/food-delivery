@@ -8,6 +8,7 @@
                signature_menu_id signatureMenuId, 
                tel,
                address_code addressCode, 
+               address_detail addressDetail,
                biz_number bizNumber,
                info, 
                min_order_price minOrderPrice, 
@@ -31,6 +32,7 @@
             signature_menu_id, 
             tel, 
             address_code,
+            address_detail,
             biz_number, 
             info, 
             min_order_price, 
@@ -46,6 +48,7 @@
             #{signatureMenuId},
             #{tel},
             #{addressCode},
+            #{addressDetail},
             #{bizNumber},
             #{info},
             #{minOrderPrice},
@@ -131,4 +134,36 @@
         WHERE  id = #{shopId}
         AND    work_condition != 'OPEN'
     </select>
+    
+    <insert id="insertDeliveryLocation">
+        INSERT INTO DELIVERY_LOCATION (shop_id, town_code)
+        VALUES (#{shopId}, #{townCode})
+    </insert>
+    
+    <select id="findByTownCode" resultType="com.delfood.dto.ShopDTO">
+        SELECT  A.id, 
+                A.name,
+                A.delivery_type deliveryType,
+                A.signature_menu_id signatureMenuId,
+                A.info,
+                A.order_type orderType
+        FROM    SHOP A JOIN DELIVERY_LOCATION B
+                ON A.id = B.shop_id
+        WHERE   A.status != 'DELETE'
+        AND     B.town_code = #{townCode}
+        ORDER BY work_condition DESC
+    </select>
+    
+    <select id="countByOwnerIdAndDeliveryLocationId" resultType="Long">
+        SELECT  COUNT(*)
+        FROM    SHOP A JOIN DELIVERY_LOCATION B
+        ON      A.id = B.shop_id
+        WHERE   A.owner_id = #{ownerId}
+        AND     B.id = #{deliveryLocationId}
+    </select>
+    
+    <delete id="deleteDeliveryLocation">
+        DELETE FROM  DELIVERY_LOCATION
+        WHERE   id = #{id}
+    </delete>
 </mapper>

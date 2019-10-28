@@ -95,4 +95,30 @@ public interface ShopMapper {
    * @return workCondition이 OPEN이 아닐 때 1
    */
   public long countByIdIsNotOpen(Long shopId);
+
+  /**
+   * 배달 지역을 추가한다.
+   * @author jun
+   * @param shopId 배달 지역을 추가할 매장의 id
+   * @param townCode 배달 지역(읍면동코드)
+   */
+  public int insertDeliveryLocation(Long shopId, String townCode);
+  
+  
+  /**
+   * 해당 배달 지역으로 매장을 조회하고, 그 매장의 주인이 해당 사용자인지 확인한다. 
+   * 1이 나오면 주인이 맞다.
+   * @author jun
+   * @param deliveryLocationId 배달 지역 id
+   * @param ownerId 사장님 아이디
+   * @return
+   */
+  public long countByOwnerIdAndDeliveryLocationId(Long deliveryLocationId,String ownerId);
+
+  /**
+   * 배달지역 삭제 메서드.
+   * @param deliveryLocationId 삭제할 배달 지역 아이디
+   * @return
+   */
+  public int deleteDeliveryLocation(Long deliveryLocationId);
 }
