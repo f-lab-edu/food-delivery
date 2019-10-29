@@ -65,9 +65,9 @@
         LIMIT 10
     </select>
     
-    
     <select id="findById" resultType="com.delfood.dto.ShopDTO">
-        <include refid="selectShop"></include>
+        SELECT id, name
+        FROM SHOP
         WHERE id = #{id}
     </select>
     
@@ -94,7 +94,6 @@
         
         WHERE id = #{id}
     </update>
-    
     
     <select id="countByOwnerId" resultType="long">
         SELECT COUNT(*)

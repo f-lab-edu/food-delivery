@@ -12,7 +12,7 @@ public interface MenuGroupMapper {
    * 
    * @author jinyoung
    * 
-   * @param menuGroupInfo
+   * @param menuGroupInfo 메뉴 그룹 정보
    * @return 
    */
   public int insertMenuGroup(MenuGroupDTO menuGroupInfo);
@@ -20,7 +20,7 @@ public interface MenuGroupMapper {
   /**
    * 메뉴 그룹 이름의 중복을 검사한다.
    * 
-   * @param name
+   * @param name 메뉴 그룹 이름
    * @return
    */
   public int nameCheck(String name);
@@ -60,7 +60,7 @@ public interface MenuGroupMapper {
   /**
    * 한 매장의 모든 메뉴그룹 각각에 메뉴들을 포함하여 조회한다.
    * 
-   * @param shopId
+   * @param shopId 매장 아이디
    * @return
    */
   public List<MenuGroupDTO> findMenuGroupAndMenus(Long shopId);

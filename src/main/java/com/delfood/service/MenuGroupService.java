@@ -16,9 +16,16 @@ public class MenuGroupService {
   MenuGroupMapper menuGroupMapper;
   
 
+  /**
+   * 메뉴그룹 추가.
+   * 
+   * @author jinyoung
+   * 
+   * @param menuGroupInfo 메뉴그룹 정보
+   */
   public void addMenuGroup(MenuGroupDTO menuGroupInfo) {
     int result = menuGroupMapper.insertMenuGroup(menuGroupInfo);
-    if(result != 1) {
+    if (result != 1) {
       log.error("insert MenuGroup ERROR! {}", menuGroupInfo);
       throw new RuntimeException("insert MenuGroup error!");
     }
@@ -56,7 +63,7 @@ public class MenuGroupService {
   @Transactional(rollbackFor = RuntimeException.class)
   public void updateMenuGroupNameAndContent(String name, String content, Long id) {
     int result = menuGroupMapper.updateNameAndContent(name, content, id);
-    if(result != 1) {
+    if (result != 1) {
       log.error("updateNameAndContent ERROR! name : {}, content : {}, id : {}",name,content,id);
       throw new RuntimeException("Error during update menuGroup name and content!");
     }
@@ -70,14 +77,14 @@ public class MenuGroupService {
    */
   public void deleteMenuGroup(Long id) {
     int result = menuGroupMapper.deleteMenuGroup(id);
-    if(result != 1) {
+    if (result != 1) {
       log.error("deleteMenuGroup ERROR! id : {}", id);
       throw new RuntimeException("Error during update menuGroup status!");
     }
   }
   
   /**
-   * 한 매장의 메뉴 그룹과 각 메뉴그룹의 메뉴들을 조회
+   * 한 매장의 메뉴 그룹과 각 메뉴그룹의 메뉴들을 조회.
    * 
    * @author jinyoung
    * @param shopId 매장 아이디

@@ -395,7 +395,9 @@ public class MemberController {
         new UpdateMemberPasswordResponse(UpdateStatus.EMPTY_PASSWORD);
     private static final UpdateMemberPasswordResponse PASSWORD_MISMATCH =
         new UpdateMemberPasswordResponse(UpdateStatus.PASSWORD_MISMATCH);
-
+    
+    
+    
   }
 
   @Getter

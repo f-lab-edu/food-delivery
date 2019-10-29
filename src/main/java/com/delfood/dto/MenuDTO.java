@@ -11,10 +11,10 @@ import lombok.ToString;
 @Setter
 @ToString
 @Alias("menu")
-public class MenuDTO { // 메뉴
+public class MenuDTO {
   
   // 기본, 삭제, 숨김, 품절
-  public enum Status{
+  public enum Status {
     DEFAULT, DELETED, HIDDEN, SOLDOUT
   }
   

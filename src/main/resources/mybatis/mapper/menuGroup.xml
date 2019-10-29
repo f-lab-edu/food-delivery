@@ -19,9 +19,14 @@
 		FROM MENU_GROUP
 	</sql>
 
+	<sql id="selectMenu">
+		SELECT id, name, price, photo, created_at createdAt, updated_at updatedAt, status, priority, content, menuGroupId
+		FROM MENU
+	</sql>
+
 	<insert id="insertMenuGroup" parameterType="menuGroup">
-		INSERT INTO MENU_GROUP(name, content, shop_id)
-		VALUES( #{name}, #{content}, #{shopId})
+		INSERT INTO MENU_GROUP(name, content, shop_id, priority)
+		VALUES( #{name}, #{content}, #{shopId}, (SELECT MAX(priority)+1) FROM MENU_GROUP)
 	</insert>
 	
 	<select id="nameCheck" resultType="integer">
@@ -29,6 +34,12 @@
 		FROM MENU_GROUP
 		WHERE name = #{name}
 	</select>
+
+	<update id="deleteMenuGroup">
+		UPDATE MENU_GROUP
+		SET status = "DELETED"
+		WHERE id = #{id}
+	</update>
 	
 	<select id="findByShopid" resultType="menuGroup">
 		<include refid="selectMenuGroup"></include>
@@ -48,11 +59,6 @@
 		SET status = "DELETED"
 		WHERE id = #{id}
 	</update>
-	
-	<sql id="selectMenu">
-		SELECT id, name, price, photo, created_at createdAt, updated_at updatedAt, status, priority, content, menuGroupId
-		FROM MENU
-	</sql>
 
 	<select id="findMenubyGroupId" resultType="menu">
 		<include refid="selectMenu"></include>
