@@ -121,4 +121,13 @@ public interface ShopMapper {
    * @return
    */
   public int deleteDeliveryLocation(Long deliveryLocationId);
+
+  /**
+   * 해당 카테고리를 가지는 매장 정보를 가져온다.
+   * 매장에서 설정한 배달 가능 지역에 포함되어 있어야 조회된다.
+   * @param categoryId 검색할 음식 카테고리
+   * @param townCode 검색할 배달 지역
+   * @return
+   */
+  public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode);
 }

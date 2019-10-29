@@ -178,12 +178,16 @@ public class ShopService {
       throw new RuntimeException("delete Deliveery Location ERROR");
     }
   }
-
+  
   public ShopDTO getShop(Long shopId) {
     return shopMapper.findById(shopId);
   }
 
   public List<AddressDTO> getDeliveryLocations(Long shopId) {
     return addressService.getTownInfoByShopId(shopId);
+  }
+  
+  public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode) {
+    return shopMapper.findByCategoryIdAndTownCode(categoryId, townCode);
   }
 }
