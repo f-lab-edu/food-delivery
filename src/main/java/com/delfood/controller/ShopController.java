@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.delfood.aop.OwnerLoginCheck;
+import com.delfood.aop.OwnerShopCheck;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.ShopDTO;
@@ -23,6 +25,7 @@ import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -44,28 +47,22 @@ public class ShopController {
    * @return
    */
   @PostMapping
-  public ResponseEntity<AddShopResponse> addShop(HttpSession session,
+  @OwnerLoginCheck
+  public ResponseEntity<CommonResponse> addShop(HttpSession session,
       @RequestBody ShopDTO shopInfo) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
-
-    // 로그인 하지 않았을 시 401코드를 반환한다.
-    if (ownerId == null) {
-      return new ResponseEntity<ShopController.AddShopResponse>(AddShopResponse.NO_LOGIN,
-          HttpStatus.UNAUTHORIZED);
-    }
-
     shopInfo.setOwnerId(ownerId);
-
+    
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
-      return new ResponseEntity<ShopController.AddShopResponse>(AddShopResponse.NULL_ARGUMENTS,
+      return new ResponseEntity<CommonResponse>(AddShopResponse.NULL_ARGUMENTS,
           HttpStatus.BAD_REQUEST);
     }
 
     shopService.addShop(shopInfo);
 
 
-    return new ResponseEntity<ShopController.AddShopResponse>(AddShopResponse.SUCCESS,
+    return new ResponseEntity<CommonResponse>(AddShopResponse.SUCCESS,
         HttpStatus.CREATED);
   }
 
@@ -77,16 +74,14 @@ public class ShopController {
    * @return 페이지에 따른 사장님 매장, 총 매장 개수
    */
   @GetMapping
-  public ResponseEntity<MyShopsResponse> myShops(MyShopsRequest myShopsRequest,
+  @OwnerLoginCheck
+  public ResponseEntity<CommonResponse> myShops(MyShopsRequest myShopsRequest,
       HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
-    if (id == null) {
-      return new ResponseEntity<MyShopsResponse>(MyShopsResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
-    }
 
     List<ShopDTO> myShops = shopService.getMyShops(id, myShopsRequest.getLastId());
     long myShopCount = shopService.getMyShopCount(id);
-    return new ResponseEntity<MyShopsResponse>(MyShopsResponse.success(myShops, myShopCount),
+    return new ResponseEntity<CommonResponse>(MyShopsResponse.success(myShops, myShopCount),
         HttpStatus.OK);
   }
 
@@ -99,28 +94,21 @@ public class ShopController {
    * @return
    */
   @PatchMapping("{id}")
-  public ResponseEntity<UpdateShopResponse> updateShop(
-      @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session,
-      @PathVariable(required = true) Long id) {
+  @OwnerShopCheck
+  public ResponseEntity<CommonResponse> updateShop(@PathVariable(required = true) Long id,
+      @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
-    if (ownerId == null) {
-      return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.NO_LOGIN,
-          HttpStatus.UNAUTHORIZED);
-    }
-
     final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
 
-
     if (shopService.isShopOwner(copyData.getId(), ownerId) == false) {
-      return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.UNAUTHORIZED,
+      return new ResponseEntity<CommonResponse>(UpdateShopResponse.UNAUTHORIZED,
           HttpStatus.UNAUTHORIZED);
     }
 
     shopService.updateShop(copyData);
 
 
-    return new ResponseEntity<ShopController.UpdateShopResponse>(UpdateShopResponse.SUCCESS,
-        HttpStatus.OK);
+    return new ResponseEntity<CommonResponse>(UpdateShopResponse.SUCCESS, HttpStatus.OK);
   }
 
   /**
@@ -132,34 +120,19 @@ public class ShopController {
    * @return
    */
   @PatchMapping("open/{id}")
-  public ResponseEntity<OpenShopResponse> openShop(
+  @OwnerShopCheck
+  public ResponseEntity<CommonResponse> openShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
-
-    String ownerId = SessionUtil.getLoginOwnerId(session);
-
-    // 로그인 하지 않았을시
-    if (ownerId == null) {
-      return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.NO_LOGIN,
-          HttpStatus.UNAUTHORIZED);
-    }
-
-    // 로그인한 사장님이 해당 가게의 사장님이 아닐 시
-    if (shopService.isShopOwner(id, ownerId) == false) {
-      return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.UNAUTHORIZED,
-          HttpStatus.UNAUTHORIZED);
-    }
 
     // 매장이 오픈중일 때
     if (shopService.notOpenCheck(id) == false) {
-      return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.IS_OPEN,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<CommonResponse>(OpenShopResponse.IS_OPEN, HttpStatus.BAD_REQUEST);
     }
 
 
     shopService.openShop(id);
 
-    return new ResponseEntity<ShopController.OpenShopResponse>(OpenShopResponse.SUCCESS,
-        HttpStatus.OK);
+    return new ResponseEntity<CommonResponse>(OpenShopResponse.SUCCESS, HttpStatus.OK);
   }
 
   /**
@@ -171,36 +144,21 @@ public class ShopController {
    * @return
    */
   @PatchMapping("close/{id}")
-  public ResponseEntity<CloseShopResponse> closeShop(
+  @OwnerShopCheck
+  public ResponseEntity<CommonResponse> closeShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
-
-    String ownerId = SessionUtil.getLoginOwnerId(session);
-
-    // 로그인 하지 않았을시
-    if (ownerId == null) {
-      return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.NO_LOGIN,
-          HttpStatus.UNAUTHORIZED);
-    }
-
-    // 로그인한 사장님이 해당 가게의 사장님이 아닐 시
-    if (shopService.isShopOwner(id, ownerId) == false) {
-      return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.UNAUTHORIZED,
-          HttpStatus.UNAUTHORIZED);
-    }
 
     // 해당 매장이 영업중이 아닐시
     if (shopService.notOpenCheck(id) == true) {
-      return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.NOT_OPEN,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<CommonResponse>(CloseShopResponse.NOT_OPEN, HttpStatus.BAD_REQUEST);
     }
 
     shopService.closeShop(id);
 
-    return new ResponseEntity<ShopController.CloseShopResponse>(CloseShopResponse.SUCCESS,
-        HttpStatus.OK);
+    return new ResponseEntity<CommonResponse>(CloseShopResponse.SUCCESS, HttpStatus.OK);
   }
 
-  
+
 
   /**
    * 매장 정보를 조회한다.
@@ -210,139 +168,108 @@ public class ShopController {
    * @return
    */
   @GetMapping("{shopId}")
+  @OwnerShopCheck
   public ResponseEntity<ShopInfoResponse> shopInfo(
       @PathVariable(value = "shopId", required = true) Long shopId, HttpSession session) {
-    String ownerId = SessionUtil.getLoginOwnerId(session);
-
-    // 로그인 하지 않은 경우
-    if (ownerId == null) {
-      return new ResponseEntity<ShopController.ShopInfoResponse>(ShopInfoResponse.NO_LOGIN,
-          HttpStatus.UNAUTHORIZED);
-    }
-
-    // 자신의 매장이 아닌 경우
-    if (shopService.isShopOwner(shopId, ownerId) == false) {
-      return new ResponseEntity<ShopController.ShopInfoResponse>(ShopInfoResponse.UNAUTHRIZED,
-          HttpStatus.UNAUTHORIZED);
-    }
-
     ShopDTO shopInfo = shopService.getShop(shopId);
     List<AddressDTO> deliveryLocations = shopService.getDeliveryLocations(shopId);
 
     return new ResponseEntity<ShopController.ShopInfoResponse>(
-        new ShopInfoResponse(ShopInfoResponse.Result.SUCCESS, shopInfo, deliveryLocations),
-        HttpStatus.OK);
+        new ShopInfoResponse(shopInfo, deliveryLocations), HttpStatus.OK);
   }
 
 
 
   // Response 객체
   @Getter
-  @RequiredArgsConstructor
-  private static class AddShopResponse {
-    enum Result {
-      SUCCESS, NO_LOGIN, NULL_ARGUMENTS
+  private static class AddShopResponse extends CommonResponse{
+    enum Message {
+      NULL_ARGUMENTS
     }
 
     @NonNull
-    Result result;
+    Message message;
 
-    private static final AddShopResponse SUCCESS = new AddShopResponse(Result.SUCCESS);
-    private static final AddShopResponse NO_LOGIN = new AddShopResponse(Result.NO_LOGIN);
     private static final AddShopResponse NULL_ARGUMENTS =
-        new AddShopResponse(Result.NULL_ARGUMENTS);
+        new AddShopResponse(Message.NULL_ARGUMENTS);
+    
+    public AddShopResponse(Message message) {
+      super(Result.FAIL);
+      this.message = message;
+    }
   }
 
   @Getter
-  @RequiredArgsConstructor
   @AllArgsConstructor
-  private static class MyShopsResponse {
-    enum Result {
-      SUCCESS, NO_LOGIN
-    }
-
-    @NonNull
-    Result result;
+  private static class MyShopsResponse extends CommonResponse {
 
     List<ShopDTO> myShops;
 
     Long shopCount;
 
-    private static final MyShopsResponse NO_LOGIN = new MyShopsResponse(Result.NO_LOGIN);
-
     public static MyShopsResponse success(List<ShopDTO> myShops, Long shopCount) {
-      return new MyShopsResponse(Result.SUCCESS, myShops, shopCount);
+      return new MyShopsResponse(myShops, shopCount);
     }
   }
 
   @Getter
-  @RequiredArgsConstructor
-  private static class UpdateShopResponse {
-    enum Result {
-      SUCCESS, NO_LOGIN, UNAUTHORIZED
+  private static class UpdateShopResponse extends CommonResponse {
+
+    enum Message {
+      NO_LOGIN, UNAUTHORIZED
     }
 
     @NonNull
-    private Result result;
-    private static final UpdateShopResponse SUCCESS = new UpdateShopResponse(Result.SUCCESS);
-    private static final UpdateShopResponse NO_LOGIN = new UpdateShopResponse(Result.NO_LOGIN);
+    private Message message;
+    private static final UpdateShopResponse NO_LOGIN = new UpdateShopResponse(Message.NO_LOGIN);
     private static final UpdateShopResponse UNAUTHORIZED =
-        new UpdateShopResponse(Result.UNAUTHORIZED);
+        new UpdateShopResponse(Message.UNAUTHORIZED);
+    
+    public UpdateShopResponse(Message message) {
+      super(Result.FAIL);
+      this.message = message;
+    }
   }
 
   @Getter
-  @RequiredArgsConstructor
-  private static class OpenShopResponse {
-    enum Result {
-      SUCCESS, NO_LOGIN, UNAUTHORIZED, IS_OPEN
+  private static class OpenShopResponse extends CommonResponse {
+    enum Message {
+      AREADY_OPEN
     }
 
     @NonNull
-    private Result result;
-    private static final OpenShopResponse SUCCESS = new OpenShopResponse(Result.SUCCESS);
-    private static final OpenShopResponse NO_LOGIN = new OpenShopResponse(Result.NO_LOGIN);
-    private static final OpenShopResponse UNAUTHORIZED = new OpenShopResponse(Result.UNAUTHORIZED);
-    private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Result.IS_OPEN);
+    private Message message;
+    private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Message.AREADY_OPEN);
+    
+    public OpenShopResponse(Message message) {
+      super(Result.FAIL);
+      this.message = message;
+    }
   }
 
   @Getter
-  @RequiredArgsConstructor
-  private static class CloseShopResponse {
-    enum Result {
-      SUCCESS, NO_LOGIN, UNAUTHORIZED, NOT_OPEN
+  private static class CloseShopResponse extends CommonResponse {
+    enum Message {
+      NOT_OPEN
     }
 
     @NonNull
-    private Result result;
-    private static final CloseShopResponse SUCCESS = new CloseShopResponse(Result.SUCCESS);
-    private static final CloseShopResponse NO_LOGIN = new CloseShopResponse(Result.NO_LOGIN);
-    private static final CloseShopResponse UNAUTHORIZED =
-        new CloseShopResponse(Result.UNAUTHORIZED);
-    private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Result.NOT_OPEN);
-
-
+    private Message message;
+    private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Message.NOT_OPEN);
+    
+    public CloseShopResponse(Message message) {
+      super(Result.FAIL);
+      this.message = message;
+    }
   }
 
 
 
-
-
-
   @Getter
-  @RequiredArgsConstructor
   @AllArgsConstructor
-  private static class ShopInfoResponse {
-    enum Result {
-      SUCCESS, NO_LOGIN, UNAUTHRIZED
-    }
-
-    @NonNull
-    private Result result;
+  private static class ShopInfoResponse extends CommonResponse {
     private ShopDTO shopInfo;
     private List<AddressDTO> deliveryLocations;
-
-    private static final ShopInfoResponse NO_LOGIN = new ShopInfoResponse(Result.NO_LOGIN);
-    private static final ShopInfoResponse UNAUTHRIZED = new ShopInfoResponse(Result.UNAUTHRIZED);
   }
 
   // Request 객체
@@ -353,7 +280,6 @@ public class ShopController {
     private Long lastId;
   }
 
-  
 
 
 }
