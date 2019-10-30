@@ -90,6 +90,7 @@
     <update id="updateMemberAddress">
         UPDATE MEMBER
         SET address_code = #{addressCode},
+            address_detail = #{addressDetail}
         WHERE id = #{id}
     </update>
     

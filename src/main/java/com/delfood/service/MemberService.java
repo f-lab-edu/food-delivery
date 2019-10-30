@@ -99,8 +99,8 @@ public class MemberService {
    * @return
    */
   @Transactional(rollbackFor = RuntimeException.class)
-  public void updateMemberAddress(String id, String addressCode) {
-    int result = memberMapper.updateMemberAddress(id, addressCode);
+  public void updateMemberAddress(String id, String addressCode, String addressDetail) {
+    int result = memberMapper.updateMemberAddress(id, addressCode, addressDetail);
     if (result != 1) {
       log.error("update Member address ERROR! id : {}, addressCode : {}, addressDetail : {}", id,
           addressCode);
