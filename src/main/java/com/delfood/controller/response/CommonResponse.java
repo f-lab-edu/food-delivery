@@ -1,4 +1,4 @@
-package com.delfood.controller;
+package com.delfood.controller.response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString
 @Getter
 public class CommonResponse {
-  enum Result {
+  public enum Result {
     SUCCESS, NO_LOGIN, UNAUTHORIZED, FAIL
   }
 

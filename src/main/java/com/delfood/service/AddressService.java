@@ -1,5 +1,6 @@
 package com.delfood.service;
 
+import com.delfood.controller.reqeust.GetAddressesRequest;
 import com.delfood.dto.AddressDTO;
 import com.delfood.mapper.AddressMapper;
 import java.util.List;
@@ -14,5 +15,10 @@ public class AddressService {
 
   public List<AddressDTO> getTownInfoByShopId(Long shopId) {
     return addressMapper.findByShopId(shopId);
+  }
+
+
+  public List<AddressDTO> getAddressByZipAddress(GetAddressesRequest searchInfo) {
+    return addressMapper.findByZipAddress(searchInfo);
   }
 }

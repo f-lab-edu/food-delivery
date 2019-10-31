@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import com.delfood.controller.CommonResponse;
+import com.delfood.controller.response.CommonResponse;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
 import lombok.extern.log4j.Log4j2;

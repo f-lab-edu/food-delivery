@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.AddressMapper">
+    <sql id="selectAll">
+        SELECT  town_code townCode,
+                city_name cityName,
+                city_country_name cityCountryName,
+                town_name townName,
+                road_name_code roadNameCode,
+                road_name roadName,
+                underground_status undergroundStatus,
+                building_number buildingNumber,
+                building_side_number buildingSideNumber,
+                zip_code zipCode,
+                building_management_number buildingManagementNumber,
+                building_name_for_city buildingNameForCity,
+                building_use_classification buildingUseClassification,
+                administrative_town_code administrativeTownCode,
+                administrative_town_name administrativeTownName,
+                ground_floor_number groundFloorNumber,
+                underground_floor_number undergroundFloorNumber,
+                classification_apartment_buildings classificationApartmentBuildings,
+                building_count buildingCount,
+                detail_building_name detailBuildingName,
+                building_name_change_history buildingNameChangeHistory,
+                detail_building_name_change_history detailBuildingNameChangeHistory,
+                living_status livingStatus,
+                building_center_point_x_coordinate buildingCenterPointXCoordinate,
+                building_center_point_y_coordinate buildingCenterPointYCoordinate,
+                exit_x_coordinate exitXCoordinate,
+                exit_y_coordinate exitYCoordinate,
+                city_name_eng cityNameEng,
+                city_country_name_eng cityCountryNameEng,
+                town_name_eng townNameEng,
+                road_name_eng roadNameEng,
+                town_mobile_classification townMobileClassification,
+                mobile_reason_code mobileReasonCode
+        FROM    ADDRESS
+    </sql>
     <select id="findByTownCode" resultType="com.delfood.dto.AddressDTO">
         SELECT DISTINCT
                 A.town_code townCode,
@@ -28,4 +64,38 @@
         ORDER BY A.town_code ASC
         LIMIT   10
     </select>
+    
+    <select id="findByZipAddress" resultType="com.delfood.dto.AddressDTO">
+        <include refid="selectAll"></include>
+        WHERE   1 = 1
+        <if test="cityName != null">
+	        AND city_name LIKE CONCAT(#{cityName}, '%')
+        </if>
+        <if test="cityCountryName != null">
+	        AND city_country_name LIKE CONCAT(#{cityCountryName}, '%')
+        </if>
+        <if test="townName != null">
+	        AND town_name LIKE CONCAT(#{townName}, '%')
+        </if>
+        <if test="roadName != null">
+            AND road_name LIKE CONCAT(#{roadName}, '%')
+        </if>
+        
+        <if test="buildingNumber != null">
+            AND building_number LIKE CONCAT(#{buildingNumber}, '%')
+        </if>
+        <if test="buildingSideNumber != null">
+            AND building_side_number LIKE CONCAT(#{buildingSideNumber}, '%')
+        </if>
+        <if test="buildingNameForCity != null">
+            AND building_name_for_city LIKE CONCAT(#{buildingNameForCity}, '%')
+        </if>
+        
+        <if test="lastSearchBuildingManagementNumber != null">
+            AND building_management_number > #{lastSearchBuildingManagementNumber}
+        </if>
+        ORDER BY building_management_number
+        LIMIT   10
+    </select>
+        
 </mapper>

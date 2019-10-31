@@ -1,6 +1,7 @@
 package com.delfood.controller;
 
 import com.delfood.aop.OwnerLoginCheck;
+import com.delfood.controller.response.CommonResponse;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
 import com.delfood.service.OwnerService;

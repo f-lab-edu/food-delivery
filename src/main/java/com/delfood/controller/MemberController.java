@@ -1,6 +1,7 @@
 package com.delfood.controller;
 
 import com.delfood.aop.MemberLoginCheck;
+import com.delfood.controller.response.CommonResponse;
 import com.delfood.dto.MemberDTO;
 import com.delfood.service.MemberService;
 import com.delfood.utils.SessionUtil;

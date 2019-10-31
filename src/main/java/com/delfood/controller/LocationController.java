@@ -1,21 +1,29 @@
 package com.delfood.controller;
 
-import com.delfood.service.ShopService;
-import com.delfood.utils.SessionUtil;
+import java.util.List;
 import javax.servlet.http.HttpSession;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.delfood.aop.OwnerShopCheck;
+import com.delfood.controller.reqeust.GetAddressesRequest;
+import com.delfood.dto.AddressDTO;
+import com.delfood.service.AddressService;
+import com.delfood.service.ShopService;
+import com.delfood.utils.SessionUtil;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @RestController
 @RequestMapping("/locations/")
@@ -23,6 +31,8 @@ public class LocationController {
   @Autowired
   private ShopService shopService;
   
+  @Autowired
+  private AddressService addressService;
   
   
   
@@ -71,23 +81,9 @@ public class LocationController {
    * @return
    */
   @DeleteMapping("deliveries/{id}")
+  @OwnerShopCheck
   public ResponseEntity<DeleteDeliveryLocationResponse> deleteDeliveryLocation(
       @PathVariable(required = true, value = "id") Long id, HttpSession session) {
-
-    String ownerId = SessionUtil.getLoginOwnerId(session);
-    // 로그인 하지 않았을시
-    if (ownerId == null) {
-      return new ResponseEntity<DeleteDeliveryLocationResponse>(
-          DeleteDeliveryLocationResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
-    }
-
-    // 자신의 가게가 아닐 시
-    if (shopService.isShopOwnerByDeliveryLocationId(id, ownerId) == false) {
-      return new ResponseEntity<DeleteDeliveryLocationResponse>(
-          DeleteDeliveryLocationResponse.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
-    }
-
-    // 핵심 로직
     shopService.deleteDeliveryLocation(id);
 
 
@@ -95,8 +91,17 @@ public class LocationController {
         DeleteDeliveryLocationResponse.SUCCESS, HttpStatus.OK);
   }
   
-  
-  
+  /**
+   * 지번 주소 정보로 검색한다.
+   * @author jun
+   * @param requestInfo
+   * @return
+   */
+  @GetMapping("address")
+  public ResponseEntity<GetAddressesByZipInfo> getAddressByZipInfo(GetAddressesRequest requestInfo) {
+    List<AddressDTO> addresses = addressService.getAddressByZipAddress(requestInfo);
+    return new ResponseEntity<LocationController.GetAddressesByZipInfo>(new GetAddressesByZipInfo(addresses), HttpStatus.OK);
+  }
   
   
   
@@ -112,6 +117,7 @@ public class LocationController {
     @NonNull
     private String townCode;
   }
+  
   
   
   
@@ -150,5 +156,11 @@ public class LocationController {
         new DeleteDeliveryLocationResponse(Result.NO_LOGIN);
     private static final DeleteDeliveryLocationResponse UNAUTHORIZED =
         new DeleteDeliveryLocationResponse(Result.UNAUTHORIZED);
+  }
+  
+  @Getter
+  @AllArgsConstructor
+  private static class GetAddressesByZipInfo{
+    private List<AddressDTO> addresses;
   }
 }

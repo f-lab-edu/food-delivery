@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.aop.OwnerShopCheck;
+import com.delfood.controller.response.CommonResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.ShopDTO;
