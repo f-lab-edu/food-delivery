@@ -95,17 +95,17 @@
         WHERE id = #{id}
     </update>
     
-    <select id="countByOwnerId" resultType="long">
+    <select id="countByOwnerId" resultType="Integer">
         SELECT COUNT(*)
         FROM SHOP
         WHERE owner_id = #{ownerId}
     </select>
     
-    <select id="countByOwnerIdAndShopId" resultType="long">
+    <select id="countByOwnerIdAndShopId" resultType="Integer">
     	SELECT COUNT(*)
     	FROM SHOP
-    	WHERE id = #{shopId},
-    	AND owner_id = #{owner_id}
+    	WHERE id = #{shopId}
+    	AND owner_id = #{ownerId}
     </select>
     
 </mapper>

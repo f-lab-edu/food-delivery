@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.delfood.dto.MenuGroupDTO;
+import com.delfood.error.exception.InvalidMenuGroupCountException;
+import com.delfood.error.exception.InvalidMenuGroupIdException;
 import com.delfood.mapper.MenuGroupMapper;
 import lombok.extern.log4j.Log4j2;
 
@@ -90,8 +92,28 @@ public class MenuGroupService {
    * @param shopId 매장 아이디
    * @return 
    */
-  public List<MenuGroupDTO> getMenuGroupsIncludedMenus(Long shopId){
+  public List<MenuGroupDTO> getMenuGroupsIncludedMenus(Long shopId) {
     return menuGroupMapper.findByShopid(shopId);
+  }
+
+  /**
+   * 매장의 메뉴그룹 순서를 수정한다.
+   * 
+   * @param shopId 매장 아이디
+   * @param idList 메뉴그룹 아이디 리스트
+   */
+  @Transactional(rollbackFor = InvalidMenuGroupIdException.class)
+  public void updateMenuGroupPriority(Long shopId, List<Long> idList) {
+    int total = menuGroupMapper.totalCount(shopId);
+    if (idList.size() != total) {
+      throw new InvalidMenuGroupCountException("The menugroup of targets is not correct.");
+    }
+    
+    for (int i = 1; i <= idList.size(); i++) {
+      if ((menuGroupMapper.updateMenuGroupPriority(idList.get(i - 1), i)) == 0) {
+        throw new InvalidMenuGroupIdException("Invalid menu group");
+      }
+    }
   }
   
 }

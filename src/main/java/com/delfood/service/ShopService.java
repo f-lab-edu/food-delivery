@@ -71,8 +71,7 @@ public class ShopService {
    * @return
    */
   public boolean checkShopId(String ownerId, Long shopId) {
-    return shopMapper.countByOwnerIdAndShopId(ownerId, shopId) == 1
-        || shopId == null;
+    return shopMapper.countByOwnerIdAndShopId(ownerId, shopId) != 1;
   }
   
 }

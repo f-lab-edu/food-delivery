@@ -60,9 +60,32 @@ public interface MenuGroupMapper {
   /**
    * 한 매장의 모든 메뉴그룹 각각에 메뉴들을 포함하여 조회한다.
    * 
+   * @author jinyoung
+   * 
    * @param shopId 매장 아이디
    * @return
    */
   public List<MenuGroupDTO> findMenuGroupAndMenus(Long shopId);
+
+  /**
+   * 한 매장의 전체 메뉴그룹 수를 반환한다.
+   * 
+   * @author jinyoung
+   * 
+   * @param shopId 매장 아이디
+   * @return
+   */
+  public int totalCount(Long shopId);
+
+  /**
+   * 메뉴 그룹의 우선순위를 수정한다.
+   * 
+   * @author jinyoung
+   * 
+   * @param id 메뉴그룹 아이디
+   * @param priority 우선순위
+   * @return
+   */
+  public int updateMenuGroupPriority(Long id, int priority);
   
 }

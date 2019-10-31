@@ -37,12 +37,13 @@ public class MenuController {
    * - 매장 목록을 보여준다.
    * 
    * @author jinyoung
+   * 
    * @param session
    * 
    */
-  @GetMapping("/menuMng/shops/{lastId}")
+  @GetMapping("/shops/{shopId}/menuGroups")
   public ResponseEntity<List<ShopDTO>> menuMngInfo(HttpSession session,
-      @PathVariable long lastId) {
+      @PathVariable("shopId") long lastId) {
     
     String loginOwnerId = SessionUtil.getLoginOwnerId(session);
     if (loginOwnerId == null) {
@@ -50,7 +51,7 @@ public class MenuController {
           HttpStatus.UNAUTHORIZED);
     }
     
-    List<ShopDTO> myShops = shopService.getMyShops(loginOwnerId, lastId);
+    List<ShopDTO> myShops = shopService.getMyShops(loginOwnerId, shopId);
     return new ResponseEntity<List<ShopDTO>>(myShops, HttpStatus.OK);
   }
   
@@ -93,12 +94,13 @@ public class MenuController {
    * @param menuGroupInfo 가입에 필요한 메뉴그룹 정보
    * @return
    */
-  @PostMapping("/shops/{id}/menuGroups")
+  @PostMapping("/shops/{shopId}/menuGroups")
   public ResponseEntity<AddMenuGroupResponse> addMenuGroup(HttpSession session,
-      @RequestBody MenuGroupDTO menuGroupInfo) {
+      @RequestBody MenuGroupDTO menuGroupInfo, @PathVariable long shopId) {
     
-    if (shopService.checkShopId(SessionUtil.getLoginOwnerId(session),
-        menuGroupInfo.getShopId())) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    
+    if (shopService.checkShopId(ownerId, shopId)) {
       return new ResponseEntity<MenuController.AddMenuGroupResponse>(
           AddMenuGroupResponse.EMPTY_SHOP_ID, HttpStatus.UNAUTHORIZED);
     }
@@ -109,6 +111,7 @@ public class MenuController {
           AddMenuGroupResponse.NAME_DUPLICATED, HttpStatus.CONFLICT);
     }
     
+    menuGroupInfo.setShopId(shopId);
     menuGroupService.addMenuGroup(menuGroupInfo);
     
     return new ResponseEntity<MenuController.AddMenuGroupResponse>(
@@ -156,7 +159,7 @@ public class MenuController {
    * @param menuGroupId 매뉴 그룹 아이디
    * @return
    */
-  @DeleteMapping("shops/{shopId}/menuGroups/{menuGroupId}")
+  @DeleteMapping("/shops/{shopId}/menuGroups/{menuGroupId}")
   public HttpStatus deleteMenuGroup(
       HttpSession session, @PathVariable("shopId") Long shopId,
       @PathVariable("menuGroupId") Long menuGroupId) {
@@ -176,6 +179,20 @@ public class MenuController {
     return HttpStatus.OK;
   }
   
+  /**
+   * 메뉴그룹 순서를 변경한다.
+   * 
+   * @param idList 정렬된 메뉴그룹 아이디 리스트
+   * @return
+   */
+  @PatchMapping("/shops/{shopId}/menuGroups/priority")
+  public HttpStatus updateMenuGroupPriority(
+      @PathVariable("shopId") Long shopId, @RequestBody List<Long> idList) {
+    
+    menuGroupService.updateMenuGroupPriority(shopId, idList);
+    
+    return HttpStatus.OK;
+  }
   
   // ===================== resopnse 객체 =====================
   
@@ -204,7 +221,6 @@ public class MenuController {
         = new AddMenuGroupResponse(AddMenuGroupStatus.EMPTY_SHOP_ID);
   }
   
-  
   @Getter
   @RequiredArgsConstructor
   private static class UpdateMenuGroupResponse {
@@ -223,9 +239,25 @@ public class MenuController {
         = new UpdateMenuGroupResponse(UpdateMenuGroupStatus.EMPTY_NAME);
   }
   
+  @Getter
+  @RequiredArgsConstructor
+  private static class UpdateMenuGroupPriorityResponse {
+    enum UpdateMenuGroupPriorityStatus {
+      SUCCESS, NOT_MATCH_COUNT_OF_MENUGROUP
+    }
+    
+    @NonNull
+    private UpdateMenuGroupPriorityStatus result;
+    
+    private static final UpdateMenuGroupPriorityResponse SUCCESS
+        = new UpdateMenuGroupPriorityResponse(UpdateMenuGroupPriorityStatus.SUCCESS);
+    private static final UpdateMenuGroupPriorityResponse NOT_MATCH_COUNT_OF_MENUGROUP
+        = new UpdateMenuGroupPriorityResponse(
+            UpdateMenuGroupPriorityStatus.NOT_MATCH_COUNT_OF_MENUGROUP);
+  }
+  
   // ===================== request 객체 =====================
   
-  @Setter
   @Getter
   private static class UpdateMenuGroupRequest {
     @NonNull
