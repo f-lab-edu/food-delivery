@@ -8,6 +8,7 @@ import com.delfood.mapper.ShopMapper;
 import com.delfood.mapper.WorkMapper;
 import lombok.extern.log4j.Log4j2;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ public class ShopService {
 
   @Autowired
   private WorkService workService;
-  
+
   @Autowired
   private AddressService addressService;
 
@@ -165,9 +166,10 @@ public class ShopService {
     long result = shopMapper.countByOwnerIdAndDeliveryLocationId(deliveryLocationId, ownerId);
     return result == 1;
   }
-  
+
   /**
    * 배달 지역을 삭제한다.
+   * 
    * @author jun
    * @param deliveryLocationId 삭제할 배달 지역 id
    */
@@ -178,7 +180,7 @@ public class ShopService {
       throw new RuntimeException("delete Deliveery Location ERROR");
     }
   }
-  
+
   public ShopDTO getShop(Long shopId) {
     return shopMapper.findById(shopId);
   }
@@ -186,8 +188,22 @@ public class ShopService {
   public List<AddressDTO> getDeliveryLocations(Long shopId) {
     return addressService.getTownInfoByShopId(shopId);
   }
-  
+
   public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode) {
     return shopMapper.findByCategoryIdAndTownCode(categoryId, townCode);
+  }
+
+  @Transactional
+  public List<ShopDTO> closeAllShops(String ownerId) {
+    List<ShopDTO> closeShops = shopMapper.findByBeClose(ownerId);
+    closeShops.stream().forEach(e -> closeShop(e.getId()));
+    return closeShops;
+  }
+
+  @Transactional
+  public List<ShopDTO> openAllShops(String ownerId) {
+    List<ShopDTO> openShops = shopMapper.findByBeOpen(ownerId);
+    openShops.stream().forEach(e -> openShop(e.getId()));
+    return openShops;
   }
 }

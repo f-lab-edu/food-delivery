@@ -130,4 +130,10 @@ public interface ShopMapper {
    * @return
    */
   public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode);
+
+
+  public List<ShopDTO> findByBeOpen(String ownerId);
+
+  public List<ShopDTO> findByBeClose(String ownerId);
+
 }

@@ -181,4 +181,21 @@
         AND     A.status != 'DELETE'
         AND     B.town_code LIKE #{townCode} || '%'
     </select>
+    
+    
+    <select id="findByBeOpen" resultType="com.delfood.dto.ShopDTO">
+        SELECT  id, name
+        FROM    SHOP
+        WHERE   status != 'DELETE'
+        AND     owner_id = #{ownerId}
+        AND     work_condition = 'CLOSE'
+    </select>
+    
+    <select id="findByBeClose" resultType="com.delfood.dto.ShopDTO">
+        SELECT  id, name
+        FROM    SHOP
+        WHERE   status != 'DELETE'
+        AND     owner_id = #{ownerId}
+        AND     work_condition = 'OPEN'
+    </select>
 </mapper>

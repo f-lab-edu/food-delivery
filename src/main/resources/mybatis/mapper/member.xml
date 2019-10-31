@@ -99,4 +99,11 @@
           FROM MEMBER
          WHERE id = #{id}
     </select>
+    
+    
+    <select id="findTownCodeById" resultType="String">
+        SELECT  SUBSTRING(address_code, 1, 10)
+        FROM    MEMBER
+        WHERE   id = #{id}
+    </select>
 </mapper>

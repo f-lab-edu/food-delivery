@@ -108,5 +108,15 @@ public class MemberService {
     }
   }
 
+  /**
+   * 회원의 읍면동 코드를 조회한다.
+   * 
+   * @param memberId
+   * @return
+   */
+  public String getTownCode(String memberId) {
+    return memberMapper.findTownCodeById(memberId);
+  }
+
 
 }

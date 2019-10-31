@@ -21,5 +21,7 @@ public interface MemberMapper {
   int updateMemberAddress(String id, String addressCode, String addressDetail);
 
   int idCheck(String id);
+
+  String findTownCodeById(String id);
   
 }

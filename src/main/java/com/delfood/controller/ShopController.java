@@ -52,7 +52,7 @@ public class ShopController {
       @RequestBody ShopDTO shopInfo) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     shopInfo.setOwnerId(ownerId);
-    
+
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
       return new ResponseEntity<CommonResponse>(AddShopResponse.NULL_ARGUMENTS,
@@ -62,8 +62,7 @@ public class ShopController {
     shopService.addShop(shopInfo);
 
 
-    return new ResponseEntity<CommonResponse>(AddShopResponse.SUCCESS,
-        HttpStatus.CREATED);
+    return new ResponseEntity<CommonResponse>(AddShopResponse.SUCCESS, HttpStatus.CREATED);
   }
 
   /**
@@ -134,6 +133,20 @@ public class ShopController {
 
     return new ResponseEntity<CommonResponse>(OpenShopResponse.SUCCESS, HttpStatus.OK);
   }
+  
+  /**
+   * 오픈할 수 있는 사장님의 모든 매장을 오픈한다.
+   * @author jun
+   * @param session
+   * @return 오픈한 매장의 id, 이름
+   */
+  @PatchMapping("open/")
+  @OwnerLoginCheck
+  public ResponseEntity<CommonResponse> openAllShops(HttpSession session) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    List<ShopDTO> openShops =  shopService.openAllShops(ownerId);
+    return new ResponseEntity<CommonResponse>(new OpenAllShopsResponse(openShops), HttpStatus.OK);
+  }
 
   /**
    * 매장을 닫는다.
@@ -156,6 +169,21 @@ public class ShopController {
     shopService.closeShop(id);
 
     return new ResponseEntity<CommonResponse>(CloseShopResponse.SUCCESS, HttpStatus.OK);
+  }
+
+  /**
+   * 현재 오픈중인 모든 매장을 닫는다.
+   * @author jun
+   * @param session 접속한 사용자의 세션
+   * @return 운영 종료를 진행한 매장의 id, 이름
+   */
+  @PatchMapping("close/")
+  @OwnerLoginCheck
+  public ResponseEntity<CommonResponse> closeAllShops(HttpSession session) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    List<ShopDTO> closeShops = shopService.closeAllShops(ownerId);
+    return new ResponseEntity<CommonResponse>(new closeAllShopsResponse(closeShops),
+        HttpStatus.OK);
   }
 
 
@@ -182,7 +210,7 @@ public class ShopController {
 
   // Response 객체
   @Getter
-  private static class AddShopResponse extends CommonResponse{
+  private static class AddShopResponse extends CommonResponse {
     enum Message {
       NULL_ARGUMENTS
     }
@@ -192,7 +220,7 @@ public class ShopController {
 
     private static final AddShopResponse NULL_ARGUMENTS =
         new AddShopResponse(Message.NULL_ARGUMENTS);
-    
+
     public AddShopResponse(Message message) {
       super(Result.FAIL);
       this.message = message;
@@ -214,21 +242,8 @@ public class ShopController {
 
   @Getter
   private static class UpdateShopResponse extends CommonResponse {
-
-    enum Message {
-      NO_LOGIN, UNAUTHORIZED
-    }
-
-    @NonNull
-    private Message message;
-    private static final UpdateShopResponse NO_LOGIN = new UpdateShopResponse(Message.NO_LOGIN);
-    private static final UpdateShopResponse UNAUTHORIZED =
-        new UpdateShopResponse(Message.UNAUTHORIZED);
-    
-    public UpdateShopResponse(Message message) {
-      super(Result.FAIL);
-      this.message = message;
-    }
+    // 해당 Response는 AOP로 통합되었습니다.
+    // 추후 확장성을 고려하여 남겨놓습니다. - jun
   }
 
   @Getter
@@ -240,11 +255,18 @@ public class ShopController {
     @NonNull
     private Message message;
     private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Message.AREADY_OPEN);
-    
+
     public OpenShopResponse(Message message) {
       super(Result.FAIL);
       this.message = message;
     }
+  }
+  
+  
+  @Getter
+  @AllArgsConstructor
+  private static class OpenAllShopsResponse extends CommonResponse {
+    List<ShopDTO> openShops;
   }
 
   @Getter
@@ -256,7 +278,7 @@ public class ShopController {
     @NonNull
     private Message message;
     private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Message.NOT_OPEN);
-    
+
     public CloseShopResponse(Message message) {
       super(Result.FAIL);
       this.message = message;
@@ -270,6 +292,12 @@ public class ShopController {
   private static class ShopInfoResponse extends CommonResponse {
     private ShopDTO shopInfo;
     private List<AddressDTO> deliveryLocations;
+  }
+
+  @Getter
+  @AllArgsConstructor
+  private static class closeAllShopsResponse extends CommonResponse {
+    private List<ShopDTO> closeShops;
   }
 
   // Request 객체
