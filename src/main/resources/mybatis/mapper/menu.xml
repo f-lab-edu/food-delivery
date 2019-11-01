@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.MenuGroupMapper">
+
+	<sql id="selectMenu">
+		SELECT id, name, price, photo, created_at createdAt,
+		updated_at updatedAt, status, priority, content, menuGroupId
+		FROM MENU
+	</sql>
+	
+	<insert id="insertMenu" parameterType="menu">
+		INSERT INTO(name, price, photo, priority, content, menu_group_id)
+		VALUES(#{name}, #{price}, #{photo}, #{priority}, #{content}, #{menuGroupId})
+	</insert>
+	
+
+</mapper>

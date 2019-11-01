@@ -42,4 +42,16 @@ public class MenuDTO {
   
   private Long menuGroupId; // 메뉴 그룹 아이디
   
+  /**
+   * 메뉴 등록 필수 조건인 이름, 가격, 메뉴 그룹 아이디가 있는지 없는지 확인한다.
+   * 
+   * @author jinyoung
+   * 
+   * @param menuInfo 메뉴 등록에 필요한 정보
+   * @return
+   */
+  public static boolean hasNullDataBeforeAdd(MenuDTO menuInfo) {
+    return menuInfo.getName() == null || menuInfo.getPrice() == null
+        || menuInfo.getMenuGroupId() == null;
+  }
 }

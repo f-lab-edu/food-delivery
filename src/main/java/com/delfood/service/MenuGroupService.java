@@ -25,6 +25,7 @@ public class MenuGroupService {
    * 
    * @param menuGroupInfo 메뉴그룹 정보
    */
+  @Transactional(rollbackFor = RuntimeException.class)
   public void addMenuGroup(MenuGroupDTO menuGroupInfo) {
     int result = menuGroupMapper.insertMenuGroup(menuGroupInfo);
     if (result != 1) {
