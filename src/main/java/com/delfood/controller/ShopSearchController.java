@@ -1,7 +1,6 @@
 package com.delfood.controller;
 
 import com.delfood.aop.MemberLoginCheck;
-import com.delfood.controller.response.CommonResponse;
 import com.delfood.dto.ShopCategoryDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.service.MemberService;
@@ -55,12 +54,12 @@ public class ShopSearchController {
    */
   @GetMapping("/available/shops")
   @MemberLoginCheck
-  public ResponseEntity<CommonResponse> getShopsByCategoryIdAndTownCode(
+  public ResponseEntity<GetShopByCategoryIdAndTownCodeResponse> getShopsByCategoryIdAndTownCode(
       @RequestParam(required = true) Long categoryId, HttpSession session) {
     String memberId = SessionUtil.getLoginMemberId(session);
     String townCode = memberService.getTownCode(memberId);
 
-    return new ResponseEntity<CommonResponse>(new GetShopByCategoryIdAndTownCodeResponse(
+    return new ResponseEntity<GetShopByCategoryIdAndTownCodeResponse>(new GetShopByCategoryIdAndTownCodeResponse(
         shopService.findByCategoryIdAndTownCode(categoryId, townCode)), HttpStatus.OK);
   }
 
@@ -75,7 +74,7 @@ public class ShopSearchController {
 
   @Getter
   @AllArgsConstructor
-  private static class GetShopByCategoryIdAndTownCodeResponse extends CommonResponse {
+  private static class GetShopByCategoryIdAndTownCodeResponse {
     private List<ShopDTO> shopsInfo;
   }
 

@@ -92,7 +92,7 @@ public class LocationController {
   }
   
   /**
-   * 지번 주소 정보로 검색한다.
+   * 주소를 검색한다.
    * @author jun
    * @param requestInfo
    * @return

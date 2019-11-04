@@ -179,7 +179,8 @@
         ON      A.id = B.shop_id
         WHERE   A.work_condition = 'OPEN'
         AND     A.status != 'DELETE'
-        AND     B.town_code LIKE #{townCode} || '%'
+        AND     B.town_code LIKE CONCAT(#{townCode}, '%')
+        AND     A.signature_menu_id = #{categoryId}
     </select>
     
     

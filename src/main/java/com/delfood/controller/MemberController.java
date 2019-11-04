@@ -1,7 +1,6 @@
 package com.delfood.controller;
 
 import com.delfood.aop.MemberLoginCheck;
-import com.delfood.controller.response.CommonResponse;
 import com.delfood.dto.MemberDTO;
 import com.delfood.service.MemberService;
 import com.delfood.utils.SessionUtil;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -65,10 +65,10 @@ public class MemberController {
    */
   @GetMapping("myInfo")
   @MemberLoginCheck
-  public ResponseEntity<CommonResponse> memberInfo(HttpSession session) {
+  public ResponseEntity<MemberInfoResponse> memberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     MemberDTO memberInfo = memberService.getMemberInfo(id);
-    return new ResponseEntity<CommonResponse>(new MemberInfoResponse(memberInfo), HttpStatus.OK);
+    return new ResponseEntity<MemberInfoResponse>(new MemberInfoResponse(memberInfo), HttpStatus.OK);
   }
 
   /**
@@ -169,13 +169,13 @@ public class MemberController {
    * 
    * @author jun
    * @param session 현제 접속한 세션
-   * @return 로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환 로그아웃 성공시 200 코드를 반환하고 result:SUCCESS 반환
+   * @return 로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환 로그아웃 성공시 200 코드를 반환
    */
   @GetMapping("logout")
   @MemberLoginCheck
-  public ResponseEntity<CommonResponse> logout(HttpSession session) {
+  @ResponseStatus(code = HttpStatus.OK)
+  public void logout(HttpSession session) {
     SessionUtil.logoutMember(session);
-    return CommonResponse.SUCCESS_RESPONSE;
   }
 
   /**
@@ -186,22 +186,22 @@ public class MemberController {
    */
   @PatchMapping("password")
   @MemberLoginCheck
-  public ResponseEntity<CommonResponse> updateMemberInfo(HttpSession session,
+  public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session,
       @RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest) {
     String password = passwordRequest.getPassword();
     String newPassword = passwordRequest.getNewPassword();
     String id = SessionUtil.getLoginMemberId(session);
-    ResponseEntity<CommonResponse> responseEntity = null;
+    ResponseEntity<UpdateMemberPasswordResponse> responseEntity = null;
     if (memberService.login(id, password) == null) {
       // 원래 패스워드가 일치하지 않음
-      responseEntity = new ResponseEntity<CommonResponse>(UpdateMemberPasswordResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
+      responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(UpdateMemberPasswordResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
     } else if (newPassword == null) {
       // 새로운 패스워드를 입력하지 않음
-      responseEntity = new ResponseEntity<CommonResponse>(UpdateMemberPasswordResponse.EMPTY_PASSWORD, HttpStatus.BAD_REQUEST);
+      responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(UpdateMemberPasswordResponse.EMPTY_PASSWORD, HttpStatus.BAD_REQUEST);
     } else {
       // 성공시
       memberService.updateMemberPassword(id, newPassword);
-      responseEntity = CommonResponse.SUCCESS_RESPONSE;
+      responseEntity = new ResponseEntity<MemberController.UpdateMemberPasswordResponse>(HttpStatus.OK);
     }
 
     return responseEntity;
@@ -216,13 +216,13 @@ public class MemberController {
    */
   @DeleteMapping("myInfo")
   @MemberLoginCheck
-  public ResponseEntity<CommonResponse> deleteMemberInfo(HttpSession session) {
+  @ResponseStatus(code = HttpStatus.OK)
+  public void deleteMemberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     memberService.deleteMember(id);
     
     // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
     SessionUtil.logoutAll(session);
-    return CommonResponse.SUCCESS_RESPONSE;
   }
 
   /**
@@ -233,24 +233,24 @@ public class MemberController {
    */
   @PatchMapping("address")
   @MemberLoginCheck
-  public ResponseEntity<CommonResponse> updateMemberAddress(
+  public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(
       @RequestBody @NotNull UpdateMemberAddressRequest memberInfo, HttpSession session) {
-    ResponseEntity<CommonResponse> responseEntity = null;
+    ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
     String addressCode = memberInfo.getAddressCode();
     String addressDetail = memberInfo.getAddressDetail();
     String id = SessionUtil.getLoginMemberId(session);
 
     if (addressCode == null) {
       // 요청한 주소가 null일 때
-      responseEntity = new ResponseEntity<CommonResponse>(
+      responseEntity = new ResponseEntity<UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.EMPTY_ADDRESS, HttpStatus.BAD_REQUEST);
     } else if(addressDetail == null) { 
-      responseEntity = new ResponseEntity<CommonResponse>(
+      responseEntity = new ResponseEntity<UpdateMemberAddressResponse>(
           UpdateMemberAddressResponse.EMPTY_ADDRESS_DETAIL, HttpStatus.BAD_REQUEST);
     } else {
       // 모든 조건을 충족할 때
       memberService.updateMemberAddress(id, addressCode, addressDetail);
-      responseEntity = CommonResponse.SUCCESS_RESPONSE;
+      responseEntity = new ResponseEntity<MemberController.UpdateMemberAddressResponse>(HttpStatus.OK);
     }
 
     return responseEntity;
@@ -287,7 +287,7 @@ public class MemberController {
 
   @Getter
   @RequiredArgsConstructor
-  private static class LogoutResponse extends CommonResponse {
+  private static class LogoutResponse {
     // 해당 클래스는 AOP 적용으로 통합되었습니다.
     // 추후 확장성을 고려하여 클래스를 남겨놓습니다 - jun
   }
@@ -326,7 +326,7 @@ public class MemberController {
   }
 
   @Getter
-  private static class UpdateMemberPasswordResponse extends CommonResponse {
+  private static class UpdateMemberPasswordResponse {
     enum Message {
       EMPTY_PASSWORD, PASSWORD_MISMATCH
     }
@@ -340,20 +340,19 @@ public class MemberController {
         new UpdateMemberPasswordResponse(Message.PASSWORD_MISMATCH);
 
     public UpdateMemberPasswordResponse(Message message) {
-      super(Result.FAIL);
       this.message = message;
     }
   }
 
   @Getter
   @RequiredArgsConstructor
-  private static class DeleteMemberResponse extends CommonResponse {
+  private static class DeleteMemberResponse {
     // 해당 메서드는 AOP로 통합되었습니다.
     // 추후 확장성을 고려하여 남겨놓습니다 - jun
   }
 
   @Getter
-  private static class UpdateMemberAddressResponse extends CommonResponse {
+  private static class UpdateMemberAddressResponse {
     enum UpdateStatus {
       EMPTY_ADDRESS, EMPTY_ADDRESS_DETAIL
     }
@@ -367,14 +366,13 @@ public class MemberController {
         new UpdateMemberAddressResponse(UpdateStatus.EMPTY_ADDRESS_DETAIL);
     
     public UpdateMemberAddressResponse(UpdateStatus message) {
-      super(Result.FAIL);
       this.message = message;
     }
   }
   
   @Getter
   @AllArgsConstructor
-  private static class MemberInfoResponse extends CommonResponse {
+  private static class MemberInfoResponse {
     private MemberDTO memberInfo;
   }
 

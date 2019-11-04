@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.aop.OwnerShopCheck;
-import com.delfood.controller.response.CommonResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.ShopDTO;
@@ -49,21 +48,21 @@ public class ShopController {
    */
   @PostMapping
   @OwnerLoginCheck
-  public ResponseEntity<CommonResponse> addShop(HttpSession session,
+  public ResponseEntity<AddShopResponse> addShop(HttpSession session,
       @RequestBody ShopDTO shopInfo) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     shopInfo.setOwnerId(ownerId);
 
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
-      return new ResponseEntity<CommonResponse>(AddShopResponse.NULL_ARGUMENTS,
+      return new ResponseEntity<AddShopResponse>(AddShopResponse.NULL_ARGUMENTS,
           HttpStatus.BAD_REQUEST);
     }
 
     shopService.addShop(shopInfo);
 
 
-    return new ResponseEntity<CommonResponse>(AddShopResponse.SUCCESS, HttpStatus.CREATED);
+    return new ResponseEntity<AddShopResponse>(HttpStatus.CREATED);
   }
 
   /**
@@ -75,13 +74,13 @@ public class ShopController {
    */
   @GetMapping
   @OwnerLoginCheck
-  public ResponseEntity<CommonResponse> myShops(MyShopsRequest myShopsRequest,
+  public ResponseEntity<MyShopsResponse> myShops(MyShopsRequest myShopsRequest,
       HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
 
     List<ShopDTO> myShops = shopService.getMyShops(id, myShopsRequest.getLastId());
     long myShopCount = shopService.getMyShopCount(id);
-    return new ResponseEntity<CommonResponse>(MyShopsResponse.success(myShops, myShopCount),
+    return new ResponseEntity<MyShopsResponse>(MyShopsResponse.success(myShops, myShopCount),
         HttpStatus.OK);
   }
 
@@ -95,20 +94,12 @@ public class ShopController {
    */
   @PatchMapping("{id}")
   @OwnerShopCheck
-  public ResponseEntity<CommonResponse> updateShop(@PathVariable(required = true) Long id,
+  public ResponseEntity<UpdateShopResponse> updateShop(@PathVariable(required = true) Long id,
       @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session) {
-    String ownerId = SessionUtil.getLoginOwnerId(session);
     final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
-
-    if (shopService.isShopOwner(copyData.getId(), ownerId) == false) {
-      return new ResponseEntity<CommonResponse>(UpdateShopResponse.UNAUTHORIZED,
-          HttpStatus.UNAUTHORIZED);
-    }
-
     shopService.updateShop(copyData);
 
-
-    return new ResponseEntity<CommonResponse>(UpdateShopResponse.SUCCESS, HttpStatus.OK);
+    return new ResponseEntity<UpdateShopResponse>(HttpStatus.OK);
   }
 
   /**
@@ -121,18 +112,18 @@ public class ShopController {
    */
   @PatchMapping("open/{id}")
   @OwnerShopCheck
-  public ResponseEntity<CommonResponse> openShop(
+  public ResponseEntity<OpenShopResponse> openShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
 
     // 매장이 오픈중일 때
     if (shopService.notOpenCheck(id) == false) {
-      return new ResponseEntity<CommonResponse>(OpenShopResponse.IS_OPEN, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<OpenShopResponse>(OpenShopResponse.IS_OPEN, HttpStatus.BAD_REQUEST);
     }
 
 
     shopService.openShop(id);
 
-    return new ResponseEntity<CommonResponse>(OpenShopResponse.SUCCESS, HttpStatus.OK);
+    return new ResponseEntity<OpenShopResponse>(HttpStatus.OK);
   }
   
   /**
@@ -143,10 +134,10 @@ public class ShopController {
    */
   @PatchMapping("open/")
   @OwnerLoginCheck
-  public ResponseEntity<CommonResponse> openAllShops(HttpSession session) {
+  public ResponseEntity<OpenAllShopsResponse> openAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     List<ShopDTO> openShops =  shopService.openAllShops(ownerId);
-    return new ResponseEntity<CommonResponse>(new OpenAllShopsResponse(openShops), HttpStatus.OK);
+    return new ResponseEntity<OpenAllShopsResponse>(new OpenAllShopsResponse(openShops), HttpStatus.OK);
   }
 
   /**
@@ -159,17 +150,16 @@ public class ShopController {
    */
   @PatchMapping("close/{id}")
   @OwnerShopCheck
-  public ResponseEntity<CommonResponse> closeShop(
+  public ResponseEntity<CloseShopResponse> closeShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
 
     // 해당 매장이 영업중이 아닐시
     if (shopService.notOpenCheck(id) == true) {
-      return new ResponseEntity<CommonResponse>(CloseShopResponse.NOT_OPEN, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<CloseShopResponse>(CloseShopResponse.NOT_OPEN, HttpStatus.BAD_REQUEST);
     }
 
     shopService.closeShop(id);
-
-    return new ResponseEntity<CommonResponse>(CloseShopResponse.SUCCESS, HttpStatus.OK);
+    return new ResponseEntity<CloseShopResponse>(HttpStatus.OK);
   }
 
   /**
@@ -180,10 +170,10 @@ public class ShopController {
    */
   @PatchMapping("close/")
   @OwnerLoginCheck
-  public ResponseEntity<CommonResponse> closeAllShops(HttpSession session) {
+  public ResponseEntity<closeAllShopsResponse> closeAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     List<ShopDTO> closeShops = shopService.closeAllShops(ownerId);
-    return new ResponseEntity<CommonResponse>(new closeAllShopsResponse(closeShops),
+    return new ResponseEntity<closeAllShopsResponse>(new closeAllShopsResponse(closeShops),
         HttpStatus.OK);
   }
 
@@ -211,7 +201,7 @@ public class ShopController {
 
   // Response 객체
   @Getter
-  private static class AddShopResponse extends CommonResponse {
+  private static class AddShopResponse {
     enum Message {
       NULL_ARGUMENTS
     }
@@ -223,14 +213,13 @@ public class ShopController {
         new AddShopResponse(Message.NULL_ARGUMENTS);
 
     public AddShopResponse(Message message) {
-      super(Result.FAIL);
       this.message = message;
     }
   }
 
   @Getter
   @AllArgsConstructor
-  private static class MyShopsResponse extends CommonResponse {
+  private static class MyShopsResponse {
 
     List<ShopDTO> myShops;
 
@@ -242,13 +231,13 @@ public class ShopController {
   }
 
   @Getter
-  private static class UpdateShopResponse extends CommonResponse {
+  private static class UpdateShopResponse {
     // 해당 Response는 AOP로 통합되었습니다.
     // 추후 확장성을 고려하여 남겨놓습니다. - jun
   }
 
   @Getter
-  private static class OpenShopResponse extends CommonResponse {
+  private static class OpenShopResponse {
     enum Message {
       AREADY_OPEN
     }
@@ -258,7 +247,6 @@ public class ShopController {
     private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Message.AREADY_OPEN);
 
     public OpenShopResponse(Message message) {
-      super(Result.FAIL);
       this.message = message;
     }
   }
@@ -266,12 +254,12 @@ public class ShopController {
   
   @Getter
   @AllArgsConstructor
-  private static class OpenAllShopsResponse extends CommonResponse {
+  private static class OpenAllShopsResponse {
     List<ShopDTO> openShops;
   }
 
   @Getter
-  private static class CloseShopResponse extends CommonResponse {
+  private static class CloseShopResponse {
     enum Message {
       NOT_OPEN
     }
@@ -281,7 +269,6 @@ public class ShopController {
     private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Message.NOT_OPEN);
 
     public CloseShopResponse(Message message) {
-      super(Result.FAIL);
       this.message = message;
     }
   }
@@ -290,14 +277,14 @@ public class ShopController {
 
   @Getter
   @AllArgsConstructor
-  private static class ShopInfoResponse extends CommonResponse {
+  private static class ShopInfoResponse {
     private ShopDTO shopInfo;
     private List<AddressDTO> deliveryLocations;
   }
 
   @Getter
   @AllArgsConstructor
-  private static class closeAllShopsResponse extends CommonResponse {
+  private static class closeAllShopsResponse {
     private List<ShopDTO> closeShops;
   }
 

@@ -63,8 +63,8 @@
     </select>
     
     <insert id="insertMember" parameterType="com.delfood.dto.MemberDTO">
-        INSERT INTO MEMBER(id, password, name, tel, mail)
-        VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail})
+        INSERT INTO MEMBER(id, password, name, tel, mail, address_code, address_detail)
+        VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail}, #{addressCode}, #{addressDetail})
     </insert>
     
     <select id="findByIdAndPassword" resultMap="memberDTO">

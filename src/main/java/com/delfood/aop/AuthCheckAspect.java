@@ -5,11 +5,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import com.delfood.controller.response.CommonResponse;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
 import lombok.extern.log4j.Log4j2;
@@ -32,7 +33,7 @@ public class AuthCheckAspect {
    * @throws Throwable
    */
   @Around("@annotation(com.delfood.aop.OwnerLoginCheck)")
-  public ResponseEntity<CommonResponse> ownerLoginCheck(ProceedingJoinPoint pjp) throws Throwable {
+  public Object ownerLoginCheck(ProceedingJoinPoint pjp) throws Throwable {
     log.debug("AOP - Owner Login Check Started");
     
     HttpSession session = ((ServletRequestAttributes)(RequestContextHolder.currentRequestAttributes())).getRequest().getSession();
@@ -40,13 +41,13 @@ public class AuthCheckAspect {
     
     if(ownerId == null) {
       log.debug("AOP - Owner Login Check Result - NO_LOGIN");
-      return CommonResponse.NO_LOGIN_RESPONSE;
+      throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED, "NO_LOGIN") {};
     }
     
     Object proceed = pjp.proceed();
     log.debug("AOP - Owner Login Check Result - SUCCESS");
     
-    return (ResponseEntity<CommonResponse>) proceed;
+    return proceed;
   }
   
   
@@ -59,7 +60,7 @@ public class AuthCheckAspect {
    * @throws Throwable
    */
   @Around("@annotation(com.delfood.aop.OwnerShopCheck)")
-  public ResponseEntity<CommonResponse> ownerShopCheck(ProceedingJoinPoint pjp) throws Throwable {
+  public Object ownerShopCheck(ProceedingJoinPoint pjp) throws Throwable {
     log.debug("AOP - Owner Shop Check Started");
     
     
@@ -68,7 +69,7 @@ public class AuthCheckAspect {
     
     if(ownerId == null) {
       log.debug("AOP - Owner Shop Check Result - NO_LOGIN");
-      return CommonResponse.NO_LOGIN_RESPONSE;
+      throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED, "NO_LOGIN") {};
     }
     
     Object[] args = pjp.getArgs();
@@ -76,14 +77,14 @@ public class AuthCheckAspect {
     
     if (!shopService.isShopOwner(shopId, ownerId)) {
       log.debug("AOP - Owner Shop Check Result - UNAUTHORIZED");
-      return CommonResponse.UNAUTHORIZED_RESPONSE;
+      throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED") {};
     }
     
     Object proceed = pjp.proceed();
     
     
     log.debug("AOP - Owner Shop Check Result - SUCCESS");
-    return (ResponseEntity<CommonResponse>) proceed;
+    return proceed;
   }
   
   /**
@@ -94,16 +95,16 @@ public class AuthCheckAspect {
    * @throws Throwable
    */
   @Around("@annotation(com.delfood.aop.MemberLoginCheck)")
-  public ResponseEntity<CommonResponse> memberLoginCheck(ProceedingJoinPoint pjp) throws Throwable {
+  public Object memberLoginCheck(ProceedingJoinPoint pjp) throws Throwable {
     log.debug("AOP - Member Login Check Started");
     
     HttpSession session = ((ServletRequestAttributes)(RequestContextHolder.currentRequestAttributes())).getRequest().getSession();
     String memberId = SessionUtil.getLoginMemberId(session);
     
     if (memberId == null) {
-      return CommonResponse.NO_LOGIN_RESPONSE;
+      throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED, "NO_LOGIN") {};
     }
     Object proceed = pjp.proceed();
-    return (ResponseEntity<CommonResponse>) proceed;
+    return proceed;
   }
 }
