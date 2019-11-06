@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.OptionMapper">
+    
+    <insert id="insertOption" parameterType="option">
+		INSERT INTO OPTION(name, price, menu_id)
+		VALUES( #{name}, #{price}, #{menuId})
+    </insert>
+    
+    <delete id="deleteOption">
+    	UPDATE OPTION
+    	SET status = "DELETE"
+    	WHERE id = #{id}
+    </delete>
+
+
+</mapper>

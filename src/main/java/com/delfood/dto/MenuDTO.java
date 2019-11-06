@@ -1,6 +1,7 @@
 package com.delfood.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.apache.ibatis.type.Alias;
 import lombok.Getter;
 import lombok.NonNull;
@@ -41,6 +42,8 @@ public class MenuDTO {
   private String content; // 설명
   
   private Long menuGroupId; // 메뉴 그룹 아이디
+  
+  private List<OptionDTO> optionList; // 옵션 리스트
   
   /**
    * 메뉴 등록 필수 조건인 이름, 가격, 메뉴 그룹 아이디가 있는지 없는지 확인한다.

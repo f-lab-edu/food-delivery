@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
@@ -108,7 +109,6 @@ public class MenuGroupController {
           AddMenuGroupResponse.NAME_DUPLICATED, HttpStatus.CONFLICT);
     }
     
-    menuGroupInfo.setShopId(shopId);
     menuGroupService.addMenuGroup(menuGroupInfo);
     
     return new ResponseEntity<MenuGroupController.AddMenuGroupResponse>(
@@ -173,12 +173,13 @@ public class MenuGroupController {
   
   
   /**
-   * 메뉴그룹 순서를 변경한다.
+   * 메뉴그룹 순서 변경.
    * 
-   * @param idList 정렬된 메뉴그룹 아이디 리스트
+   * @param shopId 매장 아이디
+   * @param idList 순서가 있는 메뉴그룹 아이디 아이디 리스트
    * @return
    */
-  @PatchMapping("/shops/{shopId}/menuGroups/priority")
+  @PutMapping("/shops/{shopId}/menuGroups/priority")
   public HttpStatus updateMenuGroupPriority(
       @PathVariable("shopId") Long shopId, @RequestBody List<Long> idList) {
     

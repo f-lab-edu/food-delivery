@@ -4,9 +4,11 @@ import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.error.exception.InvalidMenuGroupCountException;
 import com.delfood.error.exception.InvalidMenuGroupIdException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpStatusCodeException;
 
 /*
  * 스프링에서 지원하는 예외처리 어노테이션
@@ -49,4 +51,10 @@ public class ErrorController {
   public ErrorMsg handleInvalidMenuGroupIdException(InvalidMenuGroupIdException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
+  
+  @ExceptionHandler(HttpStatusCodeException.class) 
+  public ResponseEntity handleHttpStatusCodeException(HttpStatusCodeException e) {
+    return ResponseEntity.status(e.getStatusCode()).build();
+  }
+  
 }
