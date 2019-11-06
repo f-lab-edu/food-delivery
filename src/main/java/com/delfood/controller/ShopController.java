@@ -122,22 +122,24 @@ public class ShopController {
 
 
     shopService.openShop(id);
-
-    return new ResponseEntity<OpenShopResponse>(HttpStatus.OK);
+    ShopDTO openShopInfo = shopService.getShop(id);
+    return new ResponseEntity<OpenShopResponse>(new OpenShopResponse(openShopInfo), HttpStatus.OK);
   }
-  
+
   /**
    * 오픈할 수 있는 사장님의 모든 매장을 오픈한다.
+   * 
    * @author jun
-   * @param session
+   * @param session 사용자의 세션
    * @return 오픈한 매장의 id, 이름
    */
   @PatchMapping("open/")
   @OwnerLoginCheck
   public ResponseEntity<OpenAllShopsResponse> openAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
-    List<ShopDTO> openShops =  shopService.openAllShops(ownerId);
-    return new ResponseEntity<OpenAllShopsResponse>(new OpenAllShopsResponse(openShops), HttpStatus.OK);
+    List<ShopDTO> openShops = shopService.openAllShops(ownerId);
+    return new ResponseEntity<OpenAllShopsResponse>(new OpenAllShopsResponse(openShops),
+        HttpStatus.OK);
   }
 
   /**
@@ -155,7 +157,8 @@ public class ShopController {
 
     // 해당 매장이 영업중이 아닐시
     if (shopService.notOpenCheck(id) == true) {
-      return new ResponseEntity<CloseShopResponse>(CloseShopResponse.NOT_OPEN, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<CloseShopResponse>(CloseShopResponse.NOT_OPEN,
+          HttpStatus.BAD_REQUEST);
     }
 
     shopService.closeShop(id);
@@ -164,16 +167,17 @@ public class ShopController {
 
   /**
    * 현재 오픈중인 모든 매장을 닫는다.
+   * 
    * @author jun
    * @param session 접속한 사용자의 세션
    * @return 운영 종료를 진행한 매장의 id, 이름
    */
   @PatchMapping("close/")
   @OwnerLoginCheck
-  public ResponseEntity<closeAllShopsResponse> closeAllShops(HttpSession session) {
+  public ResponseEntity<CloseAllShopsResponse> closeAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     List<ShopDTO> closeShops = shopService.closeAllShops(ownerId);
-    return new ResponseEntity<closeAllShopsResponse>(new closeAllShopsResponse(closeShops),
+    return new ResponseEntity<CloseAllShopsResponse>(new CloseAllShopsResponse(closeShops),
         HttpStatus.OK);
   }
 
@@ -244,14 +248,21 @@ public class ShopController {
 
     @NonNull
     private Message message;
+    private ShopDTO openShopInfo;
+
     private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Message.AREADY_OPEN);
+
 
     public OpenShopResponse(Message message) {
       this.message = message;
     }
+    
+    public OpenShopResponse(ShopDTO shopInfo) {
+      this.openShopInfo = shopInfo;
+    }
   }
-  
-  
+
+
   @Getter
   @AllArgsConstructor
   private static class OpenAllShopsResponse {
@@ -284,7 +295,7 @@ public class ShopController {
 
   @Getter
   @AllArgsConstructor
-  private static class closeAllShopsResponse {
+  private static class CloseAllShopsResponse {
     private List<ShopDTO> closeShops;
   }
 
