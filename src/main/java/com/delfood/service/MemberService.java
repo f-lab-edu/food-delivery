@@ -1,13 +1,15 @@
 package com.delfood.service;
 
 import com.delfood.dto.MemberDTO;
-import com.delfood.mapper.DMLOperationResult;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Log4j2
 public class MemberService {
   @Autowired
   private MemberMapper memberMapper;
@@ -17,8 +19,7 @@ public class MemberService {
   }
 
   /**
-   * - 고객 회원가입 메서드
-   * 비밀번호를 암호화하여 세팅한다. MyBatis에서 insert return값은 성공시 1이 리턴된다. return값은 검사하여 null값이면
+   * - 고객 회원가입 메서드 비밀번호를 암호화하여 세팅한다. MyBatis에서 insert return값은 성공시 1이 리턴된다. return값은 검사하여 null값이면
    * true, null이 아닐시 insert에 실패한 것이니 false를 반환한다
    * 
    * @param memberInfo 저장할 회원의 정보
@@ -28,13 +29,15 @@ public class MemberService {
     int insertCount = memberMapper.insertMember(memberInfo);
 
     if (insertCount != 1) {
+      log.error("insertMember ERROR! {}", memberInfo);
       throw new RuntimeException(
           "insertMember ERROR! 회원가입 메서드를 확인해주세요\n" + "Params : " + memberInfo);
     }
   }
 
   /**
-   * 고객 로그인 메서드
+   * 고객 로그인 메서드.
+   * 
    * @param id 고객 아이디
    * @param password 고객 비밀번호
    * @return
@@ -62,33 +65,29 @@ public class MemberService {
    * @param password 변경할 비밀번호
    * @return
    */
-  public DMLOperationResult updateMemberPassword(String id, String password) {
+  @Transactional(rollbackFor = RuntimeException.class)
+  public void updateMemberPassword(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     int result = memberMapper.updateMemberPassword(id, cryptoPassword);
     if (result == 1) {
-      return DMLOperationResult.SUCCESS; // 원하는 1개의 데이터만 수정
-    } else if (result == 0) {
-      return DMLOperationResult.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
-    } else {
-      return DMLOperationResult.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
+      log.error("update Member ERROR! id : {}, pw : {}", id, password);
+      throw new RuntimeException("update Member Password ERROR!");
     }
 
   }
 
   /**
-   * 회원 status를 'DELETED'로 변경한다
+   * 회원 status를 'DELETED'로 변경한다.
    * 
    * @param id 탈퇴할 회원의 아이디
    * @return
    */
-  public DMLOperationResult deleteMember(String id) {
+  @Transactional(rollbackFor = RuntimeException.class)
+  public void deleteMember(String id) {
     int result = memberMapper.deleteMember(id);
-    if (result == 1) {
-      return DMLOperationResult.SUCCESS; // 원하는 1개의 데이터만 수정
-    } else if (result == 0) {
-      return DMLOperationResult.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
-    } else {
-      return DMLOperationResult.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요.
+    if (result != 1) {
+      log.error("delete Member ERROR! id : {}" + id);
+      throw new RuntimeException("delete Member ERROR!");
     }
   }
 
@@ -100,15 +99,13 @@ public class MemberService {
    * @param addressDetail 변경할 상세 주소
    * @return
    */
-  public DMLOperationResult updateMemberAddress(String id, String address, String addressDetail) {
+  @Transactional(rollbackFor = RuntimeException.class)
+  public void updateMemberAddress(String id, String address, String addressDetail) {
     int result = memberMapper.updateMemberAddress(id, address, addressDetail);
-    if (result == 1) {
-      return DMLOperationResult.SUCCESS; // 원하는 1개의 데이터만 수정
-    } else if (result == 0) {
-      return DMLOperationResult.NONE_CHANGED; // 데이터가 수정되지 않음. WHERE 조건 확인 필요
-    } else {
-      return DMLOperationResult.TOO_MANY_CHANGED; // 데이터가 너무 많이 바뀜. WHERE 조건 확인 필요. 정상적인 상황에서는 발생하지
-                                                 // 않음.
+    if (result != 1) {
+      log.error("update Member address ERROR! id : {}, address : {}, addressDetail : {}", id,
+          address, addressDetail);
+      throw new RuntimeException("update Member address ERROR!");
     }
   }
 

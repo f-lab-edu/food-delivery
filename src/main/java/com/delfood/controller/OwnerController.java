@@ -2,8 +2,8 @@ package com.delfood.controller;
 
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
-import com.delfood.mapper.DMLOperationResult;
 import com.delfood.service.OwnerService;
+import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -93,7 +93,7 @@ public class OwnerController {
       Status ownerStatus = ownerInfo.getStatus();
       if (ownerStatus == Status.DEFAULT) { 
         ownerLoginResponse = OwnerLoginResponse.success(ownerInfo);
-        session.setAttribute("LOGIN_OWNER_ID", ownerInfo.getId());
+        SessionUtil.setLoginOwnerId(session, loginRequest.getId());
         responseEntity = new ResponseEntity<OwnerLoginResponse>(ownerLoginResponse, HttpStatus.OK);
       } else {
         ownerLoginResponse = OwnerLoginResponse.DELETED;
@@ -112,14 +112,14 @@ public class OwnerController {
    * @return
    */
   @GetMapping("logout")
-  public ResponseEntity<logoutResponse> logout(HttpSession session) {
-    String id = (String) session.getAttribute("LOGIN_OWNER_ID");
+  public ResponseEntity<LogoutResponse> logout(HttpSession session) {
+    String id = SessionUtil.getLoginOwnerId(session);
     if (id != null) {
-      session.invalidate();
-      return new ResponseEntity<OwnerController.logoutResponse>(logoutResponse.SUCCESS,
+      SessionUtil.logoutOwner(session);
+      return new ResponseEntity<OwnerController.LogoutResponse>(LogoutResponse.SUCCESS,
           HttpStatus.OK);
     } else {
-      return new ResponseEntity<OwnerController.logoutResponse>(logoutResponse.NO_LOGIN,
+      return new ResponseEntity<OwnerController.LogoutResponse>(LogoutResponse.NO_LOGIN,
           HttpStatus.UNAUTHORIZED);
     }
   }
@@ -134,7 +134,7 @@ public class OwnerController {
   @GetMapping("myInfo")
   public ResponseEntity<OwnerDTO> ownerInfo(HttpSession session) {
     ResponseEntity<OwnerDTO> responseEntity = null;
-    String id = (String) session.getAttribute("LOGIN_OWNER_ID");
+    String id = SessionUtil.getLoginOwnerId(session);
     if (id == null) {
       responseEntity = new ResponseEntity<OwnerDTO>(HttpStatus.UNAUTHORIZED);
     } else {
@@ -158,7 +158,7 @@ public class OwnerController {
     String mail = updateRequest.getMail();
     String tel = updateRequest.getTel();
     String password = updateRequest.getPassword();
-    String id = (String) session.getAttribute("LOGIN_OWNER_ID");
+    String id = SessionUtil.getLoginOwnerId(session);
 
     if (id == null) { // 로그인 상태가 아닌 경우
       return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
@@ -175,14 +175,9 @@ public class OwnerController {
           UpdateOwnerResponse.EMPTY_CONTENT, HttpStatus.BAD_REQUEST);
     }
 
-    DMLOperationResult dmlOperationError = ownerService.updateOwnerMailAndTel(id, mail, tel);
-    if (dmlOperationError == DMLOperationResult.SUCCESS) {
-      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
-    } else {
-      log.error("Member mail and tel update ERROR : {}", updateRequest);
-      throw new RuntimeException("Member mail and tel update ERROR");
-    }
+    ownerService.updateOwnerMailAndTel(id, mail, tel);
+    return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+        UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
   }
 
   /**
@@ -195,7 +190,7 @@ public class OwnerController {
   @PatchMapping("password")
   public ResponseEntity<UpdateOwnerResponse> updatePassword(
       @RequestBody UpdateOwnerPasswordRequest passwordResquest, HttpSession session) {
-    String id = (String) session.getAttribute("LOGIN_OWNER_ID");
+    String id = SessionUtil.getLoginOwnerId(session);
     String password = passwordResquest.getPassword();
     String newPassword = passwordResquest.getNewPassword();
 
@@ -215,16 +210,9 @@ public class OwnerController {
       responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
           UpdateOwnerResponse.PASSWORD_DUPLICATED, HttpStatus.CONFLICT);
     } else {
-      DMLOperationResult dmlOperationError = ownerService.updateOwnerPassword(id, newPassword);
-
-      if (DMLOperationResult.SUCCESS.equals(dmlOperationError)) {
-        responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-            UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
-      } else {
-        log.error("Password Update Error {}", passwordResquest);
-        throw new RuntimeException("Password Update Error");
-      }
-      
+      ownerService.updateOwnerPassword(id, newPassword);
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
+          UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
     }
     return responseEntity;
   }
@@ -344,16 +332,16 @@ public class OwnerController {
 
   @Getter
   @RequiredArgsConstructor
-  private static class logoutResponse {
-    enum logoutStatus {
+  private static class LogoutResponse {
+    enum LogoutStatus {
       SUCCESS, NO_LOGIN
     }
 
     @NonNull
-    private logoutStatus result;
+    private LogoutStatus result;
 
-    private static final logoutResponse SUCCESS = new logoutResponse(logoutStatus.SUCCESS);
-    private static final logoutResponse NO_LOGIN = new logoutResponse(logoutStatus.NO_LOGIN);
+    private static final LogoutResponse SUCCESS = new LogoutResponse(LogoutStatus.SUCCESS);
+    private static final LogoutResponse NO_LOGIN = new LogoutResponse(LogoutStatus.NO_LOGIN);
 
   }
 
