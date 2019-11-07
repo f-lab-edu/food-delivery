@@ -6,7 +6,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OwnerMapper {
-
+  public int insertOwner(OwnerDTO ownerInfo);
+  
+  public int idCheck(String id);
+  
   OwnerDTO findByIdAndPassword(String id, String password);
 
   OwnerDTO findById(String id);
