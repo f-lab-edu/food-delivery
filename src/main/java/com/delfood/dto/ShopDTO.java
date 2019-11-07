@@ -116,7 +116,10 @@ public class ShopDTO {
         || shopInfo.getBizNumber() == null
         || shopInfo.getInfo() == null
         || shopInfo.getMinOrderPrice() == null
-        || shopInfo.getOrderType() == null) {
+        || shopInfo.getOrderType() == null
+        || shopInfo.getTel() == null
+        || shopInfo.getAddress() == null
+        || shopInfo.getAddressDetail() == null) {
       return true;
     }
     return false;

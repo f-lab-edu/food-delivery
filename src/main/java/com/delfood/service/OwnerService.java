@@ -1,41 +1,103 @@
 package com.delfood.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.delfood.dto.OwnerDTO;
-import com.delfood.mapper.DMLOperationError;
 import com.delfood.mapper.OwnerMapper;
 import com.delfood.utils.SHA256Util;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
+@Log4j2
 public class OwnerService {
   @Autowired
   OwnerMapper ownerMapper;
 
   /**
-   * 사장님 회원 가입 메서드
+   * 사장님 회원 가입 메서드.
+   * 
    * @author jun
    * @param ownerInfo 가입할 사장님의 정보
-   * @return 가입후 성공 여부. 실패한다면 throw Exception된다.
    */
-  public DMLOperationError signUp(OwnerDTO ownerInfo) {
+  public void signUp(OwnerDTO ownerInfo) {
     String cryptoPassword = SHA256Util.encryptSHA256(ownerInfo.getPassword());
     ownerInfo.setPassword(cryptoPassword);
     int insertOwnerResult = ownerMapper.insertOwner(ownerInfo);
-    if (insertOwnerResult == 1) {
-      return DMLOperationError.SUCCESS;
-    } else {
+    if (insertOwnerResult != 1) {
+      log.error("insert Owner ERROR : {}", ownerInfo);
       throw new RuntimeException("insert Owner ERROR " + ownerInfo);
     }
   }
-  
+
   /**
-   * 사장님 id 중복 체크 메서드
+   * 사장님 id 중복 체크 메서드.
+   * 
    * @author jun
    * @param id 중복 체크할 id
    * @return 중복 id일시 true
    */
   public boolean isDuplicatedId(String id) {
     return ownerMapper.idCheck(id) == 1;
+  }
+  
+  /**
+   * 사장 정보 조회.
+   * 
+   * @param id 아이디
+   * @param password 패스워드
+   * @return  id, name, mail, tel, createAt, updatedAt, status
+   */
+  public OwnerDTO getOwner(String id, String password) {
+    String cryptoPassword = SHA256Util.encryptSHA256(password);
+    OwnerDTO ownerInfo = ownerMapper.findByIdAndPassword(id, cryptoPassword);
+    return ownerInfo;
+  }
+
+  /**
+   * 사장 정보 조회.
+   * 
+   * @param id 아이디
+   * @return id, name, mail, tel, createAt, updatedAt, status
+   */
+  public OwnerDTO getOwner(String id) {
+    return ownerMapper.findById(id);
+  }
+
+  /**
+   * 사장 이메일, 전화번호 수정.
+   * 
+   * @param id 아이디
+   * @param mail 변경할 이메일
+   * @param tel 변경할 전화번호
+   * 
+   * @return
+   */
+  @Transactional(rollbackFor = RuntimeException.class)
+  public void updateOwnerMailAndTel(String id, String mail, String tel) {
+    int result = ownerMapper.updateMailAndTel(id, mail, tel);
+    if (result != 1) {
+      log.error("updateOwnerMailAndTel ERROR! id : {}, mail : {}, tel : {}", id, mail, tel);
+      throw new RuntimeException("password update error");
+    }
+  }
+
+  /**
+   * 사장 비밀번호 수정.
+   * 
+   * @param id 아이디
+   * @param password 변경할 비밀번호
+   * @return
+   */
+  @Transactional(rollbackFor = RuntimeException.class) // runtimeException이 발생하면 rollback을 수행한다.
+  public void updateOwnerPassword(String id, String password) {
+    String cryptoPassword = SHA256Util.encryptSHA256(password);
+    int result = ownerMapper.updatePassword(id, cryptoPassword);
+    if (result != 1) {
+      log.error("updateOwnerPassword ERROR! id : {}, password : {}", id, password);
+      throw new RuntimeException("password update error");
+    }
+
   }
 }

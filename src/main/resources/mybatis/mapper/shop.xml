@@ -20,7 +20,7 @@
                created_at createdAt,
                updated_at updatedAt, 
                status, 
-               oreder_type orderType, 
+               order_type orderType, 
                origin_info originInfo,
                work_condition workCondition
         FROM SHOP
@@ -28,24 +28,26 @@
 
 
     <insert id="insertShop" parameterType="com.delfood.dto.ShopDTO">
-        INSERT INTO SHOP
+        INSERT INTO SHOP(name, delivery_type, signature_menu_id, tel, zipcode, address,
+        address_detail, biz_number, info, min_order_price, notice, operating_time, delivery_location,
+        owner_id, order_type, origin_info)
         VALUES(
-            name = #{name},
-            delivery_type = #{deliveryType},
-            signature_menu_id = #{signatureMenuId},
-            tel = #{tel},
-            zipcode = #{zipcode},
-            address = #{address},
-            address_detail = #{addressDetail},
-            biz_number = #{bizNumber},
-            info = #{info},
-            min_order_price = #{minOrderPrice},
-            notice = #{notice},
-            operating_time = #{operatingTime},
-            delivery_location = #{deliveryLocation},
-            owner_id = #{ownerId},
-            order_type = #{orderType},
-            origin_info = #{originInfo},
+            #{name},
+            #{deliveryType},
+            #{signatureMenuId},
+            #{tel},
+            #{zipcode},
+            #{address},
+            #{addressDetail},
+            #{bizNumber},
+            #{info},
+            #{minOrderPrice},
+            #{notice},
+            #{operatingTime},
+            #{deliveryLocation},
+            #{ownerId},
+            #{orderType},
+            #{originInfo}
         )
     </insert>
     
@@ -56,14 +58,16 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findByOwnerId">
-        <include refid="selectOwner"></include>
-        WHERE ownerId = #{ownerId}
+    <select id="findByOwnerId" resultType="com.delfood.dto.ShopDTO">
+        <include refid="selectShop"></include>
+        WHERE owner_id = #{ownerId}
+        <if test="lastId != null">AND id > #{lastId}</if>
+        LIMIT 10
     </select>
     
     
-    <select id="findById">
-        <include refid="selectOwner"></include>
+    <select id="findById" resultType="com.delfood.dto.ShopDTO">
+        <include refid="selectShop"></include>
         WHERE id = #{id}
     </select>
     
@@ -90,4 +94,11 @@
         
         WHERE id = #{id}
     </update>
+    
+    
+    <select id="countByOwnerId" resultType="long">
+        SELECT COUNT(*)
+        FROM SHOP
+        WHERE owner_id = #{ownerId}
+    </select>
 </mapper>

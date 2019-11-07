@@ -11,4 +11,37 @@
         FROM    OWNER
         WHERE   id = #{id}
     </select>
+
+    <select id="findByIdAndPassword" resultType="Owner">
+      SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
+      FROM OWNER
+      WHERE id = #{id}
+       AND password = #{password}
+    </select>
+    
+    <select id="findById" resultType="Owner">
+      SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
+      FROM OWNER
+      WHERE id = #{id}
+    </select>
+    
+    <update id="updatePassword">
+      UPDATE OWNER
+      SET password = #{password}
+      WHERE id = #{id}
+    </update>
+    
+    <update id="updateMailAndTel">
+      UPDATE OWNER
+      SET
+      <if test="mail != null">
+      mail = #{mail},
+      </if>
+      <if test="tel != null">
+      tel = #{tel},
+      </if>
+      updated_at = NOW()
+      WHERE id = #{id}
+    </update>
+
 </mapper>

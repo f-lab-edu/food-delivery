@@ -68,13 +68,9 @@ public class MemberDTO {
    * @return
    */
   public static boolean hasNullDataBeforeSignup(MemberDTO memberInfo) {
-    if (memberInfo.getId() == null || memberInfo.getPassword() == null
+    return memberInfo.getId() == null || memberInfo.getPassword() == null
         || memberInfo.getName() == null || memberInfo.getTel() == null
-        || memberInfo.getMail() == null) {
-      return true;
-    }
-
-    return false;
+        || memberInfo.getMail() == null;
   }
 
 
