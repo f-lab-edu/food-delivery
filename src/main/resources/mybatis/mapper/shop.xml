@@ -7,15 +7,13 @@
                delivery_type deliveryType, 
                signature_menu_id signatureMenuId, 
                tel,
-               zipcode, 
-               address, 
-               address_detail addressDetail, 
+               address_code addressCode, 
+               address_detail addressDetail,
                biz_number bizNumber,
                info, 
                min_order_price minOrderPrice, 
                notice, 
                operating_time operatingTime,
-               delivery_location deliveryLocation, 
                owner_id ownerId, 
                created_at createdAt,
                updated_at updatedAt, 
@@ -28,23 +26,34 @@
 
 
     <insert id="insertShop" parameterType="com.delfood.dto.ShopDTO">
-        INSERT INTO SHOP(name, delivery_type, signature_menu_id, tel, zipcode, address,
-        address_detail, biz_number, info, min_order_price, notice, operating_time, delivery_location,
-        owner_id, order_type, origin_info)
+        INSERT INTO SHOP(
+            name,
+            delivery_type, 
+            signature_menu_id, 
+            tel, 
+            address_code,
+            address_detail,
+            biz_number, 
+            info, 
+            min_order_price, 
+            notice, 
+            operating_time,
+            owner_id, 
+            order_type, 
+            origin_info
+        )
         VALUES(
             #{name},
             #{deliveryType},
             #{signatureMenuId},
             #{tel},
-            #{zipcode},
-            #{address},
+            #{addressCode},
             #{addressDetail},
             #{bizNumber},
             #{info},
             #{minOrderPrice},
             #{notice},
             #{operatingTime},
-            #{deliveryLocation},
             #{ownerId},
             #{orderType},
             #{originInfo}
@@ -79,17 +88,15 @@
      -->
     <update id="updateShop">
         UPDATE SHOP
-        SET <if test="name != null">name = #{name},</if>
-            <if test="deliveryType != null">delivery_type = #{deliveryType},</if>
-            <if test="signatureMenuId != null">signature_menu_id = #{signatureMenuId},</if>
+        SET
             <if test="tel != null">tel = #{tel},</if>
-            <if test="info != null">info = #{info},</if>
-            <if test="minOrderPrice != null">min_order_price = #{minOrderPrice},</if>
-            <if test="notice != null">notice = #{notice},</if>
+            <if test="deliveryType != null">delivery_type = #{deliveryType},</if>
             <if test="operatingTime != null">operating_time = #{operatingTime},</if>
-            <if test="deliveryLocation != null">delivery_location = #{deliveryLocation},</if>
-            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="info != null">info = #{info},</if>
             <if test="originInfo != null">origin_info = #{originInfo},</if>
+            <if test="notice != null">notice = #{notice},</if>
+            <if test="minOrderPrice != null">min_order_price = #{minOrderPrice},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
             updated_at = NOW()
         
         WHERE id = #{id}
@@ -100,5 +107,95 @@
         SELECT COUNT(*)
         FROM SHOP
         WHERE owner_id = #{ownerId}
+    </select>
+    
+    <select id="countByShopIdAndOwnerId" resultType="long">
+        SELECT COUNT(*)
+        FROM SHOP
+        WHERE id = #{shopId}
+        AND   owner_id = #{ownerId}
+    </select>
+    
+    <update id="updateShopOpenById">
+        UPDATE SHOP
+        SET work_condition = 'OPEN'
+        WHERE id = #{shopId}
+    </update>
+    
+    <update id="updateShopCloseById">
+        UPDATE SHOP
+        SET work_condition = 'CLOSE'
+        WHERE id=#{shopId}
+    </update>
+    
+    <select id="countByIdIsNotOpen" resultType="long">
+        SELECT COUNT(*) 
+        FROM   SHOP
+        WHERE  id = #{shopId}
+        AND    work_condition != 'OPEN'
+    </select>
+    
+    <insert id="insertDeliveryLocation">
+        INSERT INTO DELIVERY_LOCATION (shop_id, town_code)
+        VALUES (#{shopId}, #{townCode})
+    </insert>
+    
+    <select id="findByTownCode" resultType="com.delfood.dto.ShopDTO">
+        SELECT  A.id, 
+                A.name,
+                A.delivery_type deliveryType,
+                A.signature_menu_id signatureMenuId,
+                A.info,
+                A.order_type orderType
+        FROM    SHOP A JOIN DELIVERY_LOCATION B
+                ON A.id = B.shop_id
+        WHERE   A.status != 'DELETE'
+        AND     B.town_code = #{townCode}
+        ORDER BY work_condition DESC
+    </select>
+    
+    <select id="countByOwnerIdAndDeliveryLocationId" resultType="Long">
+        SELECT  COUNT(*)
+        FROM    SHOP A JOIN DELIVERY_LOCATION B
+        ON      A.id = B.shop_id
+        WHERE   A.owner_id = #{ownerId}
+        AND     B.id = #{deliveryLocationId}
+    </select>
+    
+    <delete id="deleteDeliveryLocation">
+        DELETE FROM  DELIVERY_LOCATION
+        WHERE   id = #{id}
+    </delete>
+    
+    <select id="findByCategoryIdAndTownCode" resultType="com.delfood.dto.ShopDTO">
+        SELECT  DISTINCT
+                A.id,
+                A.name,
+                A.signature_menu_id signatureMenuId,
+                A.info,
+                A.order_type orderType
+        FROM    SHOP A 
+        JOIN    DELIVERY_LOCATION B 
+        ON      A.id = B.shop_id
+        WHERE   A.work_condition = 'OPEN'
+        AND     A.status != 'DELETE'
+        AND     B.town_code LIKE #{townCode} || '%'
+    </select>
+    
+    
+    <select id="findByBeOpen" resultType="com.delfood.dto.ShopDTO">
+        SELECT  id, name
+        FROM    SHOP
+        WHERE   status != 'DELETE'
+        AND     owner_id = #{ownerId}
+        AND     work_condition = 'CLOSE'
+    </select>
+    
+    <select id="findByBeClose" resultType="com.delfood.dto.ShopDTO">
+        SELECT  id, name
+        FROM    SHOP
+        WHERE   status != 'DELETE'
+        AND     owner_id = #{ownerId}
+        AND     work_condition = 'OPEN'
     </select>
 </mapper>
