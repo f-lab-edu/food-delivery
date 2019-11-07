@@ -6,6 +6,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ShopMapper {
+  /**
+   * 매장 입점 신청을 한다.
+   * @author jun
+   * @param shopInfo 입점 신청 매장 정보
+   * @return
+   */
   public int insertShop(ShopDTO shopInfo);
 
   /**
@@ -41,11 +47,20 @@ public interface ShopMapper {
   public ShopDTO findById(Long id);
 
   /**
-   * 사장 id로 가지고 있는 매장을 모두 조회한다.<br>
-   * 한 사장당 많은 매장을 가지기는 어려우므로 페이징 처리를 따로 하지는 않았다.
+   * 사장 id로 가지고 있는 매장을 조회한다.<br>
    * @author jun
    * @param ownerId 매장을 가진 사장의 id
+   * @param lastId 페이지
    * @return
    */
-  public List<ShopDTO> findByOwnerId(String ownerId);
+  public List<ShopDTO> findByOwnerId(String ownerId, Long lastId);
+
+  /**
+   * 사장 id로 가지고 있는 매장의 개수를 조회한다.
+   * @author jun
+   * @param ownerId 사장님 id
+   * @return 매장 개수
+   */
+  public long countByOwnerId(String ownerId);
+
 }
