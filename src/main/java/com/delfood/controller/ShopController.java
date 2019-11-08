@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.aop.OwnerShopCheck;
 import com.delfood.dto.AddressDTO;
+import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
@@ -195,7 +196,7 @@ public class ShopController {
   public ResponseEntity<ShopInfoResponse> shopInfo(
       @PathVariable(value = "shopId", required = true) Long shopId, HttpSession session) {
     ShopDTO shopInfo = shopService.getShop(shopId);
-    List<AddressDTO> deliveryLocations = shopService.getDeliveryLocations(shopId);
+    List<DeliveryLocationDTO> deliveryLocations = shopService.getDeliveryLocations(shopId);
 
     return new ResponseEntity<ShopController.ShopInfoResponse>(
         new ShopInfoResponse(shopInfo, deliveryLocations), HttpStatus.OK);
@@ -290,7 +291,7 @@ public class ShopController {
   @AllArgsConstructor
   private static class ShopInfoResponse {
     private ShopDTO shopInfo;
-    private List<AddressDTO> deliveryLocations;
+    private List<DeliveryLocationDTO> deliveryLocations;
   }
 
   @Getter

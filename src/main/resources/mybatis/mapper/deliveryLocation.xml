@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.DeliveryLocationMapper">
+
+    <resultMap type="com.delfood.dto.DeliveryLocationDTO" id="deliveryLocationDTO">
+        <result property="id" column="id"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="townCode" column="town_code"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="addressInfo" column="town_code" select="findByTownCode"></association>
+    </resultMap>
+
+    <select id="findByTownCode" resultType="com.delfood.dto.AddressDTO">
+        SELECT DISTINCT
+                A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName
+        FROM    ADDRESS A JOIN DELIVERY_LOCATION B
+        ON      A.town_code = B.town_code
+        WHERE   A.town_code = #{townCode}
+        ORDER BY A.town_code ASC
+        LIMIT   10
+    </select>
+
     <select id="findById" resultType="com.delfood.dto.DeliveryLocationDTO">
         SELECT  id, 
                 shop_id shopId,
@@ -8,5 +30,32 @@
                 created_at createdAt
         FROM    DELIVERY_LOCATION
         WHERE   id = #{id}
+    </select>
+    
+    <insert id="insertDeliveryLocation">
+            INSERT INTO DELIVERY_LOCATION (shop_id, town_code)
+            VALUES 
+        <foreach collection="townCodes" item="townCode" separator=",">
+            (#{shopId}, #{townCode})
+        </foreach>
+    </insert>
+    
+    <select id="countByOwnerIdAndDeliveryLocationId" resultType="Long">
+        SELECT  COUNT(*)
+        FROM    SHOP A JOIN DELIVERY_LOCATION B
+        ON      A.id = B.shop_id
+        WHERE   A.owner_id = #{ownerId}
+        AND     B.id = #{deliveryLocationId}
+    </select>
+    
+    <delete id="deleteDeliveryLocation">
+        DELETE FROM  DELIVERY_LOCATION
+        WHERE   id = #{id}
+    </delete>
+    
+    <select id="findByShopId" resultMap="deliveryLocationDTO">
+        SELECT  *
+        FROM    DELIVERY_LOCATION
+        WHERE   shop_id = #{shopId}
     </select>
 </mapper>

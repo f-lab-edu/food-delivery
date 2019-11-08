@@ -59,8 +59,10 @@ public class ShopSearchController {
     String memberId = SessionUtil.getLoginMemberId(session);
     String townCode = memberService.getTownCode(memberId);
 
-    return new ResponseEntity<GetShopByCategoryIdAndTownCodeResponse>(new GetShopByCategoryIdAndTownCodeResponse(
-        shopService.findByCategoryIdAndTownCode(categoryId, townCode)), HttpStatus.OK);
+    return new ResponseEntity<GetShopByCategoryIdAndTownCodeResponse>(
+        new GetShopByCategoryIdAndTownCodeResponse(
+            shopSearchService.findByCategoryIdAndTownCode(categoryId, townCode)),
+        HttpStatus.OK);
   }
 
 

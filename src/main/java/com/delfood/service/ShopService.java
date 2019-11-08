@@ -4,14 +4,20 @@ import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
+import com.delfood.mapper.DeliveryLocationMapper;
 import com.delfood.mapper.ShopMapper;
 import com.delfood.mapper.WorkMapper;
 import lombok.extern.log4j.Log4j2;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpStatusCodeException;
 
 @Service
 @Log4j2
@@ -24,6 +30,9 @@ public class ShopService {
 
   @Autowired
   private AddressService addressService;
+
+  @Autowired
+  DeliveryLocationMapper deliveryLocateionMapper;
 
   /**
    * 매장 정보 삽입 메서드.
@@ -141,14 +150,23 @@ public class ShopService {
    * 
    * @author jun
    * @param shopId 배달 지역을 추가할 매장의 id
-   * @param townCode 읍면동코드. ADDRESS PK의 첫 10자리와 같다
+   * @param requestTownCodes 읍면동코드 리스트. ADDRESS PK의 첫 10자리와 같다
    */
+  @SuppressWarnings("serial")
   @Transactional
-  public void addDeliveryLocation(Long shopId, String townCode) {
-    int result = shopMapper.insertDeliveryLocation(shopId, townCode);
-    if (result != 1) {
-      log.error("addDelivertLocation ERROR! shopId : {}, townCode : {}, result : {}", shopId,
-          townCode, result);
+  public void addDeliveryLocation(Long shopId, Set<String> requestTownCodes) {
+    int result = -1;
+    try {
+      result = deliveryLocateionMapper.insertDeliveryLocation(shopId, requestTownCodes);
+    } catch (DataIntegrityViolationException e) {
+      log.error("중복된 배달 지역 추가 시도! 에러 메세지 : " + e.getMessage());
+      throw new HttpStatusCodeException(HttpStatus.BAD_REQUEST, "중복된 배달 지역을 추가할 수 없습니다.") {};
+    }
+    
+    if (result != requestTownCodes.size()) {
+      log.error(
+          "addDelivertLocation ERROR! shopId : {}, requestdeliveryLocations : {}, result : {}",
+          shopId, requestTownCodes, result);
       throw new RuntimeException("addDelivertLocation ERROR!");
     }
 
@@ -163,7 +181,8 @@ public class ShopService {
    * @return 권한이 있다면 true
    */
   public boolean isShopOwnerByDeliveryLocationId(Long deliveryLocationId, String ownerId) {
-    long result = shopMapper.countByOwnerIdAndDeliveryLocationId(deliveryLocationId, ownerId);
+    long result =
+        deliveryLocateionMapper.countByOwnerIdAndDeliveryLocationId(deliveryLocationId, ownerId);
     return result == 1;
   }
 
@@ -175,24 +194,43 @@ public class ShopService {
    */
   @Transactional
   public void deleteDeliveryLocation(Long deliveryLocationId) {
-    int result = shopMapper.deleteDeliveryLocation(deliveryLocationId);
+    int result = deliveryLocateionMapper.deleteDeliveryLocation(deliveryLocationId);
     if (result != 1) {
       throw new RuntimeException("delete Deliveery Location ERROR");
     }
   }
 
+  /**
+   * 매장 정보를 조회한다.
+   * 
+   * @author jun
+   * @param shopId 조회할 매장의 id
+   * @return
+   */
   public ShopDTO getShop(Long shopId) {
     return shopMapper.findById(shopId);
   }
 
-  public List<AddressDTO> getDeliveryLocations(Long shopId) {
-    return addressService.getTownInfoByShopId(shopId);
+
+
+  /**
+   * 배달 가능 지역을 조회한다. 배달 가능 지역 정보를 내부에 포함하여 리턴한다.
+   * 
+   * @author jun
+   * @param shopId 조회할 매장의 아이디
+   * @return
+   */
+  public List<DeliveryLocationDTO> getDeliveryLocations(Long shopId) {
+    return deliveryLocateionMapper.findByShopId(shopId);
   }
 
-  public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode) {
-    return shopMapper.findByCategoryIdAndTownCode(categoryId, townCode);
-  }
 
+  /**
+   * 자신이 가지고 있는 모든 매장을 마감한다.
+   * 
+   * @param ownerId 사장님 아이디
+   * @return
+   */
   @Transactional
   public List<ShopDTO> closeAllShops(String ownerId) {
     List<ShopDTO> closeShops = shopMapper.findByBeClose(ownerId);
@@ -200,6 +238,12 @@ public class ShopService {
     return closeShops;
   }
 
+  /**
+   * 자신이 가지고 있는 모든 매장을 오픈한다.
+   * 
+   * @param ownerId 사장님 아이디
+   * @return
+   */
   @Transactional
   public List<ShopDTO> openAllShops(String ownerId) {
     List<ShopDTO> openShops = shopMapper.findByBeOpen(ownerId);

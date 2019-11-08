@@ -13,4 +13,5 @@ public class DeliveryLocationDTO {
   private Long shopId;
   private String townCode;
   private LocalDateTime createdAt;
+  private AddressDTO addressInfo;
 }

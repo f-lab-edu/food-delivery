@@ -1,6 +1,7 @@
 package com.delfood.mapper;
 
 import com.delfood.dto.ShopCategoryDTO;
+import com.delfood.dto.ShopDTO;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +21,6 @@ public interface ShopSearchMapper {
    * @return
    */
   public ShopCategoryDTO findById();
+
+  public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode);
 }

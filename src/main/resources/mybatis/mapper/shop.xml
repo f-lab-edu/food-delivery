@@ -135,11 +135,6 @@
         AND    work_condition != 'OPEN'
     </select>
     
-    <insert id="insertDeliveryLocation">
-        INSERT INTO DELIVERY_LOCATION (shop_id, town_code)
-        VALUES (#{shopId}, #{townCode})
-    </insert>
-    
     <select id="findByTownCode" resultType="com.delfood.dto.ShopDTO">
         SELECT  A.id, 
                 A.name,
@@ -152,35 +147,6 @@
         WHERE   A.status != 'DELETE'
         AND     B.town_code = #{townCode}
         ORDER BY work_condition DESC
-    </select>
-    
-    <select id="countByOwnerIdAndDeliveryLocationId" resultType="Long">
-        SELECT  COUNT(*)
-        FROM    SHOP A JOIN DELIVERY_LOCATION B
-        ON      A.id = B.shop_id
-        WHERE   A.owner_id = #{ownerId}
-        AND     B.id = #{deliveryLocationId}
-    </select>
-    
-    <delete id="deleteDeliveryLocation">
-        DELETE FROM  DELIVERY_LOCATION
-        WHERE   id = #{id}
-    </delete>
-    
-    <select id="findByCategoryIdAndTownCode" resultType="com.delfood.dto.ShopDTO">
-        SELECT  DISTINCT
-                A.id,
-                A.name,
-                A.signature_menu_id signatureMenuId,
-                A.info,
-                A.order_type orderType
-        FROM    SHOP A 
-        JOIN    DELIVERY_LOCATION B 
-        ON      A.id = B.shop_id
-        WHERE   A.work_condition = 'OPEN'
-        AND     A.status != 'DELETE'
-        AND     B.town_code LIKE CONCAT(#{townCode}, '%')
-        AND     A.signature_menu_id = #{categoryId}
     </select>
     
     
