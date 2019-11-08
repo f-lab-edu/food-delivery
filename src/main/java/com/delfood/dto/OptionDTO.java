@@ -36,14 +36,15 @@ public class OptionDTO {
   private Long menuId; // 메뉴 아이디
   
   /**
-   * 옵션 추가 시 null 이 있는 지 확인
+   * 옵션 추가 시 null 이 있는 지 확인.
    * 
-   * @param optionInfo
+   * @param optionInfo 옵션정보
    * @return
    */
   public static boolean hasNullDataBeforeCreate(OptionDTO optionInfo) {
     if (optionInfo.getName() == null
-        || optionInfo.getPrice() == null) {
+        || optionInfo.getPrice() == null
+        || optionInfo.getMenuId() == null) {
       return true;
     }
     return false;

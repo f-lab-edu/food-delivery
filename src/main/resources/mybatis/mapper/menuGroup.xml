@@ -26,7 +26,7 @@
 
 	<insert id="insertMenuGroup" parameterType="menuGroup">
 		INSERT INTO MENU_GROUP(name, content, shop_id, priority)
-		VALUES( #{name}, #{content}, #{shopId}, (SELECT MAX(priority)+1 FROM MENU_GROUP MENUGROUP))
+		VALUES( #{name}, #{content}, #{shopId}, (SELECT MAX(priority)+1 FROM MENU_GROUP MENUGROUP WHERE shop_id = #{shop_id}))
 	</insert>
 	
 	<select id="nameCheck" resultType="integer">
@@ -69,6 +69,7 @@
 	<select id="totalCount" resultType="Integer">
 		SELECT COUNT(*)
 		  FROM MENU_GROUP
+		 WHERE status != "DELETED"
 	</select>
 	
 	<update id="updateMenuGroupPriority">

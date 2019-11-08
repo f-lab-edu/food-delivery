@@ -107,11 +107,13 @@ public class MenuGroupService {
   public void updateMenuGroupPriority(Long shopId, List<Long> idList) {
     int total = menuGroupMapper.totalCount(shopId);
     if (idList.size() != total) {
+      log.error("The menugroup of targets is not correct. {}", idList);
       throw new InvalidMenuGroupCountException("The menugroup of targets is not correct.");
     }
     
     for (int i = 1; i <= idList.size(); i++) {
       if ((menuGroupMapper.updateMenuGroupPriority(idList.get(i - 1), i)) == 0) {
+        log.error("Invalid menu group. {}", idList);
         throw new InvalidMenuGroupIdException("Invalid menu group");
       }
     }

@@ -66,9 +66,9 @@ public interface MenuMapper {
    * 메뉴 조회.
    * 
    * @author jinyoung
-   * @param menuId 메뉴 아이디
+   * @param id 메뉴 아이디
    * @return
    */
-  public MenuDTO findById(Long menuId);
+  public MenuDTO findById(Long id);
 
 }

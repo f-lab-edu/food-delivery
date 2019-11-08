@@ -42,10 +42,7 @@ public class OptionService {
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void addOptionList(List<OptionDTO> optionList, Long menuId) {
-    for (OptionDTO optionInfo : optionList) {
-      optionInfo.setMenuId(menuId);
-      addOption(optionInfo);
-    }
+    optionMapper.insertOptionList(optionList, menuId);
   }
   
   /**

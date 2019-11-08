@@ -35,7 +35,7 @@ public class MenuController {
    * @return
    */
   @GetMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
-  public MenuDTO menu(@RequestBody Long menuId) {
+  public MenuDTO menu(@PathVariable Long menuId) {
     return menuService.getMenuInfo(menuId);
   }
   
@@ -55,9 +55,9 @@ public class MenuController {
     }
     
     Long menuId = menuService.addMenu(menuInfo);
-    
-    optionService.addOptionList(menuInfo.getOptionList(), menuId);
-    
+    if (menuInfo.getOptionList() != null) {
+      optionService.addOptionList(menuInfo.getOptionList(), menuId);
+    }
     return HttpStatus.CREATED;
   }
   
@@ -68,17 +68,12 @@ public class MenuController {
    * @param menuId 메뉴 아이디
    * @return
    */
-  @PatchMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
+  @DeleteMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
   public HttpStatus deleteMenu(@PathVariable Long menuGroupId,
       @PathVariable Long menuId) {
     
-    if (menuGroupId == null || menuId == null) {
-      return HttpStatus.BAD_REQUEST;
-    }
-    
     menuService.deleteMenu(menuId);
     return HttpStatus.OK;
-    
   }
 
   
@@ -106,8 +101,8 @@ public class MenuController {
    */
   @PatchMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
   public HttpStatus updateMenu(@RequestBody MenuDTO menuInfo) {
-    menuService.updateMenu(menuInfo);
     
+    menuService.updateMenu(menuInfo);
     return HttpStatus.OK;
   }
   
@@ -116,6 +111,7 @@ public class MenuController {
    */
   @PostMapping("/menus/{menuId}/options")
   public HttpStatus addOption(@RequestBody OptionDTO optionInfo) {
+    
     optionService.addOption(optionInfo);
     return HttpStatus.OK;
   }
@@ -132,7 +128,6 @@ public class MenuController {
   public HttpStatus deleteOption(@PathVariable Long optionId) {
     
     optionService.deleteOption(optionId);
-    
     return HttpStatus.OK;
   }
   

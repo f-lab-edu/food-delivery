@@ -23,8 +23,10 @@
 	</sql>
 	
 	<insert id="insertMenu" parameterType="menu">
-		INSERT INTO(name, price, photo, priority, content, menu_group_id)
-		VALUES(#{name}, #{price}, #{photo}, #{priority}, #{content}, #{menuGroupId})
+		INSERT INTO MENU(name, price, photo, priority, content, menu_group_id)
+		VALUES(#{name}, #{price}, #{photo},
+		(SELECT MAX(priority)+1 FROM MENU MENUS WHERE menu_group_id = #{menuGroupId}),
+		 #{content}, #{menuGroupId})
 		<selectKey resultType="long" keyProperty="id" order="AFTER">
         SELECT LAST_INSERT_ID()
     	</selectKey> 
@@ -32,11 +34,11 @@
 	
 	<update id="deleteMenu">
 		UPDATE MENU
-		SET status = "DELETE"
+		SET status = "DELETED"
 		WHERE id = #{id}
 	</update>
 	
-	<select id="checkMenu">
+	<select id="checkMenu" resultType="integer">
 		SELECT COUNT(id)
 		FROM MENU
 		WHERE menu_Group_id = #{menuGroupId}
@@ -58,14 +60,17 @@
 		WHERE id = #{id}
 	</update>
 
-	<select id="findById">
+	<select id="findById" resultType="menu">
 		SELECT id, name, price, photo, content
+		FROM MENU
+		WHERE id = #{id}
 	</select>
 	
-	<select id="findOptionbyMenuId">
-		SELECT id, name, price, status, menu_id menuId
-		FROM OPTION
-		WHERE id = #{id}
+	<select id="totalCount" resultType="integer">
+		SELECT COUNT(id)
+		FROM MENU
+		WHERE status != "DELETED"
+		AND menu_group_id = #{menuGroupId}
 	</select>
 	
 </mapper>
