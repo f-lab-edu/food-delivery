@@ -2,12 +2,12 @@ package com.delfood.controller.reqeust;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class GetAddressesRequest {
-  private String cityName;
-  private String cityCountryName;
   private String townName;
   private Integer buildingNumber;
   private Integer buildingSideNumber;

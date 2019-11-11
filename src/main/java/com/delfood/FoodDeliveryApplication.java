@@ -2,6 +2,7 @@ package com.delfood;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
@@ -20,6 +21,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  * id값이 존재한다면 서버에서는 이 세션의 주인이 이 id를 가진 사용자라고 확인하게 되고 관련된 정보를 사용할 수 있도록 조회한다.
  */
 @EnableAspectJAutoProxy // 최상위 클래스에 적용해야 AOP를 찾을 수 있도록 만들어준다.
+@EnableCaching // Spring에서 Caching을 사용하겠다고 선언한다.
 public class FoodDeliveryApplication {
 
   public static void main(String[] args) {

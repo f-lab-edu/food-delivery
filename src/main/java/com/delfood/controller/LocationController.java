@@ -1,23 +1,21 @@
 package com.delfood.controller;
 
 import com.delfood.aop.OwnerShopCheck;
+import com.delfood.config.CacheKeys;
 import com.delfood.controller.reqeust.GetAddressesRequest;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.service.AddressService;
 import com.delfood.service.ShopService;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,6 +59,7 @@ public class LocationController {
    * @param shopId 배달가능 지역을 조회할 매장의 id
    * @return
    */
+  @Cacheable(value = CacheKeys.DELIVERY_LOCATION, key = "#shopId")
   @GetMapping("deliveries/{shopId}/possibles")
   @OwnerShopCheck
   public List<DeliveryLocationDTO> getDeliveryLocations(
@@ -93,12 +92,12 @@ public class LocationController {
    * @param requestInfo 검색할 주소 정보.
    * @return
    */
+  @Cacheable(value = CacheKeys.ADDRESS_SEARCH, key = "#requestInfo")
   @GetMapping("address")
-  public ResponseEntity<GetAddressesByZipInfo> getAddressByZipInfo(
+  public List<AddressDTO> getAddressByZipInfo(
       GetAddressesRequest requestInfo) {
     List<AddressDTO> addresses = addressService.getAddressByZipAddress(requestInfo);
-    return new ResponseEntity<LocationController.GetAddressesByZipInfo>(
-        new GetAddressesByZipInfo(addresses), HttpStatus.OK);
+    return addresses;
   }
 
 
@@ -112,11 +111,4 @@ public class LocationController {
   }
 
 
-  // ---------------------- Response 객체 ----------------------
-
-  @Getter
-  @AllArgsConstructor
-  private static class GetAddressesByZipInfo {
-    private List<AddressDTO> addresses;
-  }
 }

@@ -55,7 +55,7 @@
         <include refid="selectAll"></include>
         WHERE   1 = 1
         <if test="townName != null">
-            AND town name LIKE CONCAT(#{townName}, '%')
+            AND town_name LIKE CONCAT(#{townName}, '%')
         </if>
         <if test="roadName != null">
             AND road_name LIKE CONCAT(#{roadName}, '%')
