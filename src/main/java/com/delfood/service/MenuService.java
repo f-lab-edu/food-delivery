@@ -2,7 +2,6 @@ package com.delfood.service;
 
 import com.delfood.dto.MenuDTO;
 import com.delfood.mapper.MenuMapper;
-import java.sql.SQLException;
 import java.util.List;
 
 import lombok.extern.log4j.Log4j2;
@@ -67,7 +66,7 @@ public class MenuService {
   public void checkMenu(Long menuGroupId, Long menuId) {
     int result = menuMapper.checkMenu(menuGroupId, menuId);
     if (result == 0) {
-      log.error("menuGroupId(" + menuGroupId + ") is not match menuId(" + menuId + ")");
+      log.error("menuGroupId({}) is not match menuId({})", menuGroupId, menuId);
       throw new RuntimeException("menuGroupId is not match menuId");
     }
     
@@ -95,7 +94,7 @@ public class MenuService {
     
     for (int i = 1; i <= idList.size(); i++) {
       if ((menuMapper.updateMenuPriority(idList.get(i - 1), i)) == 0) {
-        log.error("Invalid menu id", idList.get(i - 1));
+        log.error("Invalid menu id {}", idList.get(i - 1));
         throw new RuntimeException("Invalid menu id");
       }
     }

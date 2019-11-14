@@ -1,8 +1,8 @@
 package com.delfood.error;
 
 import com.delfood.error.exception.DuplicateIdException;
-import com.delfood.error.exception.InvalidMenuGroupCountException;
-import com.delfood.error.exception.InvalidMenuGroupIdException;
+import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
+import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

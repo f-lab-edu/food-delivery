@@ -1,14 +1,16 @@
 package com.delfood.service;
 
+import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.delfood.dto.MenuGroupDTO;
-import com.delfood.error.exception.InvalidMenuGroupCountException;
-import com.delfood.error.exception.InvalidMenuGroupIdException;
+import com.delfood.error.exception.TargetNotFoundException;
+import com.delfood.error.exception.TooManyModifiedException;
+import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
+import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
 import com.delfood.mapper.MenuGroupMapper;
-import lombok.extern.log4j.Log4j2;
+import com.delfood.dto.MenuGroupDTO;
 
 @Service
 @Log4j2
@@ -51,7 +53,7 @@ public class MenuGroupService {
    * @param shopId 매장 아이디
    * @return 
    */
-  public List<MenuGroupDTO> getMenuGroups(Long shopId){
+  public List<MenuGroupDTO> getMenuGroups(Long shopId) {
     return menuGroupMapper.findByShopid(shopId);
   }
   
@@ -70,6 +72,7 @@ public class MenuGroupService {
       log.error("updateNameAndContent ERROR! name : {}, content : {}, id : {}",name,content,id);
       throw new RuntimeException("Error during update menuGroup name and content!");
     }
+    
   }
   
   /**
@@ -78,11 +81,18 @@ public class MenuGroupService {
    * @author jinyoung
    * @param id 아이디
    */
+  @Transactional(rollbackFor = RuntimeException.class)
   public void deleteMenuGroup(Long id) {
     int result = menuGroupMapper.deleteMenuGroup(id);
+    
+    if (result == 0) {
+      log.error("Not found menugroup to delete! id : {}", id);
+      throw new TargetNotFoundException("Not found menugroup to delete!");
+    }
+    
     if (result != 1) {
-      log.error("deleteMenuGroup ERROR! id : {}", id);
-      throw new RuntimeException("Error during update menuGroup status!");
+      log.error("menugroup modified too many times! id : {}", id);
+      throw new TooManyModifiedException("menugroup modified too many times!");
     }
   }
   
@@ -103,7 +113,7 @@ public class MenuGroupService {
    * @param shopId 매장 아이디
    * @param idList 메뉴그룹 아이디 리스트
    */
-  @Transactional(rollbackFor = InvalidMenuGroupIdException.class)
+  @Transactional(rollbackFor = RuntimeException.class)
   public void updateMenuGroupPriority(Long shopId, List<Long> idList) {
     int total = menuGroupMapper.totalCount(shopId);
     if (idList.size() != total) {

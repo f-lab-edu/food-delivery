@@ -1,4 +1,4 @@
-package com.delfood.error.exception;
+package com.delfood.error.exception.menuGroup;
 
 public class InvalidMenuGroupCountException extends RuntimeException {
 

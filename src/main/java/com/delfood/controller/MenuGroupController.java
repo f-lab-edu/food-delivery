@@ -180,12 +180,10 @@ public class MenuGroupController {
    * @return
    */
   @PutMapping("/shops/{shopId}/menuGroups/priority")
-  public HttpStatus updateMenuGroupPriority(
+  public void updateMenuGroupPriority(
       @PathVariable("shopId") Long shopId, @RequestBody List<Long> idList) {
     
     menuGroupService.updateMenuGroupPriority(shopId, idList);
-    
-    return HttpStatus.OK;
   }
   
   /**

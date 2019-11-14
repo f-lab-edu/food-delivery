@@ -25,9 +25,7 @@ public interface OptionMapper {
    * @param optionList 옵션 정보들을 담은 리스트
    * @return
    */
-  public int insertOptionList(@Param("optionList") List<OptionDTO> optionList,
-      @Param("menuId") Long menuId);
-  
+  public int insertOptionList(List<OptionDTO> optionList, Long menuId);
   
   /**
    * 옵션 삭제.

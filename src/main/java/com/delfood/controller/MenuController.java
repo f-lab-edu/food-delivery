@@ -66,14 +66,12 @@ public class MenuController {
    * 
    * @param menuGroupId 메뉴그룹 아이디
    * @param menuId 메뉴 아이디
-   * @return
    */
   @DeleteMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
-  public HttpStatus deleteMenu(@PathVariable Long menuGroupId,
+  public void deleteMenu(@PathVariable Long menuGroupId,
       @PathVariable Long menuId) {
     
     menuService.deleteMenu(menuId);
-    return HttpStatus.OK;
   }
 
   
@@ -82,13 +80,11 @@ public class MenuController {
    * 
    * @param menuGroupId 매장 아이디
    * @param idList 순서가 있는 메뉴그룹 아이디 아이디 리스트
-   * @return
    */
   @PutMapping("/menuGroups/{menuGroupId}/menus/priority")
-  public HttpStatus updateMenuPriority(
+  public void updateMenuPriority(
       @PathVariable Long menuGroupId, @RequestBody List<Long> idList) {
     menuService.updateMenuPriority(menuGroupId, idList);
-    return HttpStatus.OK;
   }
   
   /**
@@ -97,23 +93,20 @@ public class MenuController {
    * @author jinyoung
    * 
    * @param menuInfo 수정할 메뉴 정보
-   * @return
    */
   @PatchMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
-  public HttpStatus updateMenu(@RequestBody MenuDTO menuInfo) {
+  public void updateMenu(@RequestBody MenuDTO menuInfo) {
     
     menuService.updateMenu(menuInfo);
-    return HttpStatus.OK;
   }
   
   /**
    * 옵션 추가.
    */
   @PostMapping("/menus/{menuId}/options")
-  public HttpStatus addOption(@RequestBody OptionDTO optionInfo) {
+  public void addOption(@RequestBody OptionDTO optionInfo) {
     
     optionService.addOption(optionInfo);
-    return HttpStatus.OK;
   }
   
   /**
@@ -122,13 +115,11 @@ public class MenuController {
    * @author jinyoung
    * 
    * @param optionId 옵션 아이디
-   * @return
    */
   @DeleteMapping("/menus/{menuId}/options/{optionId}")
-  public HttpStatus deleteOption(@PathVariable Long optionId) {
+  public void deleteOption(@PathVariable Long optionId) {
     
     optionService.deleteOption(optionId);
-    return HttpStatus.OK;
   }
   
   
