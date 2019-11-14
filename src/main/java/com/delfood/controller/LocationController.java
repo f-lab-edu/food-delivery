@@ -1,7 +1,6 @@
 package com.delfood.controller;
 
 import com.delfood.aop.OwnerShopCheck;
-import com.delfood.config.CacheKeys;
 import com.delfood.controller.reqeust.GetAddressesRequest;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
@@ -59,7 +58,7 @@ public class LocationController {
    * @param shopId 배달가능 지역을 조회할 매장의 id
    * @return
    */
-  @Cacheable(value = CacheKeys.DELIVERY_LOCATION, key = "#shopId")
+  @Cacheable(value = "DELIVERY_LOCATION", key = "#shopId")
   @GetMapping("deliveries/{shopId}/possibles")
   @OwnerShopCheck
   public List<DeliveryLocationDTO> getDeliveryLocations(
@@ -92,7 +91,7 @@ public class LocationController {
    * @param requestInfo 검색할 주소 정보.
    * @return
    */
-  @Cacheable(value = CacheKeys.ADDRESS_SEARCH, key = "#requestInfo")
+  @Cacheable(value = "ADDRESS_SERCH", key = "#requestInfo")
   @GetMapping("address")
   public List<AddressDTO> getAddressByZipInfo(
       GetAddressesRequest requestInfo) {

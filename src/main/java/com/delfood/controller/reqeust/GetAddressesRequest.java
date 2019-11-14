@@ -6,7 +6,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 public class GetAddressesRequest {
   private String townName;
   private Integer buildingNumber;

@@ -108,10 +108,13 @@ public class RedisConfig {
   public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory,
       ObjectMapper objectMapper) {
     RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
-        .disableCachingNullValues().entryTtl(Duration.ofSeconds(defaultExpireSecond))
+        .disableCachingNullValues()
+        .entryTtl(Duration.ofSeconds(defaultExpireSecond))
         .serializeKeysWith(
-            RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(
+            RedisSerializationContext.SerializationPair
             .fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
 
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory)
