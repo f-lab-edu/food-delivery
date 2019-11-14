@@ -56,14 +56,13 @@ public class ShopController {
 
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
-      return new ResponseEntity<AddShopResponse>(AddShopResponse.NULL_ARGUMENTS,
-          HttpStatus.BAD_REQUEST);
+      return AddShopResponse.NULL_ARGUMENTS_RESPONSE;
     }
 
     shopService.addShop(shopInfo);
 
 
-    return new ResponseEntity<AddShopResponse>(HttpStatus.CREATED);
+    return AddShopResponse.CREATED_RESPONSE;
   }
 
   /**
@@ -95,12 +94,10 @@ public class ShopController {
    */
   @PatchMapping("{id}")
   @OwnerShopCheck
-  public ResponseEntity<UpdateShopResponse> updateShop(@PathVariable(required = true) Long id,
+  public void updateShop(@PathVariable(required = true) Long id,
       @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session) {
     final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
     shopService.updateShop(copyData);
-
-    return new ResponseEntity<UpdateShopResponse>(HttpStatus.OK);
   }
 
   /**
@@ -118,7 +115,7 @@ public class ShopController {
 
     // 매장이 오픈중일 때
     if (shopService.notOpenCheck(id) == false) {
-      return new ResponseEntity<OpenShopResponse>(OpenShopResponse.IS_OPEN, HttpStatus.BAD_REQUEST);
+      return OpenShopResponse.IS_OPEN_RESPONSE;
     }
 
 
@@ -158,8 +155,7 @@ public class ShopController {
 
     // 해당 매장이 영업중이 아닐시
     if (shopService.notOpenCheck(id) == true) {
-      return new ResponseEntity<CloseShopResponse>(CloseShopResponse.NOT_OPEN,
-          HttpStatus.BAD_REQUEST);
+      return CloseShopResponse.NOT_OPEN_RESPONSE;
     }
 
     shopService.closeShop(id);
@@ -216,6 +212,12 @@ public class ShopController {
 
     private static final AddShopResponse NULL_ARGUMENTS =
         new AddShopResponse(Message.NULL_ARGUMENTS);
+    
+    public static final ResponseEntity<AddShopResponse> CREATED_RESPONSE = 
+        new ResponseEntity<>(HttpStatus.CREATED);
+    
+    public static final ResponseEntity<AddShopResponse> NULL_ARGUMENTS_RESPONSE =
+        new ResponseEntity<>(NULL_ARGUMENTS, HttpStatus.BAD_REQUEST);
 
     public AddShopResponse(Message message) {
       this.message = message;
@@ -235,11 +237,6 @@ public class ShopController {
     }
   }
 
-  @Getter
-  private static class UpdateShopResponse {
-    // 해당 Response는 AOP로 통합되었습니다.
-    // 추후 확장성을 고려하여 남겨놓습니다. - jun
-  }
 
   @Getter
   private static class OpenShopResponse {
@@ -252,7 +249,9 @@ public class ShopController {
     private ShopDTO openShopInfo;
 
     private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Message.AREADY_OPEN);
-
+    
+    public static final ResponseEntity<OpenShopResponse> IS_OPEN_RESPONSE = 
+        new ResponseEntity<OpenShopResponse>(OpenShopResponse.IS_OPEN, HttpStatus.BAD_REQUEST);
 
     public OpenShopResponse(Message message) {
       this.message = message;
@@ -279,6 +278,9 @@ public class ShopController {
     @NonNull
     private Message message;
     private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Message.NOT_OPEN);
+    
+    public static final ResponseEntity<CloseShopResponse> NOT_OPEN_RESPONSE = 
+        new ResponseEntity<CloseShopResponse>(CloseShopResponse.NOT_OPEN, HttpStatus.BAD_REQUEST);
 
     public CloseShopResponse(Message message) {
       this.message = message;
