@@ -33,4 +33,4 @@ build/
 
 ### application profile ###
 **/application-local.properties
-
+bin/
