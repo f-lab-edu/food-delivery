@@ -57,7 +57,7 @@ public class RedisConfig {
   /*
    * Redis Connection Factory library별 특징 
    * 1. Jedis - 멀티쓰레드환경에서 쓰레드 안전을 보장하지 않는다.
-   *          - Connection pool을 사용하여 개선이 가능하지만 Lettuce보다 상대젖ㄱ으로 하드웨어적인 자원이 많이 필요하다.
+   *          - Connection pool을 사용하여 개선이 가능하지만 Lettuce보다 상대적으로 하드웨어적인 자원이 많이 필요하다.
    *          - 비동기 기능을 제공하지 않는다.
    * 
    * 2. Lettuce - Netty 기반 redis client library 
