@@ -1,7 +1,8 @@
 package com.delfood.controller;
 
 import com.delfood.aop.OwnerShopCheck;
-import com.delfood.controller.reqeust.GetAddressesRequest;
+import com.delfood.controller.reqeust.GetAddressByZipRequest;
+import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.service.AddressService;
@@ -58,7 +59,6 @@ public class LocationController {
    * @param shopId 배달가능 지역을 조회할 매장의 id
    * @return
    */
-  @Cacheable(value = "DELIVERY_LOCATION", key = "#shopId")
   @GetMapping("deliveries/{shopId}/possibles")
   @OwnerShopCheck
   public List<DeliveryLocationDTO> getDeliveryLocations(
@@ -85,16 +85,30 @@ public class LocationController {
   }
 
   /**
-   * 주소를 검색한다.
+   * 도로명 주소를 검색한다.
    * 
    * @author jun
-   * @param requestInfo 검색할 주소 정보.
+   * @param requestInfo 검색할  도로명 주소 정보.
    * @return
    */
-  @Cacheable(value = "ADDRESS_SERCH", key = "#requestInfo")
-  @GetMapping("address")
+  @GetMapping("address/road")
+  public List<AddressDTO> getAddressByRoadInfo(
+      GetAddressesByRoadRequest requestInfo) {
+    List<AddressDTO> addresses = addressService.getAddressByRoadName(requestInfo);
+    return addresses;
+  }
+  
+  
+  /**
+   * 지번 주소를 검색한다.
+   * 
+   * @author jun
+   * @param requestInfo 검색할 지번 주소 정보.
+   * @return
+   */
+  @GetMapping("address/zip")
   public List<AddressDTO> getAddressByZipInfo(
-      GetAddressesRequest requestInfo) {
+      GetAddressByZipRequest requestInfo) {
     List<AddressDTO> addresses = addressService.getAddressByZipAddress(requestInfo);
     return addresses;
   }

@@ -57,7 +57,7 @@ public class RedisConfig {
   /*
    * Redis Connection Factory library별 특징 
    * 1. Jedis - 멀티쓰레드환경에서 쓰레드 안전을 보장하지 않는다.
-   *          - Connection pool을 사용하여 개선이 가능하지만 Lettuce보다 상대적으로 하드웨어적인 자원이 많이 필요하다.
+   *          - Connection pool을 사용하여 성능, 안정성 개선이 가능하지만 Lettuce보다 상대적으로 하드웨어적인 자원이 많이 필요하다.
    *          - 비동기 기능을 제공하지 않는다.
    * 
    * 2. Lettuce - Netty 기반 redis client library 
@@ -84,7 +84,7 @@ public class RedisConfig {
     redisTemplate.setConnectionFactory(redisConnectionFactory());
     // json 형식으로 데이터를 받을 때
     // 값이 깨지지 않도록 직렬화한다.
-    // 저장할 클래스가 여러개일 경우 범용 JacsonSerializer인 GenericJackson2JsonRedisSerializer를 이용한다
+    // 저장할 클래스가 여러개일 경우 범용 JacksonSerializer인 GenericJackson2JsonRedisSerializer를 이용한다
     // 참고 https://somoly.tistory.com/134
     redisTemplate.setKeySerializer(new StringRedisSerializer());
     redisTemplate.setValueSerializer(serializer);

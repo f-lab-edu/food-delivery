@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -220,6 +221,7 @@ public class ShopService {
    * @param shopId 조회할 매장의 아이디
    * @return
    */
+  @Cacheable(value = "DELIVERY_LOCATION", key = "#shopId")
   public List<DeliveryLocationDTO> getDeliveryLocations(Long shopId) {
     return deliveryLocateionMapper.findByShopId(shopId);
   }
