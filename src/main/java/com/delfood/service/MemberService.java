@@ -69,11 +69,10 @@ public class MemberService {
   public void updateMemberPassword(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     int result = memberMapper.updateMemberPassword(id, cryptoPassword);
-    if (result == 1) {
+    if (result != 1) {
       log.error("update Member ERROR! id : {}, pw : {}", id, password);
       throw new RuntimeException("update Member Password ERROR!");
     }
-
   }
 
   /**
