@@ -51,33 +51,33 @@
     </insert>
     
     <select id="findByIdAndPassword" resultType="com.delfood.dto.MemberDTO">
-    	SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
-    	FROM   MEMBER
-    	WHERE  id = #{id}
-    	AND	   password = #{password}
-    	AND	   status != 'DELETE'
+        SELECT *
+        FROM MEMBER
+        WHERE  id = #{id}
+        AND password = #{password}
+        AND status != 'DELETE'
     </select>
     
     <update id="updateMemberPassword">
-    	UPDATE MEMBER
-    	SET password = #{password},
-    	    updated_at = NOW()
-    	WHERE id=#{id}
+        UPDATE MEMBER
+        SET password = #{password},
+            updated_at = NOW()
+        WHERE id=#{id}
     </update>
     
     <update id="deleteMember">
-    	UPDATE MEMBER
-    	SET status = 'DELETE',
-    	    updated_at = NOW()
-    	WHERE id=#{id}
+        UPDATE MEMBER
+        SET status = 'DELETE',
+            updated_at = NOW()
+        WHERE id=#{id}
     </update>
     
     <update id="updateMemberAddress">
-    	UPDATE MEMBER
-    	SET address = #{address},
-    	    address_detail = #{addressDetail},
-    	    updated_at = NOW()
-    	WHERE id = #{id}
+        UPDATE MEMBER
+        SET address = #{address},
+            address_detail = #{addressDetail},
+            updated_at = NOW()
+        WHERE id = #{id}
     </update>
     
     <select id="idCheck" resultType="int">
