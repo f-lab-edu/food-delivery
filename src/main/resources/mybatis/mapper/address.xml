@@ -51,27 +51,26 @@
         LIMIT   10
     </select>
     
-    <select id="findByZipAddress" resultType="com.delfood.dto.AddressDTO">
+    <select id="findByZipName" resultType="com.delfood.dto.AddressDTO">
         <include refid="selectAll"></include>
         WHERE   1 = 1
-        <if test="townName != null">
-            AND town name LIKE CONCAT(#{townName}, '%')
-        </if>
-        <if test="roadName != null">
-            AND road_name LIKE CONCAT(#{roadName}, '%')
-        </if>
-        <if test="buildingNumber != null">
-            AND building_number LIKE CONCAT(#{buildingNumber}, '%')
-        </if>
-        <if test="buildingSideNumber != null">
-            AND building_side_number LIKE CONCAT(#{buildingSideNumber}, '%')
-        </if>
-        <if test="buildingNameForCity != null">
-            AND building_name_for_city LIKE CONCAT(#{buildingNameForCity}, '%')
-        </if>
-        <if test="lastSearchBuildingManagementNumber != null">
-            AND building_management_number > #{lastSearchBuildingManagementNumber}
-        </if>
+        AND town_name LIKE CONCAT(IFNULL(#{townName}, ''), '%')
+        AND building_number LIKE CONCAT(IFNULL(#{buildingNumber}, ''), '%')
+        AND building_side_number LIKE CONCAT(IFNULL(#{buildingSideNumber}, ''), '%')
+        AND building_name_for_city LIKE CONCAT(IFNULL(#{buildingNameForCity}, ''), '%')
+        AND building_management_number > IFNULL(#{lastSearchBuildingManagementNumber}, '0')
+        ORDER BY building_management_number
+        LIMIT   10
+    </select>
+    
+    <select id="findByRoadName" resultType="com.delfood.dto.AddressDTO">
+        <include refid="selectAll"></include>
+        WHERE   1 = 1
+        AND road_name LIKE CONCAT(IFNULL(#{roadName}, ''), '%')
+        AND building_number LIKE CONCAT(IFNULL(#{buildingNumber}, ''), '%')
+        AND building_side_number LIKE CONCAT(IFNULL(#{buildingSideNumber}, ''), '%')
+        AND building_name_for_city LIKE CONCAT(IFNULL(#{buildingNameForCity}, ''), '%')
+        AND building_management_number > IFNULL(#{lastSearchBuildingManagementNumber}, '0')
         ORDER BY building_management_number
         LIMIT   10
     </select>

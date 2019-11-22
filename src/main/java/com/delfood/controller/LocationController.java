@@ -1,23 +1,21 @@
 package com.delfood.controller;
 
 import com.delfood.aop.OwnerShopCheck;
-import com.delfood.controller.reqeust.GetAddressesRequest;
+import com.delfood.controller.reqeust.GetAddressByZipRequest;
+import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.service.AddressService;
 import com.delfood.service.ShopService;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,18 +85,32 @@ public class LocationController {
   }
 
   /**
-   * 주소를 검색한다.
+   * 도로명 주소를 검색한다.
    * 
    * @author jun
-   * @param requestInfo 검색할 주소 정보.
+   * @param requestInfo 검색할  도로명 주소 정보.
    * @return
    */
-  @GetMapping("address")
-  public ResponseEntity<GetAddressesByZipInfo> getAddressByZipInfo(
-      GetAddressesRequest requestInfo) {
+  @GetMapping("address/road")
+  public List<AddressDTO> getAddressByRoadInfo(
+      GetAddressesByRoadRequest requestInfo) {
+    List<AddressDTO> addresses = addressService.getAddressByRoadName(requestInfo);
+    return addresses;
+  }
+  
+  
+  /**
+   * 지번 주소를 검색한다.
+   * 
+   * @author jun
+   * @param requestInfo 검색할 지번 주소 정보.
+   * @return
+   */
+  @GetMapping("address/zip")
+  public List<AddressDTO> getAddressByZipInfo(
+      GetAddressByZipRequest requestInfo) {
     List<AddressDTO> addresses = addressService.getAddressByZipAddress(requestInfo);
-    return new ResponseEntity<LocationController.GetAddressesByZipInfo>(
-        new GetAddressesByZipInfo(addresses), HttpStatus.OK);
+    return addresses;
   }
 
 
@@ -112,11 +124,4 @@ public class LocationController {
   }
 
 
-  // ---------------------- Response 객체 ----------------------
-
-  @Getter
-  @AllArgsConstructor
-  private static class GetAddressesByZipInfo {
-    private List<AddressDTO> addresses;
-  }
 }
