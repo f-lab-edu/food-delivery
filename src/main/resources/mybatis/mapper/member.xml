@@ -1,26 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.MemberMapper">
+
+    <resultMap type="com.delfood.dto.MemberDTO" id="memberDTO">
+        <result property="id" column="id"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="tel" column="tel"/>
+        <result property="mail" column="mail"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="addressCode" column="address_code"/>
+        <result property="addressDetail" column="address_detail"/>
+        <association property="addressInfo" column="address_code" javaType="com.delfood.dto.AddressDTO" select="findAddressByAddressCode"></association>
+    </resultMap>
+    
+    <select id="findAddressByAddressCode" resultType="com.delfood.dto.AddressDTO">
+        SELECT  town_code townCode,
+                city_name cityName,
+                city_country_name cityCountryName,
+                town_name townName,
+                road_name_code roadNameCode,
+                road_name roadName,
+                building_number buildingNumber,
+                building_side_number buildingSideNumber,
+                zip_code zipCode,
+                building_management_number buildingManagementNumber,
+                building_name_for_city buildingNameForCity,
+                administrative_town_code administrativeTownCode,
+                administrative_town_name administrativeTownName,
+                detail_building_name detailBuildingName,
+                building_center_point_x_coordinate buildingCenterPointXCoordinate,
+                building_center_point_y_coordinate buildingCenterPointYCoordinate
+        FROM    ADDRESS
+        WHERE   building_management_number = #{address_code}
+    </select>
     
     
-    <select id="findById" resultType="com.delfood.dto.MemberDTO">
-        SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
+    <select id="findById" resultMap="memberDTO">
+        SELECT *
         FROM MEMBER
         WHERE id = #{id}
         AND status != 'DELETE'
     </select>
     
     <insert id="insertMember" parameterType="com.delfood.dto.MemberDTO">
-        INSERT INTO MEMBER(id, password, name, tel, mail)
-        VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail})
+        INSERT INTO MEMBER(id, password, name, tel, mail, address_code, address_detail)
+        VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail}, #{addressCode}, #{addressDetail})
     </insert>
     
-    <select id="findByIdAndPassword" resultType="com.delfood.dto.MemberDTO">
-        SELECT id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt, address, address_detail addressDetail
+    <select id="findByIdAndPassword" resultMap="memberDTO">
+        SELECT *
         FROM   MEMBER
         WHERE  id = #{id}
-        AND       password = #{password}
-        AND       status != 'DELETE'
+        AND    password = #{password}
+        AND    status != 'DELETE'
     </select>
     
     <update id="updateMemberPassword">
@@ -37,7 +72,7 @@
     
     <update id="updateMemberAddress">
         UPDATE MEMBER
-        SET address = #{address},
+        SET address_code = #{addressCode},
             address_detail = #{addressDetail}
         WHERE id = #{id}
     </update>
@@ -46,5 +81,12 @@
         SELECT COUNT(id)
           FROM MEMBER
          WHERE id = #{id}
+    </select>
+    
+    
+    <select id="findTownCodeById" resultType="String">
+        SELECT  SUBSTRING(address_code, 1, 10)
+        FROM    MEMBER
+        WHERE   id = #{id}
     </select>
 </mapper>

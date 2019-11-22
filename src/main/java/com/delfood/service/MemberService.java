@@ -69,11 +69,10 @@ public class MemberService {
   public void updateMemberPassword(String id, String password) {
     String cryptoPassword = SHA256Util.encryptSHA256(password);
     int result = memberMapper.updateMemberPassword(id, cryptoPassword);
-    if (result == 1) {
+    if (result != 1) {
       log.error("update Member ERROR! id : {}, pw : {}", id, password);
       throw new RuntimeException("update Member Password ERROR!");
     }
-
   }
 
   /**
@@ -95,18 +94,27 @@ public class MemberService {
    * 회원 address를 update한다.
    * 
    * @param id 주소를 변경할 고객의 아이디
-   * @param address 변경할 주소
-   * @param addressDetail 변경할 상세 주소
+   * @param addressCode 변경할 주소 코드
    * @return
    */
   @Transactional(rollbackFor = RuntimeException.class)
-  public void updateMemberAddress(String id, String address, String addressDetail) {
-    int result = memberMapper.updateMemberAddress(id, address, addressDetail);
+  public void updateMemberAddress(String id, String addressCode, String addressDetail) {
+    int result = memberMapper.updateMemberAddress(id, addressCode, addressDetail);
     if (result != 1) {
-      log.error("update Member address ERROR! id : {}, address : {}, addressDetail : {}", id,
-          address, addressDetail);
+      log.error("update Member address ERROR! id : {}, addressCode : {}, addressDetail : {}", id,
+          addressCode);
       throw new RuntimeException("update Member address ERROR!");
     }
+  }
+
+  /**
+   * 회원의 읍면동 코드를 조회한다.
+   * 
+   * @param memberId
+   * @return
+   */
+  public String getTownCode(String memberId) {
+    return memberMapper.findTownCodeById(memberId);
   }
 
 

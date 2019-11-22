@@ -18,8 +18,10 @@ public interface MemberMapper {
 
   public int deleteMember(String id);
 
-  public int updateMemberAddress(String id, String address, String addressDetail);
+  int updateMemberAddress(String id, String addressCode, String addressDetail);
 
-  public int idCheck(String id);
+  int idCheck(String id);
+
+  String findTownCodeById(String id);
   
 }
