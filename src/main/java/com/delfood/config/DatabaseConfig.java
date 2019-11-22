@@ -19,6 +19,8 @@ public class DatabaseConfig {
   public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
     final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
     sessionFactory.setDataSource(dataSource);
+    // TypeAlias로 설정할 클래스들이 있는 패키지를 설정하면 DTO에 @Alias("aliasName")으로 typeAlias를 설정 가능
+    sessionFactory.setTypeAliasesPackage("com.delfood.dto.");
     PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
     sessionFactory.setMapperLocations(resolver.getResources("classpath:mybatis/mapper/*.xml"));
     return sessionFactory.getObject();
