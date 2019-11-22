@@ -219,10 +219,20 @@ public class MemberController {
   @ResponseStatus(code = HttpStatus.OK)
   public void deleteMemberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
-    memberService.deleteMember(id);
-    
-    // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
-    SessionUtil.logoutAll(session);
+    if (id == null) {
+      deleteResponse = DeleteMemberResponse.NO_LOGIN;
+      responseEntity =
+          new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.UNAUTHORIZED);
+    } else {
+      memberService.deleteMember(id);
+      deleteResponse = DeleteMemberResponse.SUCCESS;
+
+      // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
+      SessionUtil.clear(session);
+      responseEntity = new ResponseEntity<DeleteMemberResponse>(deleteResponse, HttpStatus.OK);
+
+    }
+    return responseEntity;
   }
 
   /**

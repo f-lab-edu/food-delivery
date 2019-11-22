@@ -60,7 +60,7 @@ public class SessionUtil {
    * @author jun
    * @param session 사용자의 세션
    */
-  public static void logoutAll(HttpSession session) {
+  public static void clear(HttpSession session) {
     session.invalidate();
   }
   
