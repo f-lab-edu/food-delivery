@@ -1,5 +1,6 @@
 package com.delfood.controller;
 
+import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
 import com.delfood.service.OwnerService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -75,6 +77,7 @@ public class OwnerController {
 
   /**
    * 회원 로그인 기능 수행.
+   * 
    * @param loginRequest 로그인 요청 ( id, password )
    * @return
    */
@@ -91,7 +94,7 @@ public class OwnerController {
           new ResponseEntity<OwnerLoginResponse>(ownerLoginResponse, HttpStatus.UNAUTHORIZED);
     } else { // 회원 정보가 존재
       Status ownerStatus = ownerInfo.getStatus();
-      if (ownerStatus == Status.DEFAULT) { 
+      if (ownerStatus == Status.DEFAULT) {
         ownerLoginResponse = OwnerLoginResponse.success(ownerInfo);
         SessionUtil.setLoginOwnerId(session, loginRequest.getId());
         responseEntity = new ResponseEntity<OwnerLoginResponse>(ownerLoginResponse, HttpStatus.OK);
@@ -112,16 +115,10 @@ public class OwnerController {
    * @return
    */
   @GetMapping("logout")
-  public ResponseEntity<LogoutResponse> logout(HttpSession session) {
-    String id = SessionUtil.getLoginOwnerId(session);
-    if (id != null) {
-      SessionUtil.logoutOwner(session);
-      return new ResponseEntity<OwnerController.LogoutResponse>(LogoutResponse.SUCCESS,
-          HttpStatus.OK);
-    } else {
-      return new ResponseEntity<OwnerController.LogoutResponse>(LogoutResponse.NO_LOGIN,
-          HttpStatus.UNAUTHORIZED);
-    }
+  @OwnerLoginCheck
+  @ResponseStatus(code = HttpStatus.OK)
+  public void logout(HttpSession session) {
+    SessionUtil.logoutOwner(session);
   }
 
 
@@ -132,16 +129,11 @@ public class OwnerController {
    * @return
    */
   @GetMapping("myInfo")
-  public ResponseEntity<OwnerDTO> ownerInfo(HttpSession session) {
-    ResponseEntity<OwnerDTO> responseEntity = null;
+  @OwnerLoginCheck
+  public ResponseEntity<OwnerInfoResponse> ownerInfo(HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
-    if (id == null) {
-      responseEntity = new ResponseEntity<OwnerDTO>(HttpStatus.UNAUTHORIZED);
-    } else {
-      OwnerDTO ownerInfo = ownerService.getOwner(id);
-      responseEntity = new ResponseEntity<OwnerDTO>(ownerInfo, HttpStatus.OK);
-    }
-    return responseEntity;
+    OwnerDTO ownerInfo = ownerService.getOwner(id);
+    return new ResponseEntity<OwnerInfoResponse>(new OwnerInfoResponse(ownerInfo), HttpStatus.OK);
   }
 
   /**
@@ -152,6 +144,7 @@ public class OwnerController {
    * @return
    */
   @PatchMapping
+  @OwnerLoginCheck
   public ResponseEntity<UpdateOwnerResponse> updateOwnerInfo(
       @RequestBody UpdateOwnerMailAndTelRequest updateRequest, HttpSession session) {
 
@@ -160,24 +153,19 @@ public class OwnerController {
     String password = updateRequest.getPassword();
     String id = SessionUtil.getLoginOwnerId(session);
 
-    if (id == null) { // 로그인 상태가 아닌 경우
-      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
-    }
-    
+    // 정보 변경시 패스워드를 입력받는다. 해당 패스워드가 틀릴 시 정보는 변경되지 않는다.
     if (ownerService.getOwner(id, password) == null) {
-      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.PASSWORD_MISMATCH,
+          HttpStatus.UNAUTHORIZED);
     }
-    
+
     if (mail == null && tel == null) { // 변경하려는 정보가 둘 다 null일 경우
-      return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.EMPTY_CONTENT, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.EMPTY_CONTENT,
+          HttpStatus.BAD_REQUEST);
     }
 
     ownerService.updateOwnerMailAndTel(id, mail, tel);
-    return new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-        UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
+    return new ResponseEntity<UpdateOwnerResponse>(HttpStatus.OK);
   }
 
   /**
@@ -188,6 +176,7 @@ public class OwnerController {
    * @return
    */
   @PatchMapping("password")
+  @OwnerLoginCheck
   public ResponseEntity<UpdateOwnerResponse> updatePassword(
       @RequestBody UpdateOwnerPasswordRequest passwordResquest, HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
@@ -197,22 +186,18 @@ public class OwnerController {
     ResponseEntity<UpdateOwnerResponse> responseEntity;
 
 
-    if (id == null) { // 비 로그인 상태
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.NO_LOGIN, HttpStatus.UNAUTHORIZED);
-    } else if (password == null || newPassword == null) { // 비밀번호나 새 비밀번호를 입력하지 않은 경우
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.EMPTY_PASSOWRD, HttpStatus.BAD_REQUEST);
+    if (password == null || newPassword == null) { // 비밀번호나 새 비밀번호를 입력하지 않은 경우
+      responseEntity = new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.EMPTY_PASSOWRD,
+          HttpStatus.BAD_REQUEST);
     } else if (ownerService.getOwner(id, password) == null) { // 아이디와 비밀번호 불일치
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
+      responseEntity = new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.PASSWORD_MISMATCH,
+          HttpStatus.UNAUTHORIZED);
     } else if (password.equals(newPassword)) { // 이전 패스워드와 동일한 경우
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.PASSWORD_DUPLICATED, HttpStatus.CONFLICT);
+      responseEntity = new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.PASSWORD_DUPLICATED,
+          HttpStatus.CONFLICT);
     } else {
       ownerService.updateOwnerPassword(id, newPassword);
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(
-          UpdateOwnerResponse.SUCCESS, HttpStatus.OK);
+      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(HttpStatus.OK);
     }
     return responseEntity;
   }
@@ -282,8 +267,8 @@ public class OwnerController {
     private static final IdDuplResponse ID_DUPLICATED =
         new IdDuplResponse(DuplStatus.ID_DUPLICATED);
   }
-  
-  
+
+
   @Getter
   @AllArgsConstructor
   @RequiredArgsConstructor
@@ -307,18 +292,14 @@ public class OwnerController {
 
   @Getter
   @RequiredArgsConstructor
-  private static class UpdateOwnerResponse {
+  private static class UpdateOwnerResponse{
     enum UpdateStatus {
-      SUCCESS, NO_LOGIN, EMPTY_CONTENT, EMPTY_PASSOWRD, PASSWORD_MISMATCH, PASSWORD_DUPLICATED
+      EMPTY_CONTENT, EMPTY_PASSOWRD, PASSWORD_MISMATCH, PASSWORD_DUPLICATED
     }
 
     @NonNull
-    private UpdateStatus result;
+    private UpdateStatus message;
 
-    private static final UpdateOwnerResponse SUCCESS =
-        new UpdateOwnerResponse(UpdateStatus.SUCCESS);
-    private static final UpdateOwnerResponse NO_LOGIN =
-        new UpdateOwnerResponse(UpdateStatus.NO_LOGIN);
     private static final UpdateOwnerResponse EMPTY_CONTENT =
         new UpdateOwnerResponse(UpdateStatus.EMPTY_CONTENT);
     private static final UpdateOwnerResponse EMPTY_PASSOWRD =
@@ -329,20 +310,18 @@ public class OwnerController {
         new UpdateOwnerResponse(UpdateStatus.PASSWORD_DUPLICATED);
   }
 
+  @Getter
+  @AllArgsConstructor
+  private static class OwnerInfoResponse {
+    private OwnerDTO ownerInfo;
+  }
+
 
   @Getter
   @RequiredArgsConstructor
   private static class LogoutResponse {
-    enum LogoutStatus {
-      SUCCESS, NO_LOGIN
-    }
-
-    @NonNull
-    private LogoutStatus result;
-
-    private static final LogoutResponse SUCCESS = new LogoutResponse(LogoutStatus.SUCCESS);
-    private static final LogoutResponse NO_LOGIN = new LogoutResponse(LogoutStatus.NO_LOGIN);
-
+    // jun - 추후 추가할 데이터가 있을 때를 대비하여 남겨놓습니다.
+    // 해당 클래스는 AOP를 추가하며 대부분의 기능이 통합되었습니다.
   }
 
 }
