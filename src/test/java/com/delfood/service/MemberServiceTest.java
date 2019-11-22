@@ -1,25 +1,17 @@
 package com.delfood.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
 import com.delfood.dto.MemberDTO;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;
 import java.time.LocalDateTime;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 
 // Mockito에서 사용하는 목 객체를 사용하기 위해 적용한다.
