@@ -1,7 +1,7 @@
 package com.delfood.dto;
 
 import java.time.LocalDateTime;
-
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -9,6 +9,7 @@ import lombok.ToString;
 
 import org.apache.ibatis.type.Alias;
 
+@Builder
 @Getter
 @Setter
 @ToString
