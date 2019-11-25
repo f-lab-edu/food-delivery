@@ -21,7 +21,7 @@ public class ShopSearchService {
     return shopSearchMapper.findById();
   }
   
-  public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode) {
+  public List<ShopDTO> shopSearchByCategory(Long categoryId, String townCode) {
     return shopSearchMapper.findByCategoryIdAndTownCode(categoryId, townCode);
   }
 

@@ -4,6 +4,8 @@ import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
+import com.delfood.error.exception.shop.CanNotCloseShopException;
+import com.delfood.error.exception.shop.CanNotOpenShopException;
 import com.delfood.mapper.DeliveryLocationMapper;
 import com.delfood.mapper.ShopMapper;
 import com.delfood.mapper.WorkMapper;
@@ -137,6 +139,11 @@ public class ShopService {
    */
   @Transactional
   public void openShop(Long shopId) {
+    // 매장이 오픈중일 때
+    if (notOpenCheck(shopId) == false) {
+      throw new CanNotOpenShopException("영업이 이미 진행중입니다.");
+    }
+    
     workService.addWork(shopId);
     int openResult = shopMapper.updateShopOpenById(shopId);
     if (openResult != 1) {
@@ -153,6 +160,10 @@ public class ShopService {
    */
   @Transactional
   public void closeShop(Long shopId) {
+    // 해당 매장이 영업중이 아닐시
+    if (notOpenCheck(shopId) == true) {
+      throw new CanNotCloseShopException("이미 영업을 종료한 매장입니다. 영업 종료를 시도할 수 없습니다.");
+    }
     workService.closeWork(shopId);
     int closeResult = shopMapper.updateShopCloseById(shopId);
     if (closeResult != 1) {

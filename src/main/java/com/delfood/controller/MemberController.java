@@ -241,81 +241,12 @@ public class MemberController {
     private MemberDTO memberInfo;
 
     // success의 경우 memberInfo의 값을 set해줘야 하기 때문에 new 하도록 해준다.
-
     private static final LoginResponse FAIL = new LoginResponse(LoginStatus.FAIL);
-    private static final LoginResponse DELETED = new LoginResponse(LoginStatus.DELETED);
-
     private static LoginResponse success(MemberDTO memberInfo) {
       return new LoginResponse(LoginStatus.SUCCESS, memberInfo);
     }
 
 
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class LogoutResponse {
-    // 해당 클래스는 AOP 적용으로 통합되었습니다.
-    // 추후 확장성을 고려하여 클래스를 남겨놓습니다 - jun
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class SignUpResponse {
-    enum SignUpStatus {
-      SUCCESS, ID_DUPLICATED, ERROR, NULL_ARGUMENT
-    }
-
-    @NonNull
-    private SignUpStatus result;
-
-    private static final SignUpResponse SUCCESS = new SignUpResponse(SignUpStatus.SUCCESS);
-    private static final SignUpResponse ID_DUPLICATED =
-        new SignUpResponse(SignUpStatus.ID_DUPLICATED);
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class MemberIdDuplResponse {
-    enum DuplStatus {
-      SUCCESS, ID_DUPLICATED, ERROR
-    }
-
-    @NonNull
-    private DuplStatus result;
-
-    private static final MemberIdDuplResponse SUCCESS =
-        new MemberIdDuplResponse(DuplStatus.SUCCESS);
-    private static final MemberIdDuplResponse DUPLICATED =
-        new MemberIdDuplResponse(DuplStatus.ID_DUPLICATED);
-
-
-  }
-
-  @Getter
-  private static class UpdateMemberPasswordResponse {
-    enum Message {
-      EMPTY_PASSWORD, PASSWORD_MISMATCH
-    }
-
-    @NonNull
-    private Message message;
-
-    private static final UpdateMemberPasswordResponse EMPTY_PASSWORD =
-        new UpdateMemberPasswordResponse(Message.EMPTY_PASSWORD);
-    private static final UpdateMemberPasswordResponse PASSWORD_MISMATCH =
-        new UpdateMemberPasswordResponse(Message.PASSWORD_MISMATCH);
-
-    public UpdateMemberPasswordResponse(Message message) {
-      this.message = message;
-    }
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class DeleteMemberResponse {
-    // 해당 메서드는 AOP로 통합되었습니다.
-    // 추후 확장성을 고려하여 남겨놓습니다 - jun
   }
 
   @Getter

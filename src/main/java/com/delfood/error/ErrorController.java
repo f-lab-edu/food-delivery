@@ -3,6 +3,8 @@ package com.delfood.error;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
+import com.delfood.error.exception.shop.CanNotCloseShopException;
+import com.delfood.error.exception.shop.CanNotOpenShopException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -60,6 +62,12 @@ public class ErrorController {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(IllegalArgumentException.class)
   public ErrorMsg handleIllegalArgumentException(IllegalArgumentException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
+  
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(value = {CanNotOpenShopException.class, CanNotCloseShopException.class})
+  public ErrorMsg handleCannotShopException(RuntimeException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
 }

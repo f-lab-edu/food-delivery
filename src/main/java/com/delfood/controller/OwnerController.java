@@ -3,6 +3,7 @@ package com.delfood.controller;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
+import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.OwnerService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
@@ -33,25 +34,17 @@ public class OwnerController {
 
   /**
    * 사장님 회원가입 메서드.
-   * 
+   * 아이디가 중복되었다면 에러를 발생시킨다.
    * @author jun
    * @param ownerInfo 회원가입할 사장님 정보
    */
   @PostMapping
-  public ResponseEntity<SignUpResponse> signUp(@RequestBody OwnerDTO ownerInfo) {
+  @ResponseStatus(HttpStatus.CREATED)
+  public void signUp(@RequestBody OwnerDTO ownerInfo) {
     if (OwnerDTO.hasNullDataBeforeSignUp(ownerInfo)) {
       throw new NullPointerException("사장님 회원가입에 필요한 정보에 NULL이 존재합니다.");
     }
-
-    // id 중복체크
-    if (ownerService.isDuplicatedId(ownerInfo.getId())) {
-      return new ResponseEntity<OwnerController.SignUpResponse>(SignUpResponse.ID_DUPLICATED,
-          HttpStatus.CONFLICT);
-    }
-
     ownerService.signUp(ownerInfo);
-    return new ResponseEntity<OwnerController.SignUpResponse>(SignUpResponse.SUCCESS,
-        HttpStatus.CREATED);
   }
 
   /**
@@ -62,16 +55,11 @@ public class OwnerController {
    * @return 중복된 아이디 일시 true
    */
   @GetMapping("idCheck/{id}")
-  public ResponseEntity<IdDuplResponse> idCheck(@PathVariable("id") String id) {
+  public void idCheck(@PathVariable("id") String id) {
     boolean isDupl = ownerService.isDuplicatedId(id);
     if (isDupl) {
-      return new ResponseEntity<OwnerController.IdDuplResponse>(IdDuplResponse.ID_DUPLICATED,
-          HttpStatus.CONFLICT);
-    } else {
-      return new ResponseEntity<OwnerController.IdDuplResponse>(IdDuplResponse.SUCCESS,
-          HttpStatus.OK);
+      throw new DuplicateIdException("아이디가 중복되었습니다");
     }
-    
   }
 
 
@@ -131,10 +119,10 @@ public class OwnerController {
    */
   @GetMapping("myInfo")
   @OwnerLoginCheck
-  public ResponseEntity<OwnerInfoResponse> ownerInfo(HttpSession session) {
+  public OwnerInfoResponse ownerInfo(HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
     OwnerDTO ownerInfo = ownerService.getOwner(id);
-    return new ResponseEntity<OwnerInfoResponse>(new OwnerInfoResponse(ownerInfo), HttpStatus.OK);
+    return new OwnerInfoResponse(ownerInfo);
   }
 
   /**
@@ -146,7 +134,7 @@ public class OwnerController {
    */
   @PatchMapping
   @OwnerLoginCheck
-  public ResponseEntity<UpdateOwnerResponse> updateOwnerInfo(
+  public void updateOwnerInfo(
       @RequestBody UpdateOwnerMailAndTelRequest updateRequest, HttpSession session) {
 
     String mail = updateRequest.getMail();
@@ -154,19 +142,11 @@ public class OwnerController {
     String password = updateRequest.getPassword();
     String id = SessionUtil.getLoginOwnerId(session);
 
-    // 정보 변경시 패스워드를 입력받는다. 해당 패스워드가 틀릴 시 정보는 변경되지 않는다.
-    if (ownerService.getOwner(id, password) == null) {
-      return new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.PASSWORD_MISMATCH,
-          HttpStatus.UNAUTHORIZED);
-    }
-
     if (mail == null && tel == null) { // 변경하려는 정보가 둘 다 null일 경우
-      return new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.EMPTY_CONTENT,
-          HttpStatus.BAD_REQUEST);
+      throw new NullPointerException("변경할 정보를 입력해야 합니다.");
     }
 
-    ownerService.updateOwnerMailAndTel(id, mail, tel);
-    return new ResponseEntity<UpdateOwnerResponse>(HttpStatus.OK);
+    ownerService.updateOwnerMailAndTel(id, password, mail, tel);
   }
 
   /**
@@ -178,29 +158,17 @@ public class OwnerController {
    */
   @PatchMapping("password")
   @OwnerLoginCheck
-  public ResponseEntity<UpdateOwnerResponse> updatePassword(
+  public void updatePassword(
       @RequestBody UpdateOwnerPasswordRequest passwordResquest, HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
-    String password = passwordResquest.getPassword();
-    String newPassword = passwordResquest.getNewPassword();
+    String passwordBeforeChange = passwordResquest.getPasswordBeforeChange();
+    String passwordAfterChange = passwordResquest.getPasswordAfterChange();
 
-    ResponseEntity<UpdateOwnerResponse> responseEntity;
-
-
-    if (password == null || newPassword == null) { // 비밀번호나 새 비밀번호를 입력하지 않은 경우
-      responseEntity = new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.EMPTY_PASSOWRD,
-          HttpStatus.BAD_REQUEST);
-    } else if (ownerService.getOwner(id, password) == null) { // 아이디와 비밀번호 불일치
-      responseEntity = new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.PASSWORD_MISMATCH,
-          HttpStatus.UNAUTHORIZED);
-    } else if (password.equals(newPassword)) { // 이전 패스워드와 동일한 경우
-      responseEntity = new ResponseEntity<UpdateOwnerResponse>(UpdateOwnerResponse.PASSWORD_DUPLICATED,
-          HttpStatus.CONFLICT);
+    if (passwordBeforeChange == null || passwordAfterChange == null) { // 비밀번호나 새 비밀번호를 입력하지 않은 경우
+      throw new NullPointerException();
     } else {
-      ownerService.updateOwnerPassword(id, newPassword);
-      responseEntity = new ResponseEntity<OwnerController.UpdateOwnerResponse>(HttpStatus.OK);
+      ownerService.updateOwnerPassword(id, passwordBeforeChange, passwordAfterChange);
     }
-    return responseEntity;
   }
 
 
@@ -231,44 +199,13 @@ public class OwnerController {
   @Getter
   private static class UpdateOwnerPasswordRequest {
     @NonNull
-    private String password;
+    private String passwordBeforeChange;
     @NonNull
-    private String newPassword;
+    private String passwordAfterChange;
   }
 
 
   // ===================== resopnse 객체 =====================
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class SignUpResponse {
-    enum SignUpStatus {
-      SUCCESS, ID_DUPLICATED
-    }
-
-    @NonNull
-    private SignUpStatus result;
-
-    private static final SignUpResponse SUCCESS = new SignUpResponse(SignUpStatus.SUCCESS);
-    private static final SignUpResponse ID_DUPLICATED =
-        new SignUpResponse(SignUpStatus.ID_DUPLICATED);
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class IdDuplResponse {
-    enum DuplStatus {
-      SUCCESS, ID_DUPLICATED
-    }
-
-    @NonNull
-    private DuplStatus result;
-
-    private static final IdDuplResponse SUCCESS = new IdDuplResponse(DuplStatus.SUCCESS);
-    private static final IdDuplResponse ID_DUPLICATED =
-        new IdDuplResponse(DuplStatus.ID_DUPLICATED);
-  }
-
 
   @Getter
   @AllArgsConstructor
@@ -291,40 +228,12 @@ public class OwnerController {
 
   }
 
-  @Getter
-  @RequiredArgsConstructor
-  private static class UpdateOwnerResponse{
-    enum UpdateStatus {
-      EMPTY_CONTENT, EMPTY_PASSOWRD, PASSWORD_MISMATCH, PASSWORD_DUPLICATED
-    }
-
-    @NonNull
-    private UpdateStatus message;
-
-    private static final UpdateOwnerResponse EMPTY_CONTENT =
-        new UpdateOwnerResponse(UpdateStatus.EMPTY_CONTENT);
-    private static final UpdateOwnerResponse EMPTY_PASSOWRD =
-        new UpdateOwnerResponse(UpdateStatus.EMPTY_PASSOWRD);
-    private static final UpdateOwnerResponse PASSWORD_MISMATCH =
-        new UpdateOwnerResponse(UpdateStatus.PASSWORD_MISMATCH);
-    private static final UpdateOwnerResponse PASSWORD_DUPLICATED =
-        new UpdateOwnerResponse(UpdateStatus.PASSWORD_DUPLICATED);
-  }
 
   @Getter
   @AllArgsConstructor
   private static class OwnerInfoResponse {
     private OwnerDTO ownerInfo;
   }
-
-
-  @Getter
-  @RequiredArgsConstructor
-  private static class LogoutResponse {
-    // jun - 추후 추가할 데이터가 있을 때를 대비하여 남겨놓습니다.
-    // 해당 클래스는 AOP를 추가하며 대부분의 기능이 통합되었습니다.
-  }
-
 }
 
 
