@@ -57,4 +57,9 @@ public class ErrorController {
     return ResponseEntity.status(e.getStatusCode()).build();
   }
   
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ErrorMsg handleIllegalArgumentException(IllegalArgumentException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
 }

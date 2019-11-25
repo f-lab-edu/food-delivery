@@ -2,6 +2,7 @@ package com.delfood.controller;
 
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.MemberDTO;
+import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.MemberService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
@@ -80,20 +81,12 @@ public class MemberController {
    * @return
    */
   @GetMapping("idCheck/{id}")
-  public ResponseEntity<MemberIdDuplResponse> idCheck(@PathVariable @NotNull String id) {
-    ResponseEntity<MemberIdDuplResponse> responseEntity = null;
-    MemberIdDuplResponse duplResponse;
+  public void idCheck(@PathVariable @NotNull String id) {
     boolean idDuplicated = memberService.isDuplicatedId(id);
     if (idDuplicated) {
       // 아이디가 중복되어있을 때
-      duplResponse = MemberIdDuplResponse.DUPLICATED;
-      responseEntity = new ResponseEntity<>(duplResponse, HttpStatus.CONFLICT);
-    } else {
-      // 아이디가 중복되어있지 않을 때
-      duplResponse = MemberIdDuplResponse.SUCCESS;
-      responseEntity = new ResponseEntity<>(duplResponse, HttpStatus.OK);
+      throw new DuplicateIdException("중복된 아이디입니다.");
     }
-    return responseEntity;
   }
 
   /*
@@ -109,25 +102,12 @@ public class MemberController {
    * 
    */
   @PostMapping
-  public ResponseEntity<SignUpResponse> signUp(@RequestBody @NotNull MemberDTO memberInfo) {
-    ResponseEntity<SignUpResponse> responseEntity = null;
-    SignUpResponse result;
+  @ResponseStatus(HttpStatus.CREATED)
+  public void signUp(@RequestBody @NotNull MemberDTO memberInfo) {
     if (MemberDTO.hasNullDataBeforeSignup(memberInfo)) {
       throw new NullPointerException("회원가입시 필수 데이터를 모두 입력해야 합니다.");
     }
-    String id = memberInfo.getId();
-    boolean idDuplicated = memberService.isDuplicatedId(id);
-    if (idDuplicated) {
-      // 중복 아이디일 때
-      result = SignUpResponse.ID_DUPLICATED;
-      responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.CONFLICT);
-    } else {
-      // 중복 아이디가 아닐 때
-      memberService.insertMember(memberInfo);
-      result = SignUpResponse.SUCCESS;
-      responseEntity = new ResponseEntity<SignUpResponse>(result, HttpStatus.CREATED);
-    }
-    return responseEntity;
+    memberService.insertMember(memberInfo);
   }
 
   /**
@@ -152,10 +132,6 @@ public class MemberController {
       loginResponse = LoginResponse.success(memberInfo);
       SessionUtil.setLoginMemberId(session, id);
       responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
-    } else if (MemberDTO.Status.DELETED.equals(memberInfo.getStatus())) {
-      // 삭제된 경우
-      loginResponse = LoginResponse.DELETED;
-      responseEntity = new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.UNAUTHORIZED);
     } else {
       // 예상하지 못한 오류일 경우
       log.error("login ERROR" + responseEntity);
@@ -174,41 +150,29 @@ public class MemberController {
    */
   @GetMapping("logout")
   @MemberLoginCheck
-  @ResponseStatus(code = HttpStatus.OK)
   public void logout(HttpSession session) {
     SessionUtil.logoutMember(session);
   }
 
   /**
    * 회원 비밀번호 변경.
-   * 
+   * 원래 비밀번호, 변경할 비밀번호를 모두 입력해야 한다.
+   * 변경 전 비밀번호가 일치하지 않을 시 비밀번호가 변경되지 않는다.
    * @param session 현재 로그인한 사용자의 세션
    * @return
    */
   @PatchMapping("password")
   @MemberLoginCheck
-  public ResponseEntity<UpdateMemberPasswordResponse> updateMemberInfo(HttpSession session,
+  public void updateMemberInfo(HttpSession session,
       @RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest) {
-    String password = passwordRequest.getPassword();
-    String newPassword = passwordRequest.getNewPassword();
+    String passwordBeforeChange = passwordRequest.getPasswordBeforeChange();
+    String passwordAfterChange = passwordRequest.getPasswordAfterChange();
     String id = SessionUtil.getLoginMemberId(session);
-    ResponseEntity<UpdateMemberPasswordResponse> responseEntity = null;
-    if (memberService.login(id, password) == null) {
-      // 원래 패스워드가 일치하지 않음
-      responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(
-          UpdateMemberPasswordResponse.PASSWORD_MISMATCH, HttpStatus.UNAUTHORIZED);
-    } else if (newPassword == null) {
-      // 새로운 패스워드를 입력하지 않음
-      responseEntity = new ResponseEntity<UpdateMemberPasswordResponse>(
-          UpdateMemberPasswordResponse.EMPTY_PASSWORD, HttpStatus.BAD_REQUEST);
+    if (passwordAfterChange == null || passwordBeforeChange == null) { // 유효성 검사
+      throw new NullPointerException("패스워드를 입력해주세요");
     } else {
-      // 성공시
-      memberService.updateMemberPassword(id, newPassword);
-      responseEntity =
-          new ResponseEntity<MemberController.UpdateMemberPasswordResponse>(HttpStatus.OK);
+      memberService.updateMemberPassword(id, passwordBeforeChange, passwordAfterChange);
     }
-
-    return responseEntity;
   }
 
   /**
@@ -220,12 +184,11 @@ public class MemberController {
    */
   @DeleteMapping("myInfo")
   @MemberLoginCheck
-  @ResponseStatus(code = HttpStatus.OK)
   public void deleteMemberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     memberService.deleteMember(id);
     // 회원 탈퇴시 로그아웃 시켜야 하기 때문에 세션 정보를 날린다
-    SessionUtil.clear(session);
+    SessionUtil.logoutMember(session);
   }
 
   /**
@@ -386,9 +349,9 @@ public class MemberController {
   @Getter
   private static class UpdateMemberPasswordRequest {
     @NonNull
-    private String password;
+    private String passwordBeforeChange;
     @NonNull
-    private String newPassword;
+    private String passwordAfterChange;
   }
 
   @Setter

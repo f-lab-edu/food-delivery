@@ -1,10 +1,13 @@
 package com.delfood.service;
 
 import com.delfood.dto.MemberDTO;
+import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,12 @@ public class MemberService {
    * @param memberInfo 저장할 회원의 정보
    */
   public void insertMember(MemberDTO memberInfo) {
+    // id 중복체크
+    boolean duplIdResult = isDuplicatedId(memberInfo.getId());
+    if (duplIdResult) {
+      throw new DuplicateIdException("중복된 아이디입니다.");
+    }
+
     memberInfo.setPassword(SHA256Util.encryptSHA256(memberInfo.getPassword()));
     int insertCount = memberMapper.insertMember(memberInfo);
 
@@ -62,15 +71,23 @@ public class MemberService {
    * 회원 비밀번호를 변경한다.
    * 
    * @param id 비밀번호를 변경할 아이디
-   * @param password 변경할 비밀번호
+   * @param passwordAfterChange 변경할 비밀번호
    * @return
    */
   @Transactional(rollbackFor = RuntimeException.class)
-  public void updateMemberPassword(String id, String password) {
-    String cryptoPassword = SHA256Util.encryptSHA256(password);
-    int result = memberMapper.updateMemberPassword(id, cryptoPassword);
+  public void updateMemberPassword(String id, String passwordBeforeChange,
+      String passwordAfterChange) {
+    // 변경 전 비밀번호 일치여부 검사
+    String cryptoPasswordBeforeChange = SHA256Util.encryptSHA256(passwordBeforeChange);
+    
+    if (memberMapper.findByIdAndPassword(id, cryptoPasswordBeforeChange) == null) {
+      throw new IllegalArgumentException("비밀번호가 일치하지 않습니다!");
+    }
+
+    String cryptoPasswordAfterChange = SHA256Util.encryptSHA256(passwordAfterChange);
+    int result = memberMapper.updateMemberPassword(id, cryptoPasswordAfterChange);
     if (result != 1) {
-      log.error("update Member ERROR! id : {}, pw : {}", id, password);
+      log.error("update Member ERROR! id : {}, pw : {}", id, passwordAfterChange);
       throw new RuntimeException("update Member Password ERROR!");
     }
   }
