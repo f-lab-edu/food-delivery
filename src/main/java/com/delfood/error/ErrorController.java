@@ -1,6 +1,7 @@
 package com.delfood.error;
 
 import com.delfood.error.exception.DuplicateIdException;
+import com.delfood.error.exception.menuGroup.DuplicatedMenuGroupNameException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
 import org.springframework.http.HttpStatus;
@@ -57,4 +58,9 @@ public class ErrorController {
     return ResponseEntity.status(e.getStatusCode()).build();
   }
   
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ExceptionHandler(DuplicatedMenuGroupNameException.class)
+  public ErrorMsg handleDuplicatedMenuGroupNameException(DuplicatedMenuGroupNameException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
 }
