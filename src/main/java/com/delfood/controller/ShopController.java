@@ -56,12 +56,10 @@ public class ShopController {
 
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
-      return AddShopResponse.NULL_ARGUMENTS_RESPONSE;
+      throw new NullPointerException("입점을 위해서는 필수 입력값을 입력해야 합니다");
     }
-
+    
     shopService.addShop(shopInfo);
-
-
     return AddShopResponse.CREATED_RESPONSE;
   }
 
@@ -74,14 +72,13 @@ public class ShopController {
    */
   @GetMapping
   @OwnerLoginCheck
-  public ResponseEntity<MyShopsResponse> myShops(MyShopsRequest myShopsRequest,
+  public MyShopsResponse myShops(MyShopsRequest myShopsRequest,
       HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
 
     List<ShopDTO> myShops = shopService.getMyShops(id, myShopsRequest.getLastId());
     long myShopCount = shopService.getMyShopCount(id);
-    return new ResponseEntity<MyShopsResponse>(MyShopsResponse.success(myShops, myShopCount),
-        HttpStatus.OK);
+    return MyShopsResponse.success(myShops, myShopCount);
   }
 
   /**
@@ -94,7 +91,7 @@ public class ShopController {
    */
   @PatchMapping("{id}")
   @OwnerShopCheck
-  public void updateShop(@PathVariable(required = true) Long id,
+  public void updateShop(@PathVariable Long id,
       @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session) {
     final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
     shopService.updateShop(copyData);
@@ -144,9 +141,10 @@ public class ShopController {
    */
   @PatchMapping("close/{id}")
   @OwnerShopCheck
-  public void closeShop(
+  public ShopDTO closeShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
     shopService.closeShop(id);
+    return shopService.getShop(id);
   }
 
   /**

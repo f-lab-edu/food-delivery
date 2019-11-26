@@ -55,11 +55,9 @@ public class OwnerController {
    * @return 중복된 아이디 일시 true
    */
   @GetMapping("idCheck/{id}")
-  public void idCheck(@PathVariable("id") String id) {
+  public boolean idCheck(@PathVariable("id") String id) {
     boolean isDupl = ownerService.isDuplicatedId(id);
-    if (isDupl) {
-      throw new DuplicateIdException("아이디가 중복되었습니다");
-    }
+    return isDupl;
   }
 
 
@@ -105,7 +103,6 @@ public class OwnerController {
    */
   @GetMapping("logout")
   @OwnerLoginCheck
-  @ResponseStatus(code = HttpStatus.OK)
   public void logout(HttpSession session) {
     SessionUtil.logoutOwner(session);
   }
@@ -166,9 +163,8 @@ public class OwnerController {
 
     if (passwordBeforeChange == null || passwordAfterChange == null) { // 비밀번호나 새 비밀번호를 입력하지 않은 경우
       throw new NullPointerException();
-    } else {
-      ownerService.updateOwnerPassword(id, passwordBeforeChange, passwordAfterChange);
     }
+    ownerService.updateOwnerPassword(id, passwordBeforeChange, passwordAfterChange);
   }
 
 

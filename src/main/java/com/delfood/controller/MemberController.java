@@ -66,11 +66,10 @@ public class MemberController {
    */
   @GetMapping("myInfo")
   @MemberLoginCheck
-  public ResponseEntity<MemberInfoResponse> memberInfo(HttpSession session) {
+  public MemberInfoResponse memberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     MemberDTO memberInfo = memberService.getMemberInfo(id);
-    return new ResponseEntity<MemberInfoResponse>(new MemberInfoResponse(memberInfo),
-        HttpStatus.OK);
+    return new MemberInfoResponse(memberInfo);
   }
 
   /**
@@ -81,12 +80,9 @@ public class MemberController {
    * @return
    */
   @GetMapping("idCheck/{id}")
-  public void idCheck(@PathVariable @NotNull String id) {
+  public boolean idCheck(@PathVariable @NotNull String id) {
     boolean idDuplicated = memberService.isDuplicatedId(id);
-    if (idDuplicated) {
-      // 아이디가 중복되어있을 때
-      throw new DuplicateIdException("중복된 아이디입니다.");
-    }
+    return idDuplicated;
   }
 
   /*
