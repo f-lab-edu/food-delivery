@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.delfood.error.exception.DuplicateException;
 import com.delfood.error.exception.TargetNotFoundException;
 import com.delfood.error.exception.TooManyModifiedException;
-import com.delfood.error.exception.menuGroup.DuplicatedMenuGroupNameException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
 import com.delfood.mapper.MenuGroupMapper;
@@ -32,7 +32,7 @@ public class MenuGroupService {
   public void addMenuGroup(MenuGroupDTO menuGroupInfo) {
     if (this.nameCheck(menuGroupInfo.getName())) {
       log.error("MenuGroup name is duplicated name : {}", menuGroupInfo.getName());
-      throw new DuplicatedMenuGroupNameException("MenuGroup name is duplicated! name : " 
+      throw new DuplicateException("MenuGroup name is duplicated! name : " 
             + menuGroupInfo.getName());
     }
     
@@ -74,10 +74,8 @@ public class MenuGroupService {
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void updateMenuGroupNameAndContent(String name, String content, Long id) {
-    if (content == null) {
-      content = "";
-    }
-    int result = menuGroupMapper.updateNameAndContent(name, content, id);
+    String contentStr = content == null ? "" : content;
+    int result = menuGroupMapper.updateNameAndContent(name, contentStr, id);
     if (result != 1) {
       log.error("updateNameAndContent ERROR! name : {}, content : {}, id : {}",name,content,id);
       throw new RuntimeException("Error during update menuGroup name and content!");

@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.OwnerLoginCheck;
+import com.delfood.aop.OwnerShopCheck;
 import com.delfood.dto.MenuGroupDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.service.MenuGroupService;
@@ -12,7 +14,6 @@ import javax.servlet.http.HttpSession;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,13 +44,11 @@ public class MenuGroupController {
    * 
    */
   @GetMapping("/shops/{shopId}/manage/menus")
+  @OwnerLoginCheck
   public ResponseEntity<List<ShopDTO>> shops(HttpSession session,
       @PathVariable long shopId) {
     
     String loginOwnerId = SessionUtil.getLoginOwnerId(session);
-    if (loginOwnerId == null) {
-      return new ResponseEntity<List<ShopDTO>>(HttpStatus.UNAUTHORIZED);
-    }
     
     List<ShopDTO> myShops = shopService.getMyShops(loginOwnerId, shopId);
     return new ResponseEntity<List<ShopDTO>>(myShops, HttpStatus.OK);
@@ -64,6 +63,7 @@ public class MenuGroupController {
    * @param shopId 매장 아이디
    */
   @GetMapping("/shops/{shopId}/menuGroups/all")
+  @OwnerShopCheck
   public ResponseEntity<ShopMenuInfoResponse> shopMenuInfo(@PathVariable("shopId") long shopId) {
 
     ShopDTO shopInfo = shopService.getMyShopInfo(shopId);
@@ -92,6 +92,7 @@ public class MenuGroupController {
    * @return
    */
   @PostMapping("/shops/{shopId}/menuGroups")
+  @OwnerShopCheck
   public HttpStatus addMenuGroup(@RequestBody MenuGroupDTO menuGroupInfo,
       @PathVariable long shopId) {
     
@@ -107,6 +108,7 @@ public class MenuGroupController {
    * @return
    */
   @GetMapping("/shops/{shopId}/menuGroups")
+  @OwnerShopCheck
   public ResponseEntity<List<MenuGroupDTO>> menuGroups(@PathVariable("shopId") long shopId) {
     
     List<MenuGroupDTO> menuGroups = menuGroupService.getMenuGroups(shopId);
@@ -127,17 +129,16 @@ public class MenuGroupController {
    * @return
    */
   @PatchMapping("/shops/{shopId}/menuGroups")
+  @OwnerShopCheck
   public ResponseEntity<String> updateMenuGroup(
       @RequestBody UpdateMenuGroupRequest request) {
     
     if (request.getId() == null) {
-      return new ResponseEntity<String>(
-          UpdateMenuGroupStatus.EMPTY_ID.toString(), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<String>(EMPTY_ID, HttpStatus.BAD_REQUEST);
     }
     
     if (request.getName() == null) {
-      return new ResponseEntity<String>(
-          UpdateMenuGroupStatus.EMPTY_NAME.toString(), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<String>(EMPTY_NAME, HttpStatus.BAD_REQUEST);
     }
     
     Long id = request.getId();
@@ -145,8 +146,7 @@ public class MenuGroupController {
     String content = request.getContent();
     
     menuGroupService.updateMenuGroupNameAndContent(name, content, id);
-    return new ResponseEntity<String>(
-        UpdateMenuGroupStatus.SUCCESS.toString(), HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<String>(HttpStatus.OK);
   }
   
   
@@ -158,42 +158,36 @@ public class MenuGroupController {
    * @return
    */
   @PutMapping("/shops/{shopId}/menuGroups/priority")
+  @OwnerShopCheck
   public void updateMenuGroupPriority(
       @PathVariable("shopId") Long shopId, @RequestBody List<Long> idList) {
     
     menuGroupService.updateMenuGroupPriority(shopId, idList);
   }
-  
+
   /**
    * 메뉴 그룹 삭제.
    * 실제 데이터를 삭제하진 않고 Status를 "DELETE"로 변경
    * 
    * @author jinyoung
    * 
-   * @param shopId 매장 아이디
    * @param menuGroupId 매뉴 그룹 아이디
    * @return
    */
   @DeleteMapping("/shops/{shopId}/menuGroups/{menuGroupId}")
-  public HttpStatus deleteMenuGroup(
-      HttpSession session, @PathVariable("shopId") Long shopId,
-      @PathVariable("menuGroupId") Long menuGroupId) {
-
-    if (shopId == null || menuGroupId == null) {
-      return HttpStatus.BAD_REQUEST;
-    }
-    
+  @OwnerShopCheck
+  public HttpStatus deleteMenuGroup(@PathVariable("menuGroupId") Long menuGroupId) {
     menuGroupService.deleteMenuGroup(menuGroupId);
     return HttpStatus.OK;
   }
   
-  // ==================== enum =====================
+  // ==================== static =====================
   
-  enum UpdateMenuGroupStatus {
-    SUCCESS, EMPTY_ID, EMPTY_NAME
-  }
+  private static final String EMPTY_ID = "EMPTY_ID";
+  private static final String EMPTY_NAME = "EMPTY_NAME";
   
   // ===================== resopnse 객체 =====================
+  
   @Getter
   @Builder
   private static class ShopMenuInfoResponse {
