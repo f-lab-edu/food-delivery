@@ -54,7 +54,7 @@ public class OwnerController {
    * @param id 중복체크를 진행할 사장님 ID
    * @return 중복된 아이디 일시 true
    */
-  @GetMapping("idCheck/{id}")
+  @GetMapping("duplicated/{id}")
   public boolean idCheck(@PathVariable("id") String id) {
     boolean isDupl = ownerService.isDuplicatedId(id);
     return isDupl;

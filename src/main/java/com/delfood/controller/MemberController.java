@@ -79,7 +79,7 @@ public class MemberController {
    * @param id 중복체크를 진행할 고객 아이디
    * @return
    */
-  @GetMapping("idCheck/{id}")
+  @GetMapping("duplicated/{id}")
   public boolean idCheck(@PathVariable @NotNull String id) {
     boolean idDuplicated = memberService.isDuplicatedId(id);
     return idDuplicated;
