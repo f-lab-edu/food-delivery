@@ -134,11 +134,11 @@ public class MenuGroupController {
       @RequestBody UpdateMenuGroupRequest request) {
     
     if (request.getId() == null) {
-      return new ResponseEntity<String>(EMPTY_ID, HttpStatus.BAD_REQUEST);
+      return EMPTY_ID;
     }
     
     if (request.getName() == null) {
-      return new ResponseEntity<String>(EMPTY_NAME, HttpStatus.BAD_REQUEST);
+      return EMPTY_NAME;
     }
     
     Long id = request.getId();
@@ -160,9 +160,9 @@ public class MenuGroupController {
   @PutMapping("/shops/{shopId}/menuGroups/priority")
   @OwnerShopCheck
   public void updateMenuGroupPriority(
-      @PathVariable("shopId") Long shopId, @RequestBody List<Long> idList) {
+      @PathVariable Long shopId, @RequestBody List<Long> iddList) {
     
-    menuGroupService.updateMenuGroupPriority(shopId, idList);
+    menuGroupService.updateMenuGroupPriority(shopId, iddList);
   }
 
   /**
@@ -183,8 +183,8 @@ public class MenuGroupController {
   
   // ==================== static =====================
   
-  private static final String EMPTY_ID = "EMPTY_ID";
-  private static final String EMPTY_NAME = "EMPTY_NAME";
+  private static final ResponseEntity<String> EMPTY_ID = new ResponseEntity<>("id is empty.", HttpStatus.BAD_REQUEST);
+  private static final ResponseEntity<String> EMPTY_NAME = new ResponseEntity<>("name is empty.", HttpStatus.BAD_REQUEST);
   
   // ===================== resopnse 객체 =====================
   

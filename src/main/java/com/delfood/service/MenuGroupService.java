@@ -129,12 +129,8 @@ public class MenuGroupService {
       throw new InvalidMenuGroupCountException("The menugroup of targets is not correct.");
     }
     
-    for (int i = 1; i <= idList.size(); i++) {
-      if ((menuGroupMapper.updateMenuGroupPriority(idList.get(i - 1), i)) == 0) {
-        log.error("Invalid menu group. {}", idList);
-        throw new InvalidMenuGroupIdException("Invalid menu group");
-      }
-    }
+    menuGroupMapper.updateMenuGroupPriority(shopId, idList);
+    
   }
   
 }

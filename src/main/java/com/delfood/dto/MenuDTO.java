@@ -54,7 +54,11 @@ public class MenuDTO {
    * @return
    */
   public static boolean hasNullDataBeforeAdd(MenuDTO menuInfo) {
-    return menuInfo.getName() == null || menuInfo.getPrice() == null
-        || menuInfo.getMenuGroupId() == null;
+    if (menuInfo.getName() == null || menuInfo.getPrice() == null
+        || menuInfo.getMenuGroupId() == null) {
+      return true;
+    }
+    return false;
   }
+
 }

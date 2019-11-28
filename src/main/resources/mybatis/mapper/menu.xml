@@ -25,7 +25,7 @@
 	<insert id="insertMenu" parameterType="menu">
 		INSERT INTO MENU(name, price, photo, priority, content, menu_group_id)
 		VALUES(#{name}, #{price}, #{photo},
-		(SELECT MAX(priority)+1 FROM MENU MENUS WHERE menu_group_id = #{menuGroupId}),
+		(SELECT IFNULL(MAX(priority)+1, 0) FROM MENU AS MENUS WHERE menu_group_id = #{menuGroupId}),
 		 #{content}, #{menuGroupId})
 		<selectKey resultType="long" keyProperty="id" order="AFTER">
         SELECT LAST_INSERT_ID()
@@ -47,8 +47,17 @@
 	
 	<update id="updateMenuPriority">
 		UPDATE MENU
-		SET priority = #{priority}
-		WHERE id = #{id}
+		SET priority = CASE 
+		<foreach collection="idList" item="id" index="index">
+			WHEN id = #{id} THEN #{index}
+		</foreach>
+		END
+		WHERE id IN (
+		SELECT * FROM 
+		(SELECT id FROM MENU 
+		WHERE menu_group_id = #{menuGroupId} 
+		AND status != "DELETED") 
+		TMP)
 	</update>
 	
 	<update id="updateMenu" parameterType="menu">

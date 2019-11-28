@@ -15,7 +15,7 @@
 	</resultMap>
 
 	<sql id="selectMenuGroup">
-		SELECT id, name, content, create_at createdAt, updated_at updatedAt, status, priority, shop_id shopId
+		SELECT id, name, content, created_at createdAt, updated_at updatedAt, status, priority, shop_id shopId
 		FROM MENU_GROUP
 	</sql>
 
@@ -56,7 +56,7 @@
 
 	<select id="findMenubyGroupId" resultType="menu">
 		<include refid="selectMenu"></include>
-		WHERE menuGroupId = #{menuGroupId}
+		WHERE menuGroupId = #{id}
 		AND status != "DELETED" 
 	</select>
 	
@@ -74,9 +74,17 @@
 	</select>
 	
 	<update id="updateMenuGroupPriority">
-		UPDATE MENU_GROUP
-		SET priority = #{priority},
-		WHERE id = #{id}
+		UPDATE MENU
+		SET priority = CASE 
+		<foreach collection="idList" item="id" index="index">
+			WHEN id = #{id} THEN #{index}
+		</foreach>
+		END
+		WHERE id IN (
+		SELECT * FROM 
+		(SELECT id FROM MENU 
+		WHERE shop_id = #{shopId} 
+		AND status != "DELETED") 
+		TMP)
 	</update>
-	
 </mapper>

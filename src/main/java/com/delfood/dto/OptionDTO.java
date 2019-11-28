@@ -43,8 +43,7 @@ public class OptionDTO {
    */
   public static boolean hasNullDataBeforeCreate(OptionDTO optionInfo) {
     if (optionInfo.getName() == null
-        || optionInfo.getPrice() == null
-        || optionInfo.getMenuId() == null) {
+        || optionInfo.getPrice() == null) {
       return true;
     }
     return false;

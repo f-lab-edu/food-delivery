@@ -40,7 +40,7 @@ public class MenuService {
     Long menuId = menuMapper.insertMenu(menuInfo);
     if (menuId == null) {
       log.error("insert menu error! menuInfo : {}",menuInfo);
-      throw new RuntimeException("insert menu error!" + menuInfo);
+      throw new NullPointerException("insert menu error!" + menuInfo);
     }
     return menuId;
   }
@@ -90,12 +90,7 @@ public class MenuService {
       throw new RuntimeException("The menu of targets is not correct.");
     }
     
-    for (int i = 1; i <= idList.size(); i++) {
-      if ((menuMapper.updateMenuPriority(idList.get(i - 1), i)) == 0) {
-        log.error("Invalid menu id {}", idList.get(i - 1));
-        throw new RuntimeException("Invalid menu id");
-      }
-    }
+    menuMapper.updateMenuPriority(menuGroupId, idList);
   }
 
   /**
