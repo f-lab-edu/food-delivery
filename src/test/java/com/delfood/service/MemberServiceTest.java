@@ -32,7 +32,7 @@ public class MemberServiceTest {
   public MemberDTO generateMember() {
     MemberDTO member = new MemberDTO();
     member.setId("testMemberId");
-    member.setPassword("testMemberPassword");
+    member.setPassword(SHA256Util.encryptSHA256("testMemberPassword"));
     member.setName("testUserName");
     member.setTel("010-1111-2222");
     member.setMail("test@mail.com");
@@ -83,17 +83,20 @@ public class MemberServiceTest {
     MemberDTO member = generateMember();
     given(mapper.updateMemberPassword(member.getId(), SHA256Util.encryptSHA256("1234")))
         .willReturn(1);
+    given(mapper.findByIdAndPassword(member.getId(), SHA256Util.encryptSHA256("testMemberPassword")))
+      .willReturn(member);
     
-    service.updateMemberPassword(member.getId(), "1234");
+    
+    service.updateMemberPassword(member.getId(), "testMemberPassword", "1234");
   }
   
-  @Test(expected = RuntimeException.class)
-  public void updateMemberPasswordTest_고객_비밀번호_변경_실패() {
+  @Test(expected = IllegalArgumentException.class)
+  public void updateMemberPasswordTest_고객_비밀번호_변경_실패_변경전비밀번호불일치() {
     MemberDTO member = generateMember();
-    given(mapper.updateMemberPassword(member.getId(), SHA256Util.encryptSHA256("1234")))
-        .willReturn(0);
+    given(mapper.findByIdAndPassword(member.getId(), SHA256Util.encryptSHA256("failPassword")))
+      .willReturn(null);
     
-    service.updateMemberPassword(member.getId(), "1234");
+    service.updateMemberPassword(member.getId(), "failPassword", "1234");
   }
   
   @Test

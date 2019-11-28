@@ -38,10 +38,9 @@ public class ShopSearchController {
    * @return
    */
   @GetMapping
-  public ResponseEntity<GetShopCategoriesResponse> getShopCategories() {
+  public GetShopCategoriesResponse getShopCategories() {
     List<ShopCategoryDTO> categories = shopSearchService.getCategories();
-    return new ResponseEntity<ShopSearchController.GetShopCategoriesResponse>(
-        new GetShopCategoriesResponse(categories), HttpStatus.OK);
+    return new GetShopCategoriesResponse(categories);
   }
 
   /**
@@ -54,15 +53,13 @@ public class ShopSearchController {
    */
   @GetMapping("/available/shops")
   @MemberLoginCheck
-  public ResponseEntity<GetShopByCategoryIdAndTownCodeResponse> getShopsByCategoryIdAndTownCode(
+  public GetShopByCategoryIdAndTownCodeResponse getShopsByCategoryIdAndTownCode(
       @RequestParam(required = true) Long categoryId, HttpSession session) {
     String memberId = SessionUtil.getLoginMemberId(session);
     String townCode = memberService.getTownCode(memberId);
 
-    return new ResponseEntity<GetShopByCategoryIdAndTownCodeResponse>(
-        new GetShopByCategoryIdAndTownCodeResponse(
-            shopSearchService.findByCategoryIdAndTownCode(categoryId, townCode)),
-        HttpStatus.OK);
+    return new GetShopByCategoryIdAndTownCodeResponse(
+            shopSearchService.shopSearchByCategory(categoryId, townCode));
   }
 
 

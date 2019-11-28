@@ -56,12 +56,10 @@ public class ShopController {
 
     // 입력한 데이터 중 필수 데이터가 null일 경우 400 에러코드를 반환한다.
     if (ShopDTO.hasNullDataBeforeCreate(shopInfo)) {
-      return AddShopResponse.NULL_ARGUMENTS_RESPONSE;
+      throw new NullPointerException("입점을 위해서는 필수 입력값을 입력해야 합니다");
     }
-
+    
     shopService.addShop(shopInfo);
-
-
     return AddShopResponse.CREATED_RESPONSE;
   }
 
@@ -74,14 +72,13 @@ public class ShopController {
    */
   @GetMapping
   @OwnerLoginCheck
-  public ResponseEntity<MyShopsResponse> myShops(MyShopsRequest myShopsRequest,
+  public MyShopsResponse myShops(MyShopsRequest myShopsRequest,
       HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
 
     List<ShopDTO> myShops = shopService.getMyShops(id, myShopsRequest.getLastId());
     long myShopCount = shopService.getMyShopCount(id);
-    return new ResponseEntity<MyShopsResponse>(MyShopsResponse.success(myShops, myShopCount),
-        HttpStatus.OK);
+    return MyShopsResponse.success(myShops, myShopCount);
   }
 
   /**
@@ -94,7 +91,7 @@ public class ShopController {
    */
   @PatchMapping("{id}")
   @OwnerShopCheck
-  public void updateShop(@PathVariable(required = true) Long id,
+  public void updateShop(@PathVariable Long id,
       @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session) {
     final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
     shopService.updateShop(copyData);
@@ -102,6 +99,7 @@ public class ShopController {
 
   /**
    * 매장을 오픈한다.
+   * 이미 오픈중인 매장을 오픈하려고 시도할 시 에러를 발생시킨다.
    * 
    * @author jun
    * @param id 오픈할 매장의 id
@@ -110,22 +108,15 @@ public class ShopController {
    */
   @PatchMapping("open/{id}")
   @OwnerShopCheck
-  public ResponseEntity<OpenShopResponse> openShop(
+  public ShopDTO openShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
-
-    // 매장이 오픈중일 때
-    if (shopService.notOpenCheck(id) == false) {
-      return OpenShopResponse.IS_OPEN_RESPONSE;
-    }
-
-
     shopService.openShop(id);
-    ShopDTO openShopInfo = shopService.getShop(id);
-    return new ResponseEntity<OpenShopResponse>(new OpenShopResponse(openShopInfo), HttpStatus.OK);
+    return shopService.getShop(id);
   }
 
   /**
    * 오픈할 수 있는 사장님의 모든 매장을 오픈한다.
+   * 본인의 매장중 오픈 가능한 매장을 조회한 후, 순차적으로 매장 오픈을 시도한다.
    * 
    * @author jun
    * @param session 사용자의 세션
@@ -133,15 +124,15 @@ public class ShopController {
    */
   @PatchMapping("open/")
   @OwnerLoginCheck
-  public ResponseEntity<OpenAllShopsResponse> openAllShops(HttpSession session) {
+  public List<ShopDTO> openAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     List<ShopDTO> openShops = shopService.openAllShops(ownerId);
-    return new ResponseEntity<OpenAllShopsResponse>(new OpenAllShopsResponse(openShops),
-        HttpStatus.OK);
+    return openShops;
   }
 
   /**
    * 매장을 닫는다.
+   * 오픈하지 않은 매장에 마감을 시도하면 에러를 발생시킨다.
    * 
    * @author jun
    * @param id 닫을 매장의 id
@@ -150,20 +141,15 @@ public class ShopController {
    */
   @PatchMapping("close/{id}")
   @OwnerShopCheck
-  public ResponseEntity<CloseShopResponse> closeShop(
+  public ShopDTO closeShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
-
-    // 해당 매장이 영업중이 아닐시
-    if (shopService.notOpenCheck(id) == true) {
-      return CloseShopResponse.NOT_OPEN_RESPONSE;
-    }
-
     shopService.closeShop(id);
-    return new ResponseEntity<CloseShopResponse>(HttpStatus.OK);
+    return shopService.getShop(id);
   }
 
   /**
    * 현재 오픈중인 모든 매장을 닫는다.
+   * 오픈하지 않은 매장을 조회한 후 순차적으로 마감을 시도한다.
    * 
    * @author jun
    * @param session 접속한 사용자의 세션
@@ -171,14 +157,10 @@ public class ShopController {
    */
   @PatchMapping("close/")
   @OwnerLoginCheck
-  public ResponseEntity<CloseAllShopsResponse> closeAllShops(HttpSession session) {
+  public List<ShopDTO> closeAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
-    List<ShopDTO> closeShops = shopService.closeAllShops(ownerId);
-    return new ResponseEntity<CloseAllShopsResponse>(new CloseAllShopsResponse(closeShops),
-        HttpStatus.OK);
+    return shopService.closeAllShops(ownerId);
   }
-
-
 
   /**
    * 매장 정보를 조회한다.
@@ -189,16 +171,12 @@ public class ShopController {
    */
   @GetMapping("{shopId}")
   @OwnerShopCheck
-  public ResponseEntity<ShopInfoResponse> shopInfo(
+  public ShopInfoResponse shopInfo(
       @PathVariable(value = "shopId", required = true) Long shopId, HttpSession session) {
     ShopDTO shopInfo = shopService.getShop(shopId);
     List<DeliveryLocationDTO> deliveryLocations = shopService.getDeliveryLocations(shopId);
-
-    return new ResponseEntity<ShopController.ShopInfoResponse>(
-        new ShopInfoResponse(shopInfo, deliveryLocations), HttpStatus.OK);
+    return new ShopInfoResponse(shopInfo, deliveryLocations);
   }
-
-
 
   // Response 객체
   @Getter
@@ -238,53 +216,11 @@ public class ShopController {
   }
 
 
-  @Getter
-  private static class OpenShopResponse {
-    enum Message {
-      AREADY_OPEN
-    }
-
-    @NonNull
-    private Message message;
-    private ShopDTO openShopInfo;
-
-    private static final OpenShopResponse IS_OPEN = new OpenShopResponse(Message.AREADY_OPEN);
-    
-    public static final ResponseEntity<OpenShopResponse> IS_OPEN_RESPONSE = 
-        new ResponseEntity<OpenShopResponse>(OpenShopResponse.IS_OPEN, HttpStatus.BAD_REQUEST);
-
-    public OpenShopResponse(Message message) {
-      this.message = message;
-    }
-    
-    public OpenShopResponse(ShopDTO shopInfo) {
-      this.openShopInfo = shopInfo;
-    }
-  }
-
 
   @Getter
   @AllArgsConstructor
   private static class OpenAllShopsResponse {
     List<ShopDTO> openShops;
-  }
-
-  @Getter
-  private static class CloseShopResponse {
-    enum Message {
-      NOT_OPEN
-    }
-
-    @NonNull
-    private Message message;
-    private static final CloseShopResponse NOT_OPEN = new CloseShopResponse(Message.NOT_OPEN);
-    
-    public static final ResponseEntity<CloseShopResponse> NOT_OPEN_RESPONSE = 
-        new ResponseEntity<CloseShopResponse>(CloseShopResponse.NOT_OPEN, HttpStatus.BAD_REQUEST);
-
-    public CloseShopResponse(Message message) {
-      this.message = message;
-    }
   }
 
 
