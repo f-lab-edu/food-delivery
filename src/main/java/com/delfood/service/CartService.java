@@ -35,10 +35,10 @@ public class CartService {
      * 현재 장바구니에 존재하는 모든 메뉴는 같은 매장의 메뉴라는 것이 보장된다.
      * 그렇기 때문에 단 하나의 메뉴만 꺼내서 입력하려는 메뉴와 비교해도 모든 장바구니의 메뉴가 같은 매장의 것이라는 것을 보장받을 수 있다.
      */
-    OrdersItemDTO peakData = cartDao.findPeekByMemberId(memberId);
+    OrdersItemDTO peekData = cartDao.findPeekByMemberId(memberId);
     // 장바구니에 아이템이 존재할 시 검증 로직을 실행
-    if (peakData != null) {
-      if (item.getShopId().equals(peakData.getShopId()) == false) {
+    if (peekData != null) {
+      if (item.getShopId().equals(peekData.getShopId()) == false) {
         throw new IllegalArgumentException("다른 매장의 메뉴를 함께 주문할 수 없습니다.");
       }
     }

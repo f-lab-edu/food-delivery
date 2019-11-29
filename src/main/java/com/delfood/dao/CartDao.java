@@ -77,7 +77,22 @@ public class CartDao {
    * @return 삭제에 성공할 시 true
    */
   public boolean deleteByMemberIdAndIndex(String memberId, long index) {
-    return redisTemplate.delete(RedisKeyFactory.generateCartKey(memberId));
+    /*
+     * opsForList().remove(key, count, value)
+     * key : list를 조회할 수 있는 key
+     * count > 0이면 head부터 순차적으로 조회하며 count의 절대값에 해당하는 개수만큼 제거
+     * count < 0이면 tail부터 순차적으로 조회하며 count의 절대값에 해당하는 개수만큼 제거
+     * count = 0이면 모두 조회한 후 value에 해당하는 값 모두 제거
+     * value : 주어진 값과 같은 value를 가지는 대상이 삭제 대상이 된다
+     * return값으로는 삭제한 인자의 개수를 리턴한다.
+     * 
+     * 해당 리스트에서 인덱스에 해당하는 값을 조회한 후, remove의 value값 인자로 넘겨준다.
+     * 그 후 count에 1 값을 주면 head부터 순차적으로 조회하며 index에 해당하는 값을 제거할것이다.
+     * return값이 1이면 1개를 삭제한 것이니 성공, 1이 아니라면 잘 삭제된것이 아니니 실패이다.
+     */
+    Long remove = redisTemplate.opsForList().remove(RedisKeyFactory.generateCartKey(memberId), 1,
+        redisTemplate.opsForList().index(RedisKeyFactory.generateCartKey(memberId), index));
+    return remove == 1;
   }
   
   /**

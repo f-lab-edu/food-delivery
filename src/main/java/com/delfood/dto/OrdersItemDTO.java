@@ -23,6 +23,7 @@ public class OrdersItemDTO {
   public boolean hasNullDataBeforeInsertCart() {
     return menuId == null
         || count == null
-        || count <= 0;
+        || count <= 0
+        || shopId == null;
   }
 }
