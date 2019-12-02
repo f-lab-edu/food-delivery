@@ -12,9 +12,6 @@ public class CartService {
   @Autowired
   private CartDao cartDao;
   
-  @Autowired
-  private ObjectMapper objectMapper;
-  
   /**
    * 장바구니에 메뉴를 저장한다.
    * 장바구니는 하나의 매장에 대한 메뉴만 저장이 가능하다.
@@ -77,6 +74,18 @@ public class CartService {
     if (cartDao.deleteByMemberIdAndIndex(memberId, index) == false) {
       throw new RuntimeException("삭제 실패!");
     }
-    
+  }
+  
+  /**
+   * 동일한 아이템(동일메뉴, 동일 옵션)를 장바구니에 가지고 있는지 검사한다.
+   * @param memberId 고객 아이디
+   * @param item 검사할 메뉴
+   * @return
+   */
+  public boolean containsEqualItem(String memberId, OrdersItemDTO item) {
+    return cartDao.findAllByMemberId(memberId)
+        .stream()
+        .allMatch(e -> e.getMenuId().equals(item.getMenuId())
+                    && e.getOptions().equals(item.getOptions()));
   }
 }

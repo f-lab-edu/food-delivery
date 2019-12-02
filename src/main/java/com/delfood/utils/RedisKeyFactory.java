@@ -1,17 +1,18 @@
 package com.delfood.utils;
 
 public class RedisKeyFactory {
-  private static String KEY_CART = "cart";
-  
+  public enum Key {
+    CART
+  }
   
   // 인스턴스화 방지
   private RedisKeyFactory() {}
   
-  private static String generateKey(String id, String key) {
+  private static String generateKey(String id, Key key) {
     return id + ":" + key;
   }
   
   public static String generateCartKey(String memberId) {
-    return generateKey(memberId, "cart");
+    return generateKey(memberId, Key.CART);
   }
 }

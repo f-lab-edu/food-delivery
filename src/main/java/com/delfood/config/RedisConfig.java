@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.sql.SQLException;
 import java.time.Duration;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +19,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
+@EnableTransactionManagement
 public class RedisConfig {
   @Value("${spring.redis.host}")
   private String redisHost;
@@ -90,7 +96,8 @@ public class RedisConfig {
     redisTemplate.setValueSerializer(serializer);
     redisTemplate.setHashKeySerializer(new StringRedisSerializer());
     redisTemplate.setHashValueSerializer(serializer);
-
+    redisTemplate.setEnableTransactionSupport(true); // transaction 허용
+    
     return redisTemplate;
   }
 
@@ -125,5 +132,10 @@ public class RedisConfig {
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory)
         .cacheDefaults(configuration).build();
   }
-
+  
+  @Bean
+  public PlatformTransactionManager transactionManager(DataSource dataSource) throws SQLException {
+    return new DataSourceTransactionManager(dataSource);
+  }
+  
 }
