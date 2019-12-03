@@ -3,6 +3,7 @@ package com.delfood.service;
 import static org.mockito.BDDMockito.given;
 
 import com.delfood.dao.CartDao;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,4 +19,8 @@ public class CartServiceTest {
   
   
   // 로직이 확정되면 테스트코드를 다시 작성할 예정입니다
+  @Test
+  public void mockTest() {
+    
+  }
 }
