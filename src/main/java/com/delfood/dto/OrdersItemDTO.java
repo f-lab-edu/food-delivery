@@ -1,12 +1,14 @@
 package com.delfood.dto;
 
 import java.util.List;
-import org.codehaus.commons.nullanalysis.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.codehaus.commons.nullanalysis.NotNull;
 
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"menuId", "count", "ordersItemOptions"})
 public class OrdersItemDTO {
   private Long id;
   @NotNull
@@ -15,10 +17,16 @@ public class OrdersItemDTO {
   @NotNull
   private Long count;
   
-  // 매장 아이디를 캐싱하기 위한 컬럼
+  // 캐싱용
   private Long shopId;
   
-  private List<OrdersItemOptionDTO> options;
+  // 캐싱용
+  private Long price;
+  
+  // 캐싱용
+  private String shopName;
+  
+  private List<OrdersItemOptionDTO> ordersItemOptions;
   
   public boolean hasNullDataBeforeInsertCart() {
     return menuId == null

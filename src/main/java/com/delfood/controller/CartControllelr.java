@@ -1,9 +1,13 @@
 package com.delfood.controller;
 
+import com.delfood.aop.MemberLoginCheck;
+import com.delfood.dto.OrdersItemDTO;
+import com.delfood.service.CartService;
+import com.delfood.utils.SessionUtil;
 import java.util.List;
-import java.util.function.Predicate;
 import javax.servlet.http.HttpSession;
-import org.codehaus.commons.nullanalysis.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.delfood.aop.MemberLoginCheck;
-import com.delfood.dto.OrdersItemDTO;
-import com.delfood.service.CartService;
-import com.delfood.utils.SessionUtil;
 
 @RestController
 public class CartControllelr {
@@ -45,4 +45,20 @@ public class CartControllelr {
   public void deleteCartMenu(HttpSession session, @PathVariable long index) {
     cartService.deleteCartMenu(SessionUtil.getLoginMemberId(session), index);
   }
+  
+  @GetMapping("/members/cart/price")
+  @MemberLoginCheck
+  public CartPriceResponse cartPrice(HttpSession session) {
+    return new CartPriceResponse(cartService.allPrice(SessionUtil.getLoginMemberId(session)));
+  }
+  
+  
+  
+  // Response
+  @Getter
+  @AllArgsConstructor
+  private static class CartPriceResponse {
+    private long totalPrice;
+  }
+  
 }

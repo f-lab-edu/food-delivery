@@ -36,4 +36,13 @@ public interface OptionMapper {
    * @return
    */
   public int deleteOption(Long id);
+  
+  /**
+   * 옵션 조회.
+   * 
+   * @author jun
+   * @param id 옵션 아이디
+   * @return
+   */
+  public OptionDTO findById(Long id);
 }

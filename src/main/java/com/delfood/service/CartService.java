@@ -2,7 +2,6 @@ package com.delfood.service;
 
 import com.delfood.dao.CartDao;
 import com.delfood.dto.OrdersItemDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,10 +11,19 @@ public class CartService {
   @Autowired
   private CartDao cartDao;
   
+  @Autowired
+  private MenuService menuService;
+  
+  @Autowired
+  private OptionService optionService;
+  
+  private static final long MAX_CART_ITEM_COUNT = 10;
+  
   /**
    * 장바구니에 메뉴를 저장한다.
    * 장바구니는 하나의 매장에 대한 메뉴만 저장이 가능하다.
    * 다른 매장 메뉴를 저장하려고 시도할 시 에러를 발생시킨다.
+   * 장바구니에는 최대 10종류의 아이템을 담을 수 있다.
    * 
    * @author jun
    * @param item 저장할 아이템
@@ -38,6 +46,15 @@ public class CartService {
       if (item.getShopId().equals(peekData.getShopId()) == false) {
         throw new IllegalArgumentException("다른 매장의 메뉴를 함께 주문할 수 없습니다.");
       }
+    }
+    
+    if (getOrdersItems(memberId).size() > MAX_CART_ITEM_COUNT) {
+      throw new IndexOutOfBoundsException("장바구니에는 최대 10개까지 담을 수 있습니다.");
+    }
+    
+    // 똑같은 메뉴, 옵션을 추가하려고 할 수 없도록 한다.
+    if (containsEqualItem(memberId, item)) {
+      throw new RuntimeException("똑같은 메뉴를 장바구니에 담을 수 없습니다.");
     }
     
     cartDao.addItem(item, memberId);
@@ -77,15 +94,43 @@ public class CartService {
   }
   
   /**
-   * 동일한 아이템(동일메뉴, 동일 옵션)를 장바구니에 가지고 있는지 검사한다.
+   * 동일한 아이템(동일메뉴, 동일 옵션)을 장바구니에 가지고 있는지 검사한다.
    * @param memberId 고객 아이디
    * @param item 검사할 메뉴
    * @return
    */
   public boolean containsEqualItem(String memberId, OrdersItemDTO item) {
-    return cartDao.findAllByMemberId(memberId)
-        .stream()
-        .allMatch(e -> e.getMenuId().equals(item.getMenuId())
-                    && e.getOptions().equals(item.getOptions()));
+    List<OrdersItemDTO> items = cartDao.findAllByMemberId(memberId);
+    return items.size() > 0 
+        && items.stream()
+                .anyMatch(e -> e.getMenuId().equals(item.getMenuId())
+                            && e.getOrdersItemOptions().equals(item.getOrdersItemOptions()));
+  }
+  
+  /**
+   * <b>미완성 로직</b><br>
+   * 배달료, 쿠폰 계산을 추가할 예정!<br><br>
+   * 사용자 장바구니에 있는 총 가격을 계산한다.
+   * menuService.getMenuInfo()에 캐싱 처리를 하여 DB호출을 최대한 줄일 예정.
+   * 
+   * @author jun
+   * @param memberId 고객 아이디
+   * @return
+   */
+  public long allPrice(String memberId) {
+    // To-Do : 배달료 계산 로직을 추가해야 함
+    // To-Do : 쿠폰 계산 로직을 추가해야 함
+    
+    List<OrdersItemDTO> ordersItems = getOrdersItems(memberId);
+    return ordersItems.stream()
+        .mapToLong(item -> {
+          long menuPrice = item.getCount() * menuService.getMenuInfo(item.getMenuId()).getPrice();
+          long optionsPrice =
+              item.getOrdersItemOptions().stream()
+                  .mapToLong(ordersItemOption -> optionService
+                             .getOption(ordersItemOption.getOptionId()).getPrice())
+                  .sum();
+          return menuPrice + optionsPrice;
+        }).sum();
   }
 }

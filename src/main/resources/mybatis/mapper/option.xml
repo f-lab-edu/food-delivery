@@ -26,5 +26,10 @@
     	SET status = "DELETE"
     	WHERE id = #{id}
     </delete>
-
+    
+    <select id="findById" resultType="option">
+        SELECT id, name, price, status, menu_id menuId
+        FROM OPTION
+        WHERE id = #{id}
+    </select>
 </mapper>

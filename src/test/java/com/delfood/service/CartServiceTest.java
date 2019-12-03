@@ -7,7 +7,6 @@ import com.delfood.dto.OrdersItemDTO;
 import com.delfood.dto.OrdersItemOptionDTO;
 import java.util.ArrayList;
 import java.util.List;
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,7 +25,7 @@ public class CartServiceTest {
     OrdersItemDTO item = new OrdersItemDTO();
     item.setId(1L);
     item.setMenuId(1L);
-    item.setOptions(new ArrayList<OrdersItemOptionDTO>());
+    item.setOrdersItemOptions(new ArrayList<OrdersItemOptionDTO>());
     item.setOrderId(null);
     item.setShopId(4L);
     item.setCount(1L);

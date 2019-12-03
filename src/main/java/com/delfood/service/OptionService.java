@@ -57,6 +57,10 @@ public class OptionService {
       throw new RuntimeException("delete option error!");
     }
   }
+  
+  public OptionDTO getOption(Long id) {
+    return optionMapper.findById(id);
+  }
 
   
   
