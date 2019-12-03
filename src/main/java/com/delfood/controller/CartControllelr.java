@@ -1,7 +1,7 @@
 package com.delfood.controller;
 
 import com.delfood.aop.MemberLoginCheck;
-import com.delfood.dto.OrdersItemDTO;
+import com.delfood.dto.ItemDTO;
 import com.delfood.service.CartService;
 import com.delfood.utils.SessionUtil;
 import java.util.List;
@@ -24,14 +24,14 @@ public class CartControllelr {
   
   @PostMapping("/members/cart/menus")
   @MemberLoginCheck
-  public void addMenu(@RequestBody OrdersItemDTO ordersItem, HttpSession session) {
-    cartService.addOrdersItem(ordersItem, SessionUtil.getLoginMemberId(session));
+  public void addMenu(@RequestBody ItemDTO item, HttpSession session) {
+    cartService.addOrdersItem(item, SessionUtil.getLoginMemberId(session));
   }
   
   @GetMapping("/members/cart/menus")
   @MemberLoginCheck
-  public List<OrdersItemDTO> getCart(HttpSession session) {
-    return cartService.getOrdersItems(SessionUtil.getLoginMemberId(session));
+  public List<ItemDTO> getCart(HttpSession session) {
+    return cartService.getItems(SessionUtil.getLoginMemberId(session));
   }
   
   @DeleteMapping("/members/cart/menus")

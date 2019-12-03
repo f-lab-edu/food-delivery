@@ -1,6 +1,6 @@
 package com.delfood.dao;
 
-import com.delfood.dto.OrdersItemDTO;
+import com.delfood.dto.ItemDTO;
 import com.delfood.utils.RedisKeyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class CartDao {
@@ -32,7 +31,7 @@ public class CartDao {
    * @param memberId 고객 아이디
    * @return
    */
-  public Long addItem(OrdersItemDTO item, String memberId) {
+  public Long addItem(ItemDTO item, String memberId) {
     final String key = RedisKeyFactory.generateCartKey(memberId);
     
     redisTemplate.watch(key); // 해당 키를 감시한다. 변경되면 로직 취소.
@@ -54,11 +53,11 @@ public class CartDao {
    * @param memberId 고객 아이디
    * @return
    */
-  public List<OrdersItemDTO> findAllByMemberId(String memberId) {
-    List<OrdersItemDTO> items = redisTemplate.opsForList()
+  public List<ItemDTO> findAllByMemberId(String memberId) {
+    List<ItemDTO> items = redisTemplate.opsForList()
         .range(RedisKeyFactory.generateCartKey(memberId), 0, -1)
         .stream()
-        .map(item -> objectMapper.convertValue(item, OrdersItemDTO.class))
+        .map(item -> objectMapper.convertValue(item, ItemDTO.class))
         .collect(Collectors.toList());
     return items;
   }
@@ -96,7 +95,7 @@ public class CartDao {
     return redisTemplate.opsForList()
         .range(RedisKeyFactory.generateCartKey(memberId), 0, -1)
         .stream()
-        .mapToLong(item -> objectMapper.convertValue(item, OrdersItemDTO.class).getCount())
+        .mapToLong(item -> objectMapper.convertValue(item, ItemDTO.class).getCount())
         .sum();
   }
   
@@ -132,10 +131,10 @@ public class CartDao {
    * @param memberId 고객 아이디
    * @return 리스트 첫 번째 메뉴데이터. 데이터가 없을 시 null
    */
-  public OrdersItemDTO findPeekByMemberId(String memberId) {
+  public ItemDTO findPeekByMemberId(String memberId) {
     String key = RedisKeyFactory.generateCartKey(memberId);
     return redisTemplate.opsForList().size(key) == 0 ? null
-        : objectMapper.convertValue(redisTemplate.opsForList().index(key, 0), OrdersItemDTO.class);
+        : objectMapper.convertValue(redisTemplate.opsForList().index(key, 0), ItemDTO.class);
   }
   
 }

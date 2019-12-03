@@ -1,7 +1,7 @@
 package com.delfood.service;
 
 import com.delfood.dao.CartDao;
-import com.delfood.dto.OrdersItemDTO;
+import com.delfood.dto.ItemDTO;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,9 +13,6 @@ public class CartService {
   
   @Autowired
   private MenuService menuService;
-  
-  @Autowired
-  private OptionService optionService;
   
   private static final long MAX_CART_ITEM_COUNT = 10;
   
@@ -29,7 +26,7 @@ public class CartService {
    * @param item 저장할 아이템
    * @param memberId 고객 아이디
    */
-  public void addOrdersItem(OrdersItemDTO item, String memberId) {
+  public void addOrdersItem(ItemDTO item, String memberId) {
     if (item.hasNullDataBeforeInsertCart()) {
       throw new NullPointerException("필수 입력 데이터가 누락되었습니다.");
     }
@@ -40,15 +37,15 @@ public class CartService {
      * 현재 장바구니에 존재하는 모든 메뉴는 같은 매장의 메뉴라는 것이 보장된다.
      * 그렇기 때문에 단 하나의 메뉴만 꺼내서 입력하려는 메뉴와 비교해도 모든 장바구니의 메뉴가 같은 매장의 것이라는 것을 보장받을 수 있다.
      */
-    OrdersItemDTO peekData = cartDao.findPeekByMemberId(memberId);
+    ItemDTO peekData = cartDao.findPeekByMemberId(memberId);
     // 장바구니에 아이템이 존재할 시 검증 로직을 실행
     if (peekData != null) {
-      if (item.getShopId().equals(peekData.getShopId()) == false) {
+      if (item.getShopInfo().getId().equals(peekData.getShopInfo().getId()) == false) {
         throw new IllegalArgumentException("다른 매장의 메뉴를 함께 주문할 수 없습니다.");
       }
     }
     
-    if (getOrdersItems(memberId).size() > MAX_CART_ITEM_COUNT) {
+    if (getItems(memberId).size() > MAX_CART_ITEM_COUNT) {
       throw new IndexOutOfBoundsException("장바구니에는 최대 10개까지 담을 수 있습니다.");
     }
     
@@ -65,7 +62,7 @@ public class CartService {
    * @param memberId 고객 아이디
    * @return
    */
-  public List<OrdersItemDTO> getOrdersItems(String memberId) {
+  public List<ItemDTO> getItems(String memberId) {
     return cartDao.findAllByMemberId(memberId);
   }
 
@@ -99,12 +96,9 @@ public class CartService {
    * @param item 검사할 메뉴
    * @return
    */
-  public boolean containsEqualItem(String memberId, OrdersItemDTO item) {
-    List<OrdersItemDTO> items = cartDao.findAllByMemberId(memberId);
-    return items.size() > 0 
-        && items.stream()
-                .anyMatch(e -> e.getMenuId().equals(item.getMenuId())
-                            && e.getOrdersItemOptions().equals(item.getOrdersItemOptions()));
+  public boolean containsEqualItem(String memberId, ItemDTO item) {
+    List<ItemDTO> items = cartDao.findAllByMemberId(memberId);
+    return items.contains(item);
   }
   
   /**
@@ -121,14 +115,14 @@ public class CartService {
     // To-Do : 배달료 계산 로직을 추가해야 함
     // To-Do : 쿠폰 계산 로직을 추가해야 함
     
-    List<OrdersItemDTO> ordersItems = getOrdersItems(memberId);
+    List<ItemDTO> ordersItems = getItems(memberId);
     return ordersItems.stream()
         .mapToLong(item -> {
-          long menuPrice = item.getCount() * menuService.getMenuInfo(item.getMenuId()).getPrice();
+          long menuPrice =
+              item.getCount() * menuService.getMenuInfo(item.getMenuInfo().getId()).getPrice();
           long optionsPrice =
-              item.getOrdersItemOptions().stream()
-                  .mapToLong(ordersItemOption -> optionService
-                             .getOption(ordersItemOption.getOptionId()).getPrice())
+              item.getOptions().stream()
+                  .mapToLong(itemOption -> itemOption.getPrice())
                   .sum();
           return menuPrice + optionsPrice;
         }).sum();
