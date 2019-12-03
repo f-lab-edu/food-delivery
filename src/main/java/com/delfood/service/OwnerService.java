@@ -6,6 +6,7 @@ import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.mapper.OwnerMapper;
 import com.delfood.utils.SHA256Util;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,7 +111,7 @@ public class OwnerService {
         == null) {  
       log.error("id and password do not match id : {}, password : {}",id,beforePassword);
       throw new IllegalArgumentException("id and password do not match");
-    } else if (beforePassword.equals(afterPassword)) {
+    } else if (StringUtils.equals(beforePassword, afterPassword)) {
       log.error("password duplication before: {}, after : {}", 
           beforePassword, afterPassword);
       throw new DuplicateException("password duplication");
