@@ -24,7 +24,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableTransactionManagement
 public class RedisConfig {
   @Value("${spring.redis.host}")
   private String redisHost;
@@ -35,7 +34,7 @@ public class RedisConfig {
   @Value("${spring.redis.password}")
   private String redisPwd;
 
-  @Value("${spring.redis.defaultExpireSecond}")
+  @Value("${redis.expire.second.default}")
   private long defaultExpireSecond;
   
 
@@ -133,9 +132,5 @@ public class RedisConfig {
         .cacheDefaults(configuration).build();
   }
   
-  @Bean
-  public PlatformTransactionManager transactionManager(DataSource dataSource) throws SQLException {
-    return new DataSourceTransactionManager(dataSource);
-  }
   
 }

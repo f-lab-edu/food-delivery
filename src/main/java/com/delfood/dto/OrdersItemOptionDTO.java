@@ -11,7 +11,4 @@ public class OrdersItemOptionDTO {
   private Long id;
   private Long optionId;
   private Long ordersItemId;
-  
-  // 캐싱용 컬럼
-  private Long price;
 }

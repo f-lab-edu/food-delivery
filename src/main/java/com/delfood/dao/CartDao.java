@@ -20,9 +20,9 @@ public class CartDao {
   @Autowired
   private ObjectMapper objectMapper;
   
-  @Value("${spring.redis.cartExpireSecond}")
+  @Value("${redis.expire.second.cart}")
   private long cartExpireSecond;
-  
+     
   /**
    * redis list에 해당 메뉴를 추가한다.
    * RedisKeyFactory로 고객의 아이디, 내부 키를 이용해 키를 생산한 후 메뉴를 저장시킨다.
@@ -35,15 +35,23 @@ public class CartDao {
     final String key = RedisKeyFactory.generateCartKey(memberId);
     
     redisTemplate.watch(key); // 해당 키를 감시한다. 변경되면 로직 취소.
-    if (redisTemplate.opsForList().size(key) >= 10) {
-      throw new IndexOutOfBoundsException("장바구니에는 10종류 이상 담을 수 없습니다.");
+    Long result = -1L;
+    
+    try {
+      if (redisTemplate.opsForList().size(key) >= 10) {
+        throw new IndexOutOfBoundsException("장바구니에는 10종류 이상 담을 수 없습니다.");
+      }
+
+      redisTemplate.multi();
+      redisTemplate.opsForList().rightPush(key, item);
+      redisTemplate.expire(key, cartExpireSecond, TimeUnit.SECONDS);
+
+      redisTemplate.exec();
+    } catch (Exception e) {
+      redisTemplate.discard(); // 트랜잭션 종료시 unwatch()가 호출된다
+      throw e;
     }
     
-    redisTemplate.multi();
-    Long result = redisTemplate.opsForList().rightPush(key, item);
-    redisTemplate.expire(key, cartExpireSecond, TimeUnit.SECONDS);
-    
-    redisTemplate.exec();
     return result;
   }
   

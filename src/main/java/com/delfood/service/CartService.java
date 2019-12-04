@@ -2,6 +2,8 @@ package com.delfood.service;
 
 import com.delfood.dao.CartDao;
 import com.delfood.dto.ItemDTO;
+import com.delfood.dto.OptionDTO;
+import com.delfood.error.exception.cart.DuplicateItemException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,7 @@ public class CartService {
     
     // 똑같은 메뉴, 옵션을 추가하려고 할 수 없도록 한다.
     if (containsEqualItem(memberId, item)) {
-      throw new RuntimeException("똑같은 메뉴를 장바구니에 담을 수 없습니다.");
+      throw new DuplicateItemException("똑같은 메뉴를 장바구니에 담을 수 없습니다.");
     }
     
     cartDao.addItem(item, memberId);
@@ -116,15 +118,47 @@ public class CartService {
     // To-Do : 쿠폰 계산 로직을 추가해야 함
     
     List<ItemDTO> ordersItems = getItems(memberId);
-    return ordersItems.stream()
-        .mapToLong(item -> {
-          long menuPrice =
-              item.getCount() * menuService.getMenuInfo(item.getMenuInfo().getId()).getPrice();
-          long optionsPrice =
-              item.getOptions().stream()
-                  .mapToLong(itemOption -> itemOption.getPrice())
-                  .sum();
-          return menuPrice + optionsPrice;
-        }).sum();
+    
+    return ordersItems.stream().mapToLong(this::price).sum();
   }
+  
+  /**
+   * 하나의 아이템에 대한 가격을 계산한다.
+   * 
+   * @author jun
+   * @param item 가격을 계산할 아이템
+   * @return
+   */
+  public long price(ItemDTO item) {
+    long menuPrice = menuPrice(item);
+    long optionsPrice = optionsPrice(item);
+    
+    return menuPrice + optionsPrice;
+  }
+  
+  /**
+   * 아이템에서 옵션을 제외한 메뉴의 가격을 계산한다.
+   * 
+   * @author jun
+   * @param item 가격을 계산할 아이템
+   * @return
+   */
+  public long menuPrice(ItemDTO item) {
+    return item.getMenuInfo().getPrice() * item.getCount();
+  }
+  
+  
+  /**
+   * 아이템에서 메뉴를 제외한 옵션들의 가격을 계산한다.
+   * 
+   * @author jun
+   * @param item 가격을 계산할 아이템
+   * @return
+   */
+  public long optionsPrice(ItemDTO item) {
+    return item.getOptions().stream()
+        .mapToLong(OptionDTO::getPrice)
+        .sum();
+  }
+  
 }

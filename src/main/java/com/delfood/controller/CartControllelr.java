@@ -49,7 +49,8 @@ public class CartControllelr {
   @GetMapping("/members/cart/price")
   @MemberLoginCheck
   public CartPriceResponse cartPrice(HttpSession session) {
-    return new CartPriceResponse(cartService.allPrice(SessionUtil.getLoginMemberId(session)));
+    String memberId = SessionUtil.getLoginMemberId(session);
+    return new CartPriceResponse(cartService.getItems(memberId), cartService.allPrice(memberId));
   }
   
   
@@ -58,6 +59,7 @@ public class CartControllelr {
   @Getter
   @AllArgsConstructor
   private static class CartPriceResponse {
+    private List<ItemDTO> items;
     private long totalPrice;
   }
   

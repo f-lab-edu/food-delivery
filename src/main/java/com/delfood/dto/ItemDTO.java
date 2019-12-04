@@ -3,10 +3,8 @@ package com.delfood.dto;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @EqualsAndHashCode(of = {"menuInfo", "options", "shopInfo"})
 public class ItemDTO {
   private MenuDTO menuInfo; // id, name, price
