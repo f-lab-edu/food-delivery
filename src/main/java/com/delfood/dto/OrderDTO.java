@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import org.apache.ibatis.type.Alias;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
 @Setter
@@ -22,13 +23,17 @@ public class OrderDTO {
   @NonNull
   private Long id;
   
+  // 응답 데이터의 형식을 지정해준다.
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime startTime;
   
   @NonNull
   private OrderStatus orderStatus;
   
-  private LocalDateTime exArrivalTime;
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime expectedArrivalTime;
   
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime arrivalTime;
   
   private String riderId;
