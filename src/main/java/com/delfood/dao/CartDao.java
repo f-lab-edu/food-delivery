@@ -20,7 +20,7 @@ public class CartDao {
   @Autowired
   private ObjectMapper objectMapper;
   
-  @Value("${redis.expire.second.cart}")
+  @Value("${cart.expire.second}")
   private long cartExpireSecond;
      
   /**
@@ -31,11 +31,10 @@ public class CartDao {
    * @param memberId 고객 아이디
    * @return
    */
-  public Long addItem(ItemDTO item, String memberId) {
+  public void addItem(ItemDTO item, String memberId) {
     final String key = RedisKeyFactory.generateCartKey(memberId);
     
     redisTemplate.watch(key); // 해당 키를 감시한다. 변경되면 로직 취소.
-    Long result = -1L;
     
     try {
       if (redisTemplate.opsForList().size(key) >= 10) {
@@ -51,8 +50,6 @@ public class CartDao {
       redisTemplate.discard(); // 트랜잭션 종료시 unwatch()가 호출된다
       throw e;
     }
-    
-    return result;
   }
   
   /**

@@ -13,9 +13,6 @@ public class CartService {
   @Autowired
   private CartDao cartDao;
   
-  @Autowired
-  private MenuService menuService;
-  
   private static final long MAX_CART_ITEM_COUNT = 10;
   
   /**
@@ -143,7 +140,7 @@ public class CartService {
    * @param item 가격을 계산할 아이템
    * @return
    */
-  public long menuPrice(ItemDTO item) {
+  public static long menuPrice(ItemDTO item) {
     return item.getMenuInfo().getPrice() * item.getCount();
   }
   
@@ -155,7 +152,7 @@ public class CartService {
    * @param item 가격을 계산할 아이템
    * @return
    */
-  public long optionsPrice(ItemDTO item) {
+  public static long optionsPrice(ItemDTO item) {
     return item.getOptions().stream()
         .mapToLong(OptionDTO::getPrice)
         .sum();

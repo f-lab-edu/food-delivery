@@ -34,7 +34,7 @@ public class RedisConfig {
   @Value("${spring.redis.password}")
   private String redisPwd;
 
-  @Value("${redis.expire.second.default}")
+  @Value("${default.expire.second}")
   private long defaultExpireSecond;
   
 
