@@ -5,7 +5,7 @@ Rest API형 서버로써 클라이언트는 프로토타입으로 제작하여 �
 고객 - 매장 - 라이더를 중개하는 기능을 구현할 예정입니다.<br><br>
 
 ### 프로젝트의 주요 관심사
-**공통사항**<br>
+<b>공통사항</b><br>
 - 지속적인 성능 개선
 - 나쁜 냄새가 나는 코드에 대한 리팩토링
 <br><br>
@@ -29,7 +29,7 @@ Spring boot, Maven, Mybatis, Redis, Docker, MariaDB, Jenkins, Java8, Naver Cloud
 <br>
 
 ## Wiki
-Tistory - <https://github.com/f-lab-edu/food-delivery/wiki><br>
+<https://github.com/f-lab-edu/food-delivery/wiki><br>
 Wiki에 기술 이슈에 대한 고민과 해결 방법을 포스팅한 개인 블로그의 url이 포함되어있습니다.<br>
 <br>
 ## CI
