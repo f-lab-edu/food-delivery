@@ -13,5 +13,4 @@ public class OrderFormDTO {
   
   private String addressDetail;
   
-  private Long totalPrice;
 }
