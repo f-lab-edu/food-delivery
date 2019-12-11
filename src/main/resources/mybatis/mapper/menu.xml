@@ -13,7 +13,7 @@
 		<result property="priority" column="priority"/>
 		<result property="contcent" column="contcent"/>
 		<result property="menuGroupId" column="menuGroupId"/>
-		<collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="menu" select="findOptionbyMenuId"></collection>
+		<collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="option" select="findOptionbyMenuId"></collection>
 	</resultMap>
 
 	<sql id="selectMenu">
@@ -72,5 +72,17 @@
 		WHERE status != "DELETED"
 		AND menu_group_id = #{menuGroupId}
 	</select>
+	
+	<select id="findMenuWithOptionsById" resultMap="menuResult">
+        SELECT *
+        FROM MENU
+        WHERE id = #{id}
+    </select>
+    
+    <select id="findOptionbyMenuId" resultType="option">
+        SELECT id, name, price, status, menu_id menuId
+        FROM OPTION
+        WHERE menu_id = #{id}
+    </select>
 	
 </mapper>

@@ -1,7 +1,7 @@
 package com.delfood.dto;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -49,4 +49,5 @@ public class OrderDTO {
   @NonNull
   private Long deliveryCost;
   
+  List<OrderItemDTO> items;
 }

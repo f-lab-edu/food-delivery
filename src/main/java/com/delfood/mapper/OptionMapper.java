@@ -1,7 +1,8 @@
 package com.delfood.mapper;
 
 import com.delfood.dto.OptionDTO;
-
+import com.delfood.dto.OrderItemDTO;
+import com.delfood.dto.OrderItemOptionDTO;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -36,4 +37,6 @@ public interface OptionMapper {
    * @return
    */
   public int deleteOption(Long id);
+
+  public long totalPrice(List<OrderItemOptionDTO> options);
 }

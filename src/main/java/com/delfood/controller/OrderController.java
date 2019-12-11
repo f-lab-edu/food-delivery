@@ -1,17 +1,18 @@
 package com.delfood.controller;
 
-import com.delfood.dto.OrderFormDTO;
-
+import com.delfood.aop.MemberLoginCheck;
+import com.delfood.dto.OrderDTO;
+import com.delfood.dto.OrderItemDTO;
 import com.delfood.service.OrderService;
-
 import com.delfood.utils.SessionUtil;
-
-import javax.servlet.http.HttpSession;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-
+import java.util.List;
+import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,20 +24,16 @@ public class OrderController {
   @Autowired
   OrderService orderService;
   
-  /**
-   * 주문 신청을 위한 기본 정보 조회.
-   * 
-   * @param session 현재 사용자 세션
-   * @return
-   */
-  @RequestMapping("form")
-  public ResponseEntity<OrderFormDTO> orderForm(HttpSession session) {
-    String memberId = SessionUtil.getLoginMemberId(session);
-    
-    OrderFormDTO orderFormInfo = orderService.getOrderForm(memberId);
-    
-    return new ResponseEntity<OrderFormDTO>(orderFormInfo, HttpStatus.OK);
-  }
-
   
+  @PostMapping("price")
+  @MemberLoginCheck
+  public TotalPriceResponse totalPrice(HttpSession session, @RequestBody List<OrderItemDTO> items) {
+    return new TotalPriceResponse(orderService.totalPrice(items));
+  }
+  
+  @Getter
+  @AllArgsConstructor
+  private static class TotalPriceResponse {
+    long totalPrice;
+  }
 }

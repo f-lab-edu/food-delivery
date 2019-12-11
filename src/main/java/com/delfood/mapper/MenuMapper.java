@@ -70,5 +70,13 @@ public interface MenuMapper {
    * @return
    */
   public MenuDTO findById(Long id);
+  
+  /**
+   * 메뉴를 옵션과 함께 조회한다.
+   * @author jun
+   * @param id 메뉴 아이디
+   * @return
+   */
+  public MenuDTO findMenuWithOptionsById(Long id);
 
 }

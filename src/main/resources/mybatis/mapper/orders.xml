@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.OrderMapper">
+    <resultMap type="com.delfood.dto.OrderDTO" id="orderDTO">
+        <result property="id" column="id"/>
+        <result property="startTime" column="start_time"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="exArrivalTime" column="ex_arrival_time"/>
+        <result property="arrivalTime" column="arrival_time"/>
+        <result property="riderId" column="rider_id"/>
+        <result property="addressCode" column="address_code"/>
+        <result property="addressDetail" column="address_detail"/>
+        <result property="memberId" column="member_id"/>
+        <result property="deliveryCost" column="delivery_cost"/>
+        <collection property="items" select="findItemByOrderId" column="id" javaType="java.util.ArrayList"></collection>
+    </resultMap>
+    
+    <resultMap type="com.delfood.dto.OrderItemDTO" id="orderItemDTO">
+        <result property="id" column="id"/>
+        <result property="menuId" column="menu_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="count" column="count"/>
+        <collection property="options" select="findItemOptionByItemId" column="id" javaType="java.util.ArrayList"></collection>
+    </resultMap>
+    
+    <resultMap type="com.delfood.dto.OrderItemOptionDTO" id="orderItemOptionDTO">
+        <result property="id" column="id"/>
+        <result property="optionId" column="option_id"/>
+        <result property="orderItemId" column="order_item_id"/>
+    </resultMap>
+    
+    <insert id="addOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ORDERS
+        (member_id, address_code, address_detail)
+        VALUES
+        (#{memberId}, #{addressCode}, #{addressDetail})
+    </insert>
+    
+    <insert id="addOrderItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ORDERS_ITEM
+        (menu_id, order_id, count)
+        VALUES
+        (#{menuId}, #{orderId}, #{count})
+    </insert>    
+    
+    <insert id="addOrderItemOptions">
+        INSERT INTO ORDERS_ITEM_OPTION
+        (option_id, order_item_id)
+        VALUES
+        <foreach collection="options" item="item" separator=",">
+            (#{item.optionId}, #{orderItemId})
+        </foreach>
+    </insert>
+    
+    <select id="findById" resultMap="orderDTO">
+        SELECT *
+        FROM ORDERS
+        WHERE id = #{id}
+    </select>
+    
+    <select id="findItemByOrderId" resultMap="orderItemDTO">
+        SELECT *
+        FROM ORDERS_ITEM
+        WHERE order_id = #{orderId}
+    </select>
+    
+    <select id="findItemOptionByItemId" resultType="orderItemOptionDTO">
+        SELECT *
+        FROM ORDERS_ITEM_OPTION
+        WHERE order_item_id = #{orderItemId}
+    </select>
+    
+    
+    
+</mapper>

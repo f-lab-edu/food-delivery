@@ -117,5 +117,15 @@ public class MenuService {
       throw new RuntimeException("update menu error!");
     }
   }
+  
+  /**
+   * 메뉴를 옵션정보와 함께 조회한다.
+   * @author jun
+   * @param id
+   * @return
+   */
+  public MenuDTO getMenuInfoWithOptios(Long id) {
+    return menuMapper.findMenuWithOptionsById(id);
+  }
 
 }

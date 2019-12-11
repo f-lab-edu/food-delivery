@@ -26,5 +26,11 @@
     	SET status = "DELETE"
     	WHERE id = #{id}
     </delete>
+    
+    <select id="totalPrice" resultType="long">
+        SELECT SUM(opt.price)
+        FROM   OPTION opt
+        WHERE  opt.id IN (<foreach collection="list" separator="," item="option">#{option.optionId}</foreach>)
+    </select>
 
 </mapper>

@@ -3,6 +3,7 @@ package com.delfood.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.ibatis.type.Alias;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Alias("menu")
+@EqualsAndHashCode(of = {"id"})
 public class MenuDTO {
   
   // 기본, 삭제, 숨김, 품절
