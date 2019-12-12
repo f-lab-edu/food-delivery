@@ -51,11 +51,9 @@ public class CouponDTO {
    * 
    * @author jinyoung
    */
-  public static boolean hasNullDataBeforeAdd(CouponDTO couponInfo) {
-    if (couponInfo.getName() == null || couponInfo.getDiscountType() == null
-        || couponInfo.getDiscountValue() == null || couponInfo.getEndAt() == null) {
-      return true;
-    }
-    return false;
+  public static boolean hasNullData(CouponDTO couponInfo) {
+    return couponInfo.getName() == null || couponInfo.getDiscountType() == null
+        || couponInfo.getDiscountValue() == null || couponInfo.getEndAt() == null;
+    
   }
 }

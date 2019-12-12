@@ -2,13 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.CouponMapper">
 
-	<insert id="insertCoupon" parameterType="coupon">
-		INSERT INTO COUPON(name, discount_type, discount_value, end_at)
-		VALUES(#{name}, #{discountType}, #{discountValue}, #{endAt})
-		<selectKey keyColumn="createdAt" resultType="java.time.LocalDateTime" order="AFTER">
-			SELECT created_at createdAt FROM COUPON
-			WHERE id = (SELECT LAST_INSERT_ID())
-		</selectKey>
-	</insert>
-        
+    <insert id="insertCoupon" parameterType="coupon">
+        INSERT INTO COUPON(name, discount_type, discount_value, end_at)
+        VALUES(#{name}, #{discountType}, #{discountValue}, #{endAt})
+        <selectKey keyProperty="createdAt" resultType="java.time.LocalDateTime" order="AFTER">
+        SELECT created_at FROM COUPON
+        WHERE id = (SELECT LAST_INSERT_ID())
+        </selectKey>
+    </insert>
+    
+    <update id="updateCoupon">
+        UPDATE COUPON
+        SET name = #{name}
+        AND endAt = #{endAt}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="deleteCoupon">
+        UPDATE COUPON
+        SET status = "DELETED"
+        WHERE id = #{id}
+    </update>
+    
 </mapper>

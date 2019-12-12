@@ -2,9 +2,11 @@ package com.delfood.service;
 
 import com.delfood.dto.CouponDTO;
 import com.delfood.dto.CouponDTO.DiscountType;
+import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.mapper.CouponMapper;
-
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,9 @@ public class CouponService {
   @Autowired
   private CouponMapper couponMapper;
   
+  @Autowired
+  private CouponIssueService couponIssueService;
+  
   /**
    * 쿠폰 추가.
    * @param couponInfo
@@ -29,13 +34,19 @@ public class CouponService {
     
     verifyDiscountData(couponInfo.getDiscountType(), couponInfo.getDiscountValue());
     
-    LocalDateTime createdAt = couponMapper.insertCoupon(couponInfo);
-    
-    if (couponInfo.getEndAt().isBefore(createdAt)) {
-      log.error("coupon expiration date is ealire than creation date! "
-          + "EndAt : {}, startAt : {}",couponInfo.getEndAt(), createdAt);
-      throw new RuntimeException("coupon expiration date is ealire than creation date!");
+    Long insertResult = couponMapper.insertCoupon(couponInfo);
+
+    if (insertResult != 1) {
+      log.error("coupon Insert Error! {}", couponInfo.toString());
+      throw new RuntimeException("coupon Insert Error");
     }
+    
+    if (couponInfo.getEndAt().isBefore(couponInfo.getCreatedAt())) {
+      log.error("coupon expiration date is ealire than creation date! "
+          + "EndAt : {}, startAt : {}",couponInfo.getEndAt(), couponInfo.getCreatedAt());
+      throw new DateTimeException("coupon expiration date is ealire than creation date!");
+    }
+    
   }
   
   /**
@@ -52,6 +63,45 @@ public class CouponService {
       log.error("coupon discount setting error! couponType : {} , discountValue : {}",
           discountType, discountValue);
       throw new IllegalArgumentException("coupon discount setting error!");
+    }
+  }
+  
+  /**
+   * 쿠폰 이름과 만료일 수정.
+   * 
+   * @param id 쿠폰 아이디
+   * @param name 이름
+   * @param endAt 만료일
+   */
+  @Transactional(rollbackFor = RuntimeException.class)
+  public void updateCouponNameAndEndAt(Long id, String name, LocalDateTime endAt) {
+    if (couponIssueService.isIssued(id)) {
+      log.error("Issued Coupon already exists");
+      throw new IssuedCouponExistException("Issued Coupon already exists");
+    }
+    
+    int result = couponMapper.updateCouponNameAndEndAt(id, name, endAt);
+    if (result != 0) {
+      log.error("coupon update error! id : {}, name : {}, EndAt : {} ", id, name, endAt);
+      throw new RuntimeException("coupon update error!");
+    }
+  }
+  
+  /**
+   * 쿠폰삭제.
+   * @param id 쿠폰 아이디
+   */
+  @Transactional(rollbackFor = RuntimeException.class)
+  public void deleteCoupon(Long id) {
+    if (couponIssueService.isIssued(id)) {
+      log.error("Issued Coupon already exists");
+      throw new IssuedCouponExistException("Issued Coupon already exists");
+    }
+    
+    int result = couponMapper.deleteCoupon(id);
+    if (result != 1) {
+      log.error("coupon delete error! id : {}",id);
+      throw new RuntimeException("coupon delete error!");
     }
   }
 }
