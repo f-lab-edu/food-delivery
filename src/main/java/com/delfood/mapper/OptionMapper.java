@@ -39,4 +39,6 @@ public interface OptionMapper {
   public int deleteOption(Long id);
 
   public long totalPrice(List<OrderItemOptionDTO> options);
+
+  public OptionDTO findById(Long id);
 }

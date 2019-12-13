@@ -1,5 +1,7 @@
 package com.delfood.mapper;
 
+import com.delfood.dto.ItemsBillDTO.ShopInfo;
+import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
 import java.util.List;
@@ -121,5 +123,7 @@ public interface ShopMapper {
   public List<ShopDTO> findByBeOpen(String ownerId);
 
   public List<ShopDTO> findByBeClose(String ownerId);
+
+  public ItemsBillDTO.ShopInfo findIdAndNameByMenuId(Long menuId);
 
 }

@@ -3,6 +3,7 @@ package com.delfood.error;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
+import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.error.exception.shop.CanNotCloseShopException;
 import com.delfood.error.exception.shop.CanNotOpenShopException;
 import org.springframework.http.HttpStatus;
@@ -68,6 +69,12 @@ public class ErrorController {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(value = {CanNotOpenShopException.class, CanNotCloseShopException.class})
   public ErrorMsg handleCannotShopException(RuntimeException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
+  
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(TotalPriceMismatchException.class)
+  public ErrorMsg handleTotalPriceMismatchException(TotalPriceMismatchException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
 }

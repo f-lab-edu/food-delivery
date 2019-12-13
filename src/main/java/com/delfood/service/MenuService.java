@@ -124,7 +124,7 @@ public class MenuService {
    * @param id
    * @return
    */
-  public MenuDTO getMenuInfoWithOptios(Long id) {
+  public MenuDTO getMenuInfoWithOptions(Long id) {
     return menuMapper.findMenuWithOptionsById(id);
   }
 

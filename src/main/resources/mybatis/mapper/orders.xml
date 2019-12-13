@@ -53,19 +53,20 @@
     </insert>
     
     <select id="findById" resultMap="orderDTO">
-        SELECT *
+        SELECT id, start_time, order_status, ex_arrival_time, arrival_time, rider_id, address_code, address_detail,
+                member_id, delivery_cost
         FROM ORDERS
         WHERE id = #{id}
     </select>
     
     <select id="findItemByOrderId" resultMap="orderItemDTO">
-        SELECT *
+        SELECT id, menu_id, order_id, count
         FROM ORDERS_ITEM
         WHERE order_id = #{orderId}
     </select>
     
     <select id="findItemOptionByItemId" resultType="orderItemOptionDTO">
-        SELECT *
+        SELECT id, option_id, order_item_id
         FROM ORDERS_ITEM_OPTION
         WHERE order_item_id = #{orderItemId}
     </select>

@@ -63,6 +63,10 @@ public class OptionService {
   public long totalPrice(List<OrderItemOptionDTO> options) {
     return optionMapper.totalPrice(options);
   }
+  
+  public OptionDTO getOptionInfo(Long id) {
+    return optionMapper.findById(id);
+  }
 
   
   
