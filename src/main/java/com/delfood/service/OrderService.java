@@ -53,7 +53,7 @@ public class OrderService {
   @Transactional
   public void order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient) {
     // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
-    long totalPriceFromServer = totalPrice(items);
+    long totalPriceFromServer = totalPrice(memberId, items);
     if (totalPriceFromServer != totalPriceFromClient) {
       log.error("Total Price Mismatch! client price : {}, server price : {}",
           totalPriceFromClient,
@@ -119,6 +119,7 @@ public class OrderService {
    * @param items 주문 상품들. 메뉴, 옵션 리스트가 존재한다.
    * @return
    */
+  @Transactional(readOnly = true)
   public ItemsBillDTO getBill(String memberId, List<OrderItemDTO> items) {
     // 고객 주소 정보 추출
     AddressDTO addressInfo = memberService.getMemberInfo(memberId).getAddressInfo();
@@ -128,8 +129,20 @@ public class OrderService {
     double distanceMeter =
         addressService.getDistanceMeter(shopInfo.getAddressCode(),
             addressInfo.getBuildingManagementNumber());
-    ItemsBillDTO bill = new ItemsBillDTO(memberId, addressInfo, shopInfo, distanceMeter);
     
+    // 배달료 계산
+    long deliveryPrice = addressService.deliveryPrice(distanceMeter);
+    
+    // 계산서 생성
+    ItemsBillDTO bill = ItemsBillDTO.builder()
+                                    .memberId(memberId)
+                                    .addressInfo(addressInfo)
+                                    .shopInfo(shopInfo)
+                                    .distanceMeter(distanceMeter)
+                                    .deliveryPrice(deliveryPrice)
+                                    .build();
+    
+    /// 계산서에 각 항목별로 가격과 이름 등을 추가
     for (OrderItemDTO item : items) {
       MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
       MenuInfo billMenuInfo = MenuInfo.builder()
@@ -137,6 +150,8 @@ public class OrderService {
           .name(menuInfo.getName())
           .price(menuInfo.getPrice())
           .build();
+      
+      // 항목별 옵션 정보 추가
       for (OrderItemOptionDTO orderItemOption : item.getOptions()) {
         OptionDTO optionInfo = optionService.getOptionInfo(orderItemOption.getOptionId());
         OptionInfo billOptionInfo = OptionInfo.builder()
@@ -157,8 +172,11 @@ public class OrderService {
    * @param items 계산할 아이템들
    * @return 총 가격
    */
-  public long totalPrice(List<OrderItemDTO> items) {
+  @Transactional(readOnly = true)
+  public long totalPrice(String memberId, List<OrderItemDTO> items) {
     long totalPrice = 0L;
+    
+    // 아이템 계산
     for (OrderItemDTO item : items) {
       long optionsPrice = 0L;
       MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
@@ -169,8 +187,21 @@ public class OrderService {
       long menuPrice = menuInfo.getPrice();
       totalPrice += optionsPrice + menuPrice;
     }
+    
+    // 배달료 계산
+    Long menuId = items.get(0).getMenuId();
+    String memberAddressCode = memberService.getMemberInfo(memberId).getAddressCode();
+    ShopInfo shopInfo = shopService.getShopByMenuId(menuId);
+    String shopAddressCode = shopInfo.getAddressCode();
+    
+    long deliveryCost = addressService
+        .deliveryPrice(addressService.getDistanceMeter(memberAddressCode, shopAddressCode));
+    
+    totalPrice += deliveryCost;
+    
     return totalPrice;
   }
+  
   
   public double addressDistance(String startAddressCode, String endAddressCode) {
     return addressService.getDistanceMeter(startAddressCode, endAddressCode);

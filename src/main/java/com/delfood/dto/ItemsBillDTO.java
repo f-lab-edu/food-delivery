@@ -20,7 +20,7 @@ public class ItemsBillDTO {
   @NonNull
   private ShopInfo shopInfo;
   
-  private double distanceMeter;
+  private DeliveryInfo deliveryInfo;
   
   /**
    * 해당 인자를 세팅하여 새로운 객체를 반환한다.
@@ -28,14 +28,20 @@ public class ItemsBillDTO {
    * @param memberId 고객 아이디
    * @param addressInfo 고객 주소정보
    */
+  @Builder
   public ItemsBillDTO(@NonNull String memberId,
       @NonNull AddressDTO addressInfo,
       @NonNull ShopInfo shopInfo,
-      double distanceMeter) {
+      double distanceMeter,
+      long deliveryPrice) {
     this.memberId = memberId;
     this.addressInfo = addressInfo;
     this.shopInfo = shopInfo;
-    this.distanceMeter = distanceMeter;
+    this.deliveryInfo = DeliveryInfo.builder()
+                                    .distanceMeter(distanceMeter)
+                                    .deliveryPrice(deliveryPrice)
+                                    .build();
+    
     menus = new ArrayList<ItemsBillDTO.MenuInfo>();
   }
   
@@ -80,6 +86,13 @@ public class ItemsBillDTO {
     private String name;
     
     private String addressCode;
+  }
+  
+  @Builder
+  @Getter
+  public static class DeliveryInfo {
+    private double distanceMeter;
+    private long deliveryPrice;
   }
 
 }
