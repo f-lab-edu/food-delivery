@@ -20,6 +20,8 @@ public class ItemsBillDTO {
   @NonNull
   private ShopInfo shopInfo;
   
+  private double distanceMeter;
+  
   /**
    * 해당 인자를 세팅하여 새로운 객체를 반환한다.
    * 리스트인 'menus'에는 ArrayList를 할당한다.
@@ -28,10 +30,12 @@ public class ItemsBillDTO {
    */
   public ItemsBillDTO(@NonNull String memberId,
       @NonNull AddressDTO addressInfo,
-      @NonNull ShopInfo shopInfo) {
+      @NonNull ShopInfo shopInfo,
+      double distanceMeter) {
     this.memberId = memberId;
     this.addressInfo = addressInfo;
     this.shopInfo = shopInfo;
+    this.distanceMeter = distanceMeter;
     menus = new ArrayList<ItemsBillDTO.MenuInfo>();
   }
   
@@ -74,6 +78,8 @@ public class ItemsBillDTO {
     
     @NonNull
     private String name;
+    
+    private String addressCode;
   }
 
 }

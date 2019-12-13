@@ -28,4 +28,8 @@ public class AddressService {
   public List<AddressDTO> getAddressByRoadName(GetAddressesByRoadRequest searchInfo) {
     return addressMapper.findByRoadName(searchInfo);
   }
+  
+  public double getDistanceMeter(String startAddressCode, String endAddressCode) {
+    return addressMapper.findDistanceMeterByAddressCode(startAddressCode, endAddressCode);
+  }
 }

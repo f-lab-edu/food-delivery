@@ -75,4 +75,11 @@
         LIMIT   10
     </select>
         
+    <select id="findDistanceMeterByAddressCode" resultType="double">
+        SELECT SQRT(POW(a.building_center_point_x_coordinate - b.building_center_point_x_coordinate, 2) 
+                  + POW(a.building_center_point_y_coordinate - b.building_center_point_y_coordinate, 2)) as distanceKilometer
+        FROM   ADDRESS a, ADDRESS b
+        WHERE  a.building_management_number = #{startAddressCode}
+        AND    b.building_management_number = #{endAddressCode}
+    </select>
 </mapper>

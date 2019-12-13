@@ -13,4 +13,6 @@ public interface AddressMapper {
   public List<AddressDTO> findByZipName(GetAddressByZipRequest searchInfo);
 
   public List<AddressDTO> findByRoadName(GetAddressesByRoadRequest searchInfo);
+
+  public double findDistanceMeterByAddressCode(String startAddressCode, String endAddressCode);
 }

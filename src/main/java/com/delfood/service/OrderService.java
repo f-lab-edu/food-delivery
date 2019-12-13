@@ -39,6 +39,9 @@ public class OrderService {
   @Autowired
   private ShopService shopService;
   
+  @Autowired
+  private AddressService addressService;
+  
   /**
    * <b>미완성 로직</b><br>
    * 주문 요청을 진행한다.
@@ -117,9 +120,15 @@ public class OrderService {
    * @return
    */
   public ItemsBillDTO getBill(String memberId, List<OrderItemDTO> items) {
+    // 고객 주소 정보 추출
     AddressDTO addressInfo = memberService.getMemberInfo(memberId).getAddressInfo();
+    // 매장 정보 추출
     ShopInfo shopInfo = shopService.getShopByMenuId(items.get(0).getMenuId());
-    ItemsBillDTO bill = new ItemsBillDTO(memberId, addressInfo, shopInfo);
+    // 거리 계산
+    double distanceMeter =
+        addressService.getDistanceMeter(shopInfo.getAddressCode(),
+            addressInfo.getBuildingManagementNumber());
+    ItemsBillDTO bill = new ItemsBillDTO(memberId, addressInfo, shopInfo, distanceMeter);
     
     for (OrderItemDTO item : items) {
       MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
@@ -161,6 +170,10 @@ public class OrderService {
       totalPrice += optionsPrice + menuPrice;
     }
     return totalPrice;
+  }
+  
+  public double addressDistance(String startAddressCode, String endAddressCode) {
+    return addressService.getDistanceMeter(startAddressCode, endAddressCode);
   }
   
 
