@@ -5,8 +5,18 @@
     <select id="countCouponIssue">
         SELECT COUNT(*) FROM COUPON_ISSUE
         WHERE coupon_id = #{couponId}
-        LIMIT 1
     </select>
+    
+    <insert id="insertCouponIssue">
+        INSERT INTO COUPON_ISSUE(member_id, coupon_id)
+        VALUES(#{memberId}, #{couponId})
+    </insert>
+    
+    <update id="updateCouponIssueStatusToUsed">
+        UPDATE COUPON_ISSUE
+        SET status = 'USED'
+        WHERE id = #{id}
+    </update>
     
     
 </mapper>

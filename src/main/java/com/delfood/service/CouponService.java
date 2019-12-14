@@ -4,9 +4,8 @@ import com.delfood.dto.CouponDTO;
 import com.delfood.dto.CouponDTO.DiscountType;
 import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.mapper.CouponMapper;
-import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class CouponService {
     if (couponInfo.getEndAt().isBefore(couponInfo.getCreatedAt())) {
       log.error("coupon expiration date is ealire than creation date! "
           + "EndAt : {}, startAt : {}",couponInfo.getEndAt(), couponInfo.getCreatedAt());
-      throw new DateTimeException("coupon expiration date is ealire than creation date!");
+      throw new IllegalStateException("coupon expiration date is ealire than creation date!");
     }
     
   }
@@ -72,6 +71,8 @@ public class CouponService {
    * @param id 쿠폰 아이디
    * @param name 이름
    * @param endAt 만료일
+   * 
+   * @author jinyoung
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void updateCouponNameAndEndAt(Long id, String name, LocalDateTime endAt) {
@@ -81,7 +82,7 @@ public class CouponService {
     }
     
     int result = couponMapper.updateCouponNameAndEndAt(id, name, endAt);
-    if (result != 0) {
+    if (result != 1) {
       log.error("coupon update error! id : {}, name : {}, EndAt : {} ", id, name, endAt);
       throw new RuntimeException("coupon update error!");
     }
@@ -90,6 +91,8 @@ public class CouponService {
   /**
    * 쿠폰삭제.
    * @param id 쿠폰 아이디
+   * 
+   * @author jinyoung
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void deleteCoupon(Long id) {
@@ -104,4 +107,13 @@ public class CouponService {
       throw new RuntimeException("coupon delete error!");
     }
   }
+  
+  /**
+   * 사용 가능한 쿠폰을 조회한다. (만료일이 현재시간 이후의 쿠폰만 조회)
+   * @return 쿠폰 리스트
+   */
+  public List<CouponDTO> getAvaliableCoupons() {
+    return couponMapper.findByEndAtGreaterThanNow();
+  }
+  
 }

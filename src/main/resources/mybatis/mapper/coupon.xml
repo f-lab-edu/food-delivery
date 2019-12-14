@@ -11,10 +11,10 @@
         </selectKey>
     </insert>
     
-    <update id="updateCoupon">
+    <update id="updateCouponNameAndEndAt">
         UPDATE COUPON
         SET name = #{name}
-        AND endAt = #{endAt}
+        AND end_at = #{endAt}
         WHERE id = #{id}
     </update>
     
@@ -23,5 +23,12 @@
         SET status = "DELETED"
         WHERE id = #{id}
     </update>
+    
+    <select id="findByEndAtGreaterThanNow">
+        SELECT id, name, discount_type, discount_value, created_at, end_at
+        FROM COUPON
+        WHERE end_at &gt; NOW()
+        AND status != 'DELETED'
+    </select>
     
 </mapper>
