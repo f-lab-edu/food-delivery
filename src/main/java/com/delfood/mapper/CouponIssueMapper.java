@@ -46,4 +46,11 @@ public interface CouponIssueMapper {
    */
   public int updateCouponIssueStatusToUsed(Long id);
 
+  /**
+   * 회원이 가진 쿠폰들을 조회한다.
+   * @param memberId 회원 아이디
+   * @return
+   */
+  public List<CouponIssueDTO> findByMemberId(String memberId);
+
 }

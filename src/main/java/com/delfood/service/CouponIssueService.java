@@ -30,6 +30,12 @@ public class CouponIssueService {
     return couponIssueMapper.countCouponIssue(couponId) > 0;
   }
   
+  /**
+   * 회원이 이미 해당 쿠폰을 발급받은 적이 있는지 체크한다.
+   * @param memberId 회원 아이디
+   * @param couponId 쿠폰 아이디
+   * @return
+   */
   public boolean checkDuplicateIssue(String memberId, Long couponId) {
     return couponIssueMapper.countCouponIssueByMemberIdAndCouponId(memberId, couponId) > 0;
   }
@@ -71,5 +77,17 @@ public class CouponIssueService {
       throw new RuntimeException("update coupon status error!");
     }
   }
+  
+  /**
+   * 회원이 가진 발행 쿠폰들을 조회한다.
+   * @param memberId 회원 아이디
+   * @return
+   */
+  public List<CouponIssueDTO> getCouponIssues(String memberId) {
+    return couponIssueMapper.findByMemberId(memberId);
+  }
+  
+  
+  
   
 }

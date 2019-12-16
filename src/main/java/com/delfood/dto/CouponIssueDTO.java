@@ -20,17 +20,30 @@ public class CouponIssueDTO {
     DEFAULT, USED
   }
   
+  public enum DiscountType {
+    WON, PERCENT
+  }
+  
   private Long id;
   
   private String memberId;
   
   private Long couponId;
   
-  @JsonFormat(pattern = "yy-MM-dd hh:mm:ss")
-  private LocalDateTime createdAt;
-  
   private Status status;
   
   private Long paymentId;
+  
+  private DiscountType discountType;
+  
+  private String name;
+  
+  private Long discountValue;
+  
+  @JsonFormat(pattern = "yy-MM-dd hh:mm:ss")
+  private LocalDateTime createdAt;
+  
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime endAt;
   
 }
