@@ -101,5 +101,61 @@
         WHERE order_item_id = #{orderItemId}
     </select>
     
+    <resultMap type="com.delfood.dto.OrderBillDTO" id="preOrderBill">
+        <id property="orderId" column="orderId"/>
+        <result property="startTime" column="startTime"/>
+        <result property="orderStatus" column="orderStatus"/>
+        <result property="memberId" column="memberId"/>
+        <result property="deliveryCost" column="deliveryCost"/>
+        <association property="addressInfo" column="addressCode">
+            <id property="buildingManagementNumber" column="buildingManagementNumber"/>
+            <result property="cityName" column="cityName"/>
+            <result property="cityCountryName" column="cityCountryName"/>
+            <result property="townName" column="townName"/>
+            <result property="roadName" column="roadName"/>
+            <result property="buildingNumber" column="buildingNumber"/>
+            <result property="buildingSideNumber" column="buildingSideNumber"/>
+            <result property="addressDetail" column="addressDetail"/>
+        </association>
+        <collection property="menus" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo">
+            <id property="id" column="menuId"/>
+            <result property="name" column="menuName"/>
+            <result property="price" column="menuPrice"/>
+            <collection property="options" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo$OptionInfo">
+                <id property="id" column="optionId"/>
+                <result property="name" column="optionName"/>
+                <result property="price" column="optionPrice"/>
+            </collection>
+        </collection>
+    </resultMap>
+    
+    <select id="findOrderBill" resultMap="preOrderBill">
+        SELECT odr.id orderId,
+               odr.start_time startTime,
+               odr.delivery_cost deliveryCost,
+               odr.address_code addressCode,
+               m.id menuId,
+               m.name menuName,
+               m.price menuPrice,
+               m_opt.id optionId,
+               m_opt.name optionName,
+               m_opt.price optionPrice,
+               addr.building_management_number buildingManagementNumber,
+               addr.city_name cityName,
+               addr.city_country_name cityCountryName,
+               addr.town_name townName,
+               addr.road_name roadName,
+               addr.building_number buildingNumber,
+               addr.building_side_number buildingSideNumber,
+               odr.address_detail addressDetail,
+               odr.member_id memberId,
+               odr.order_status orderStatus
+        FROM   ORDERS odr LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+               JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+               JOIN MENU m ON (m.id = item.menu_id)
+               JOIN OPTION m_opt ON (item_opt.option_id = m_opt.id)
+               JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
+        WHERE  odr.id = #{orderId}
+    </select>
     
 </mapper>

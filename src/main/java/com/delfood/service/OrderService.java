@@ -1,5 +1,6 @@
 package com.delfood.service;
 
+import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ItemsBillDTO.MenuInfo;
@@ -12,6 +13,7 @@ import com.delfood.dto.OptionDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
+import com.delfood.dto.OrderBillDTO;
 import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
@@ -53,7 +55,7 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public ItemsBillDTO order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient) {
+  public OrderResponse order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient) {
     // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
     long totalPriceFromServer = totalPrice(memberId, items);
     if (totalPriceFromServer != totalPriceFromClient) {
@@ -75,7 +77,7 @@ public class OrderService {
     // 사장님에게 알림(푸시)
     
     
-    return bill;
+    return new OrderResponse(bill, orderId);
   }
   
   /**
@@ -214,6 +216,10 @@ public class OrderService {
   
   public double addressDistance(String startAddressCode, String endAddressCode) {
     return addressService.getDistanceMeter(startAddressCode, endAddressCode);
+  }
+  
+  public OrderBillDTO getPreOrderBill(Long orderId) {
+    return orderMapper.findOrderBill(orderId);
   }
   
 
