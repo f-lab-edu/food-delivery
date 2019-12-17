@@ -12,7 +12,9 @@ public interface OrderMapper {
   
   Long addOrderItem(OrderItemDTO item);
   
-  Long addOrderItemOptions(List<OrderItemOptionDTO> options, @NonNull Long orderItemId);
-  
   OrderDTO findById(Long id);
+
+  Long addOrderItems(List<OrderItemDTO> items);
+
+  Long addOrderItemOptions(List<OrderItemOptionDTO> options);
 }

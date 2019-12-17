@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 // 사용자에게 전달하는 최종 주문서 DTO
 @Getter
+@NoArgsConstructor
 public class ItemsBillDTO {
   @NonNull
   private List<MenuInfo> menus;
@@ -46,6 +48,7 @@ public class ItemsBillDTO {
   }
   
   @Getter
+  @NoArgsConstructor
   public static class MenuInfo {
     private long id;
     private String name;

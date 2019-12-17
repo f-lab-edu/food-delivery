@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OrderMapper">
     <resultMap type="com.delfood.dto.OrderDTO" id="orderDTO">
-        <result property="id" column="id"/>
+        <id property="id" column="id"/>
         <result property="startTime" column="start_time"/>
         <result property="orderStatus" column="order_status"/>
         <result property="exArrivalTime" column="ex_arrival_time"/>
@@ -12,15 +12,15 @@
         <result property="addressDetail" column="address_detail"/>
         <result property="memberId" column="member_id"/>
         <result property="deliveryCost" column="delivery_cost"/>
-        <collection property="items" select="findItemByOrderId" column="id" javaType="java.util.ArrayList"></collection>
+        <collection property="items" select="findItemByOrderId" column="id" ofType="orderItemDTO"></collection>
     </resultMap>
     
     <resultMap type="com.delfood.dto.OrderItemDTO" id="orderItemDTO">
-        <result property="id" column="id"/>
+        <id property="id" column="id"/>
         <result property="menuId" column="menu_id"/>
         <result property="orderId" column="order_id"/>
         <result property="count" column="count"/>
-        <collection property="options" select="findItemOptionByItemId" column="id" javaType="java.util.ArrayList"></collection>
+        <collection property="options" select="findItemOptionByItemId" column="id" ofType="orderItemOptionDTO"></collection>
     </resultMap>
     
     <resultMap type="com.delfood.dto.OrderItemOptionDTO" id="orderItemOptionDTO">
@@ -28,6 +28,27 @@
         <result property="optionId" column="option_id"/>
         <result property="orderItemId" column="order_item_id"/>
     </resultMap>
+    
+    <select id="findAddressInfoByAddressCode" resultType="com.delfood.dto.AddressDTO">
+        SELECT  A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName,
+                A.road_name_code roadNameCode,
+                A.road_name roadName,
+                A.building_number buildingNumber,
+                A.building_side_number buildingSideNumber,
+                A.zip_code zipCode,
+                A.building_management_number buildingManagementNumber,
+                A.building_name_for_city buildingNameForCity,
+                A.administrative_town_code administrativeTownCode,
+                A.administrative_town_name administrativeTownName,
+                A.detail_building_name detailBuildingName,
+                A.building_center_point_x_coordinate buildingCenterPointXCoordinate,
+                A.building_center_point_y_coordinate buildingCenterPointYCoordinate
+        FROM    ADDRESS A
+        WHERE   building_management_number = #{addressCode}
+    </select>
     
     <insert id="addOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO ORDERS
@@ -43,12 +64,21 @@
         (#{menuId}, #{orderId}, #{count})
     </insert>    
     
+    <insert id="addOrderItems">
+        INSERT INTO ORDERS_ITEM
+        (id, menu_id, order_id, count)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.menuId}, #{item.orderId}, #{item.count})
+        </foreach>
+    </insert>
+    
     <insert id="addOrderItemOptions">
         INSERT INTO ORDERS_ITEM_OPTION
-        (option_id, order_item_id)
+        (id, option_id, order_item_id)
         VALUES
-        <foreach collection="options" item="item" separator=",">
-            (#{item.optionId}, #{orderItemId})
+        <foreach collection="list" item="option" separator=",">
+            (#{option.id}, #{option.optionId}, #{option.orderItemId})
         </foreach>
     </insert>
     
@@ -70,7 +100,6 @@
         FROM ORDERS_ITEM_OPTION
         WHERE order_item_id = #{orderItemId}
     </select>
-    
     
     
 </mapper>

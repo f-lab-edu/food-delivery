@@ -14,7 +14,9 @@ import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
+import com.delfood.utils.OrderUtil;
 import lombok.extern.log4j.Log4j2;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,7 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public void order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient) {
+  public ItemsBillDTO order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient) {
     // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
     long totalPriceFromServer = totalPrice(memberId, items);
     if (totalPriceFromServer != totalPriceFromClient) {
@@ -68,10 +70,12 @@ public class OrderService {
     
     
     // 계산서 발행
-    
+    ItemsBillDTO bill = getBill(memberId, items);
     
     // 사장님에게 알림(푸시)
     
+    
+    return bill;
   }
   
   /**
@@ -96,17 +100,22 @@ public class OrderService {
     log.debug("addOrder Finished");
     log.debug("order id : {}", orderId);
 
-    for (OrderItemDTO item : items) {
+    List<OrderItemOptionDTO> options = new ArrayList<OrderItemOptionDTO>();
+    
+    for (int i = 0; i < items.size(); i++) {
+      OrderItemDTO item = items.get(i);
+      item.setId(OrderUtil.generateOrderItemKey(memberId, i));
       item.setOrderId(orderId);
-
-      orderMapper.addOrderItem(item);
-      Long orderItemId = item.getId();
-      log.debug("order item id : {}", orderItemId);
-
-      orderMapper.addOrderItemOptions(item.getOptions(), orderItemId);
-      log.debug("addOrderItemOption Finished");
+      for (int j = 0; j < item.getOptions().size(); j++) {
+        OrderItemOptionDTO option = item.getOptions().get(j);
+        option.setId(OrderUtil.generateOrderItemOptionKey(memberId, i, j));
+        option.setOrderItemId(item.getId());
+        options.add(option);
+      }
     }
-    log.debug("order successed");
+    
+    orderMapper.addOrderItems(items);
+    orderMapper.addOrderItemOptions(options);
 
     return order.getId();
   }

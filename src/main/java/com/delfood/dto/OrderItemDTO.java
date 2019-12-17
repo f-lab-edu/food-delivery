@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrderItemDTO {
-  private Long id;
+  private String id;
   private Long menuId;
   private Long orderId;
   private Long count;

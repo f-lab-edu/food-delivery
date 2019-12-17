@@ -30,8 +30,9 @@ public class OrderController {
   @GetMapping("price")
   @MemberLoginCheck
   public TotalPriceResponse totalPrice(HttpSession session, @RequestBody List<OrderItemDTO> items) {
+    
     return new TotalPriceResponse(
-        orderService.getBill(SessionUtil.getLoginMemberId(session), items));
+        orderService.order(SessionUtil.getLoginMemberId(session), items, 33000));
   }
 
   @Getter
