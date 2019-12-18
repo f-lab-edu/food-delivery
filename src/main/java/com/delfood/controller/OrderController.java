@@ -47,7 +47,7 @@ public class OrderController {
    * @param orderId 주문번호
    * @return
    */
-  @GetMapping("{orderId}")
+  @GetMapping("orderBill/{orderId}")
   @MemberLoginCheck
   public OrderBillDTO orderInfo(@PathVariable("orderId") Long orderId) {
     return orderService.getPreOrderBill(orderId);
@@ -67,9 +67,41 @@ public class OrderController {
         request.getTotalPrice());
   }
   
+  /**
+   * 아이템 리스트들을 상세하게 계산서로 발행한다.
+   * @param session 사용자의 세션
+   * @param items 주문하기 전 아이템들
+   * @return
+   */
   @GetMapping("bill")
   public ItemsBillDTO getBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
     return orderService.getBill(SessionUtil.getLoginMemberId(session), items);
+  }
+  
+  /**
+   * 회원 주문내역을 모두 조회한다.
+   * 추후 페이징 추가 해야한다.
+   * @author jun
+   * @param session 사용자의 세션
+   * @return
+   */
+  @GetMapping
+  @MemberLoginCheck
+  public List<OrderDTO> myOrders(HttpSession session) {
+    return orderService.getMemberOrder(SessionUtil.getLoginMemberId(session));
+  }
+  
+  /**
+   * 주문 번호를 기반으로 주문 상세내역을 조회한다.
+   * 추후 해당 회원의 주문인지 확인하는 로직을 작성해야한다.
+   * @param session 사용자의 세션
+   * @param orderId 주문 아이디
+   * @return
+   */
+  @GetMapping("{orderId}")
+  @MemberLoginCheck
+  public OrderDTO getOrder(HttpSession session, @PathVariable Long orderId) {
+    return orderService.getOrder(orderId);
   }
   
   // request

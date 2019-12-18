@@ -12,5 +12,7 @@ import lombok.Setter;
 public class OrderItemOptionDTO {
   private String id;
   private Long optionId;
+  private String optionName;
+  private Long optionPrice;
   private String orderItemId;
 }

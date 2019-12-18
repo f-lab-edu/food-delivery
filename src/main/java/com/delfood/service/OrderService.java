@@ -190,6 +190,7 @@ public class OrderService {
   
   /**
    * 두 주소 사이 거리(Meter 단위)를 조회한다.
+   * @author jun
    * @param startAddressCode 시작 주소
    * @param endAddressCode 도착 주소
    * @return
@@ -205,6 +206,26 @@ public class OrderService {
    */
   public OrderBillDTO getPreOrderBill(Long orderId) {
     return orderMapper.findOrderBill(orderId);
+  }
+  
+  /**
+   * 고객의 주문 내역을 확인한다.
+   * @author jun
+   * @param memberId 고객아이디
+   * @return
+   */
+  public List<OrderDTO> getMemberOrder(String memberId) {
+    return orderMapper.findByMemberId(memberId);
+  }
+  
+  /**
+   * 주문 번호를 기반으로 주문 상세를 조회한다.
+   * @author jun
+   * @param orderId 주문 아이디
+   * @return
+   */
+  public OrderDTO getOrder(Long orderId) {
+    return orderMapper.findById(orderId);
   }
   
 

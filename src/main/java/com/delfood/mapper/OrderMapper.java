@@ -25,4 +25,6 @@ public interface OrderMapper {
   long findItemsPrice(List<OrderItemDTO> items);
 
   List<MenuInfo> findItemsBill(List<OrderItemDTO> items);
+
+  List<OrderDTO> findByMemberId(String memberId);
 }

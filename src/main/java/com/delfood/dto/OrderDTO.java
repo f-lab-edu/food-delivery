@@ -49,5 +49,9 @@ public class OrderDTO {
   @NonNull
   private Long deliveryCost;
   
+  private Long shopId;
+  
+  private String shopName;
+  
   List<OrderItemDTO> items;
 }

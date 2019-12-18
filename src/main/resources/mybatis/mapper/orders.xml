@@ -2,32 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OrderMapper">
     <resultMap type="com.delfood.dto.OrderDTO" id="orderDTO">
-        <id property="id" column="id"/>
-        <result property="startTime" column="start_time"/>
-        <result property="orderStatus" column="order_status"/>
-        <result property="exArrivalTime" column="ex_arrival_time"/>
-        <result property="arrivalTime" column="arrival_time"/>
-        <result property="riderId" column="rider_id"/>
-        <result property="addressCode" column="address_code"/>
-        <result property="addressDetail" column="address_detail"/>
-        <result property="memberId" column="member_id"/>
-        <result property="deliveryCost" column="delivery_cost"/>
-        <collection property="items" select="findItemByOrderId" column="id" ofType="orderItemDTO"></collection>
+        <id property="id" column="orderId"/>
+        <result property="startTime" column="orderStartTime"/>
+        <result property="orderStatus" column="orderStatus"/>
+        <result property="exArrivalTime" column="orderExArrivalTime"/>
+        <result property="arrivalTime" column="orderArrivalTime"/>
+        <result property="riderId" column="orderRiderId"/>
+        <result property="addressCode" column="orderAddressCode"/>
+        <result property="addressDetail" column="orderAddressDetail"/>
+        <result property="memberId" column="memberId"/>
+        <result property="deliveryCost" column="deliveryCost"/>
+        <result property="shopId" column="shopId"/>
+        <result property="shopName" column="shopName"/>
+        <collection property="items" ofType="com.delfood.dto.OrderItemDTO">
+            <id property="id" column="itemId"/>
+            <result property="menuId" column="menuId"/>
+            <result property="menuName" column="menuName"/>
+            <result property="menuPrice" column="menuPrice"/>
+            <result property="count" column="itemCount"/>
+            <collection property="options" ofType="com.delfood.dto.OrderItemOptionDTO">
+                <id property="id" column="itemOptionId"/>
+                <result property="optionId" column="optionId"/>
+                <result property="optionName" column="optionName"/>
+                <result property="optionPrice" column="optionPrice"/>
+            </collection>
+        </collection>
     </resultMap>
     
-    <resultMap type="com.delfood.dto.OrderItemDTO" id="orderItemDTO">
-        <id property="id" column="id"/>
-        <result property="menuId" column="menu_id"/>
-        <result property="orderId" column="order_id"/>
-        <result property="count" column="count"/>
-        <collection property="options" select="findItemOptionByItemId" column="id" ofType="orderItemOptionDTO"></collection>
-    </resultMap>
-    
-    <resultMap type="com.delfood.dto.OrderItemOptionDTO" id="orderItemOptionDTO">
-        <result property="id" column="id"/>
-        <result property="optionId" column="option_id"/>
-        <result property="orderItemId" column="order_item_id"/>
-    </resultMap>
     
     <select id="findAddressInfoByAddressCode" resultType="com.delfood.dto.AddressDTO">
         SELECT  A.town_code townCode,
@@ -83,27 +84,68 @@
     </insert>
     
     <select id="findById" resultMap="orderDTO">
-        SELECT id, start_time, order_status, ex_arrival_time, arrival_time, rider_id, address_code, address_detail,
-                member_id, delivery_cost
-        FROM ORDERS
-        WHERE id = #{id}
+        SELECT odr.id orderId,
+               odr.start_time orderStartTime,
+               odr.order_status orderStatus,
+               odr.ex_arrival_time orderExArrivalTime,
+               odr.arrival_time orderArrivalTime,
+               odr.rider_id orderRiderId,
+               odr.address_code orderAddressCode,
+               odr.address_detail orderAddressDetail,
+               odr.member_id memberId,
+               odr.delivery_cost deliveryCost,
+               shop.id shopId,
+               shop.name shopName,
+               item.id itemId,
+               menu.name menuName,
+               menu.price menuPrice,
+               item.count itemCount,
+               item_opt.id itemOptionId,
+               opt.id optionId,
+               opt.name optionName,
+               opt.price optionPrice
+        FROM ORDERS odr LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+                        LEFT OUTER JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+                        INNER JOIN MENU menu ON (menu.id = item.menu_id)
+                        LEFT OUTER JOIN OPTION opt ON (opt.menu_id = menu.id)
+                        INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+        WHERE odr.id = #{id}
     </select>
     
-    <select id="findItemByOrderId" resultMap="orderItemDTO">
-        SELECT id, menu_id, order_id, count
-        FROM ORDERS_ITEM
-        WHERE order_id = #{orderId}
+    <select id="findByMemberId" resultMap="orderDTO">
+        SELECT odr.id orderId,
+               odr.start_time orderStartTime,
+               odr.order_status orderStatus,
+               odr.ex_arrival_time orderExArrivalTime,
+               odr.arrival_time orderArrivalTime,
+               odr.rider_id orderRiderId,
+               odr.address_code orderAddressCode,
+               odr.address_detail orderAddressDetail,
+               odr.member_id memberId,
+               odr.delivery_cost deliveryCost,
+               shop.id shopId,
+               shop.name shopName,
+               item.id itemId,
+               menu.name menuName,
+               menu.price menuPrice,
+               item.count itemCount,
+               item_opt.id itemOptionId,
+               opt.id optionId,
+               opt.name optionName,
+               opt.price optionPrice
+        FROM ORDERS odr LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+                        LEFT OUTER JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+                        INNER JOIN MENU menu ON (menu.id = item.menu_id)
+                        LEFT OUTER JOIN OPTION opt ON (opt.menu_id = menu.id)
+                        INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+                        INNER JOIN MEMBER member ON (odr.member_id = member.id)
+        WHERE member.id = #{memberId}
     </select>
     
-    <select id="findItemOptionByItemId" resultType="orderItemOptionDTO">
-        SELECT id, option_id, order_item_id
-        FROM ORDERS_ITEM_OPTION
-        WHERE order_item_id = #{orderItemId}
-    </select>
     
     <resultMap type="com.delfood.dto.OrderBillDTO" id="preOrderBill">
         <id property="orderId" column="orderId"/>
-        <result property="startTime" column="startTime"/>
+        <result property="startTime" column="orderStartTime"/>
         <result property="orderStatus" column="orderStatus"/>
         <result property="memberId" column="memberId"/>
         <result property="deliveryCost" column="deliveryCost"/>

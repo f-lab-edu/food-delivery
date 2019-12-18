@@ -12,6 +12,8 @@ import lombok.Setter;
 public class OrderItemDTO {
   private String id;
   private Long menuId;
+  private String menuName;
+  private Long menuPrice;
   private Long orderId;
   private Long count;
   private List<OrderItemOptionDTO> options;
