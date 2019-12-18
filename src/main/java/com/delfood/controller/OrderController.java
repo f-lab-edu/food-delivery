@@ -32,14 +32,13 @@ public class OrderController {
   /**
    * 아이템들의 가격과 정보를 조회한다.
    * @author jun
-   * @param session 사용자의 세션
    * @param items 가격을 계산할 아이템들
    * @return
    */
   @GetMapping("price")
   @MemberLoginCheck
-  public ItemsBillDTO getItemsBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
-    return orderService.getBill(SessionUtil.getLoginMemberId(session), items);
+  public long getItemsBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
+    return orderService.totalPrice(SessionUtil.getLoginMemberId(session), items);
   }
   
   /**
@@ -49,6 +48,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("{orderId}")
+  @MemberLoginCheck
   public OrderBillDTO orderInfo(@PathVariable("orderId") Long orderId) {
     return orderService.getPreOrderBill(orderId);
   }
@@ -57,11 +57,25 @@ public class OrderController {
    * 주문을 진행한다.
    * 클라이언트에서 계산한 총 가격과 서버에서 계산한 총 가격이 다를 시 에러를 발생시킨다.
    * @param session 사용자의 세션
-   * @param items 주문할 아이템들
+   * @param request 주문 정보
    * @return
    */
   @PostMapping
-  public OrderResponse order(HttpSession session, @RequestBody List<OrderItemDTO> items) {
-    return orderService.order(SessionUtil.getLoginMemberId(session), items, 33000);
+  @MemberLoginCheck
+  public OrderResponse order(HttpSession session, @RequestBody OrderRequest request) {
+    return orderService.order(SessionUtil.getLoginMemberId(session), request.getItems(),
+        request.getTotalPrice());
+  }
+  
+  @GetMapping("bill")
+  public ItemsBillDTO getBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
+    return orderService.getBill(SessionUtil.getLoginMemberId(session), items);
+  }
+  
+  // request
+  @Getter
+  private static class OrderRequest {
+    private List<OrderItemDTO> items;
+    private long totalPrice;
   }
 }

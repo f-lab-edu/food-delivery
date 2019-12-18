@@ -158,4 +158,43 @@
         WHERE  odr.id = #{orderId}
     </select>
     
+    <select id="findItemsPrice" resultType="long">
+        SELECT <foreach collection="list" item="item" separator="+">
+                (SELECT m.price <if test="item.options.isEmpty() == false">
+                                  +
+                                  (SELECT SUM(opt.price)
+                                   FROM OPTION opt
+                                   WHERE  opt.id IN (<foreach collection="item.options" item="option" separator=",">#{option.optionId}</foreach>))
+                                   </if>
+                 FROM MENU m
+                 WHERE  m.id = #{item.menuId}
+                ) * #{item.count}
+                </foreach>
+    </select>
+    
+    <resultMap type="com.delfood.dto.ItemsBillDTO$MenuInfo" id="menuInfo">
+        <id property="id" column="menuId"/>
+        <result property="name" column="menuName"/>
+        <result property="price" column="menuPrice"/>
+        <collection property="options" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo$OptionInfo">
+            <id property="id" column="optionId"/>
+            <result property="name" column="optionName"/>
+            <result property="price" column="optionPrice"/>
+        </collection>
+    </resultMap>
+    
+    <select id="findItemsBill" resultMap="menuInfo">
+        SELECT m.id menuId, m.name menuName, m.price menuPrice,
+               opt.id optionId, opt.name optionName, opt.price optionPrice
+        FROM   MENU m LEFT OUTER JOIN OPTION opt
+                      ON (m.id = opt.menu_id)
+        WHERE  m.id IN (<foreach collection="list" item="menu" separator=",">#{menu.menuId}</foreach>)
+        AND    opt.id IN (
+        <foreach collection="list" item="menu" separator=",">
+            <foreach collection="menu.options" item="option" separator=",">
+                #{option.optionId}
+            </foreach>
+        </foreach>)
+    </select>
+    
 </mapper>

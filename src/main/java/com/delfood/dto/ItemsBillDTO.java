@@ -35,16 +35,15 @@ public class ItemsBillDTO {
       @NonNull AddressDTO addressInfo,
       @NonNull ShopInfo shopInfo,
       double distanceMeter,
-      long deliveryPrice) {
+      long deliveryPrice,
+      List<MenuInfo> menus) {
     this.memberId = memberId;
     this.addressInfo = addressInfo;
     this.shopInfo = shopInfo;
     this.deliveryInfo = DeliveryInfo.builder()
-                                    .distanceMeter(distanceMeter)
                                     .deliveryPrice(deliveryPrice)
                                     .build();
-    
-    menus = new ArrayList<ItemsBillDTO.MenuInfo>();
+    this.menus = menus;
   }
   
   @Getter
@@ -70,12 +69,25 @@ public class ItemsBillDTO {
     }
 
     @Getter
-    @Builder
+    @NoArgsConstructor
     public static class OptionInfo {
       private long id;
       @NonNull
       private String name;
       private long price;
+      
+      /**
+       * 직접 생성할 경우 Builder를 통해서 생성하게 한다.
+       * @param id 옵션 아이디
+       * @param name 옵션 이름
+       * @param price 옵션 가격
+       */
+      @Builder
+      public OptionInfo(long id, String name, long price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+      }
     }
   }
   
@@ -94,7 +106,6 @@ public class ItemsBillDTO {
   @Builder
   @Getter
   public static class DeliveryInfo {
-    private double distanceMeter;
     private long deliveryPrice;
   }
 

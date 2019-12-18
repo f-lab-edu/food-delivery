@@ -3,6 +3,7 @@ package com.delfood.mapper;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
+import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.OrderBillDTO;
 import java.util.List;
 import lombok.NonNull;
@@ -20,4 +21,8 @@ public interface OrderMapper {
   Long addOrderItemOptions(List<OrderItemOptionDTO> options);
 
   OrderBillDTO findOrderBill(Long orderId);
+
+  long findItemsPrice(List<OrderItemDTO> items);
+
+  List<MenuInfo> findItemsBill(List<OrderItemDTO> items);
 }

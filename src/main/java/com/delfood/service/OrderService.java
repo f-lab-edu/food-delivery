@@ -136,88 +136,73 @@ public class OrderService {
     AddressDTO addressInfo = memberService.getMemberInfo(memberId).getAddressInfo();
     // 매장 정보 추출
     ShopInfo shopInfo = shopService.getShopByMenuId(items.get(0).getMenuId());
-    // 거리 계산
-    double distanceMeter =
-        addressService.getDistanceMeter(shopInfo.getAddressCode(),
-            addressInfo.getBuildingManagementNumber());
-    
     // 배달료 계산
-    long deliveryPrice = addressService.deliveryPrice(distanceMeter);
+    long deliveryPrice = addressService.deliveryPrice(memberId, shopInfo.getId());
     
     // 계산서 생성
     ItemsBillDTO bill = ItemsBillDTO.builder()
                                     .memberId(memberId)
                                     .addressInfo(addressInfo)
                                     .shopInfo(shopInfo)
-                                    .distanceMeter(distanceMeter)
                                     .deliveryPrice(deliveryPrice)
+                                    .menus(orderMapper.findItemsBill(items))
                                     .build();
     
-    /// 계산서에 각 항목별로 가격과 이름 등을 추가
-    for (OrderItemDTO item : items) {
-      MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
-      MenuInfo billMenuInfo = MenuInfo.builder()
-          .id(menuInfo.getId())
-          .name(menuInfo.getName())
-          .price(menuInfo.getPrice())
-          .build();
-      
-      // 항목별 옵션 정보 추가
-      for (OrderItemOptionDTO orderItemOption : item.getOptions()) {
-        OptionDTO optionInfo = optionService.getOptionInfo(orderItemOption.getOptionId());
-        OptionInfo billOptionInfo = OptionInfo.builder()
-                                              .id(optionInfo.getId())
-                                              .name(optionInfo.getName())
-                                              .price(optionInfo.getPrice())
-                                              .build();
-        billMenuInfo.getOptions().add(billOptionInfo);
-      }
-      bill.getMenus().add(billMenuInfo);
-    }
+//    /// 계산서에 각 항목별로 가격과 이름 등을 추가
+//    for (OrderItemDTO item : items) {
+//      MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
+//      MenuInfo billMenuInfo = MenuInfo.builder()
+//          .id(menuInfo.getId())
+//          .name(menuInfo.getName())
+//          .price(menuInfo.getPrice())
+//          .build();
+//      
+//      // 항목별 옵션 정보 추가
+//      for (OrderItemOptionDTO orderItemOption : item.getOptions()) {
+//        OptionDTO optionInfo = optionService.getOptionInfo(orderItemOption.getOptionId());
+//        OptionInfo billOptionInfo = OptionInfo.builder()
+//                                              .id(optionInfo.getId())
+//                                              .name(optionInfo.getName())
+//                                              .price(optionInfo.getPrice())
+//                                              .build();
+//        billMenuInfo.getOptions().add(billOptionInfo);
+//      }
+//      bill.getMenus().add(billMenuInfo);
+//    }
     return bill;
   }
   
   /**
-   * 아이템들의 총 가격을 계산한다.
+   * 총 가격을 계산한다.
    * @author jun
    * @param items 계산할 아이템들
    * @return 총 가격
    */
   @Transactional(readOnly = true)
   public long totalPrice(String memberId, List<OrderItemDTO> items) {
-    long totalPrice = 0L;
+    long totalPrice = orderMapper.findItemsPrice(items);
+    long deliveryPrice = addressService.deliveryPrice(memberId,
+        shopService.getShopByMenuId(items.get(0).getMenuId()).getId());
     
-    // 아이템 계산
-    for (OrderItemDTO item : items) {
-      long optionsPrice = 0L;
-      MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
-      for (OrderItemOptionDTO orderItemOption : item.getOptions()) {
-        OptionDTO optionInfo = optionService.getOptionInfo(orderItemOption.getOptionId());
-        optionsPrice += optionInfo.getPrice();
-      }
-      long menuPrice = menuInfo.getPrice();
-      totalPrice += optionsPrice + menuPrice;
-    }
-    
-    // 배달료 계산
-    Long menuId = items.get(0).getMenuId();
-    String memberAddressCode = memberService.getMemberInfo(memberId).getAddressCode();
-    ShopInfo shopInfo = shopService.getShopByMenuId(menuId);
-    String shopAddressCode = shopInfo.getAddressCode();
-    
-    long deliveryCost = addressService
-        .deliveryPrice(addressService.getDistanceMeter(memberAddressCode, shopAddressCode));
-    
-    totalPrice += deliveryCost;
-    
-    return totalPrice;
+    return totalPrice + deliveryPrice;
   }
   
   
+  /**
+   * 두 주소 사이 거리(Meter 단위)를 조회한다.
+   * @param startAddressCode 시작 주소
+   * @param endAddressCode 도착 주소
+   * @return
+   */
   public double addressDistance(String startAddressCode, String endAddressCode) {
     return addressService.getDistanceMeter(startAddressCode, endAddressCode);
   }
   
+  /**
+   * 주문 정보를 조회한다.
+   * @param orderId 주문 아이디
+   * @return
+   */
   public OrderBillDTO getPreOrderBill(Long orderId) {
     return orderMapper.findOrderBill(orderId);
   }

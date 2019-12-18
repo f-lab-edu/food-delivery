@@ -15,4 +15,6 @@ public interface AddressMapper {
   public List<AddressDTO> findByRoadName(GetAddressesByRoadRequest searchInfo);
 
   public double findDistanceMeterByAddressCode(String startAddressCode, String endAddressCode);
+
+  public double findDistancemeterByMemberIdAndShopId(String memberId, Long shopId);
 }

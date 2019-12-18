@@ -57,4 +57,9 @@ public class AddressService {
     
     return deliveryCost + extraCharge;
   }
+  
+  public long deliveryPrice(String memberId, Long shopId) {
+    double distanceMeter = addressMapper.findDistancemeterByMemberIdAndShopId(memberId, shopId);
+    return deliveryPrice(distanceMeter);
+  }
 }
