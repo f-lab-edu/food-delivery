@@ -5,6 +5,7 @@ import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
+import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.OrderBillDTO;
 import com.delfood.service.OrderService;
 import com.delfood.utils.SessionUtil;
@@ -63,8 +64,28 @@ public class OrderController {
   @PostMapping
   @MemberLoginCheck
   public OrderResponse order(HttpSession session, @RequestBody OrderRequest request) {
+    if (request.getItems().isEmpty()) {
+      // items가 null일때도 NullpointerException이 발생한다
+      throw new NullPointerException("아이템이 없습니다.");
+    }
+    
+    // 해당 아이템들이 해당 매장의 것인지 검증
+    if (orderService.isShopItems(request.getItems(), request.getShopId()) == false) {
+      log.error("주문하신 매장의 메뉴 또는 옵션이 아닙니다.");
+      throw new IllegalArgumentException("주문하신 매장의 메뉴 또는 옵션이 아닙니다.");
+    }    
+    // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
+    long totalPriceFromServer =
+        orderService.totalPrice(SessionUtil.getLoginMemberId(session), request.getItems());
+    if (totalPriceFromServer != request.getTotalPrice()) {
+      log.error("Total Price Mismatch! client price : {}, server price : {}",
+          request.getTotalPrice(),
+          totalPriceFromServer);
+      throw new TotalPriceMismatchException("Total Price Mismatch!");
+    }
+
     return orderService.order(SessionUtil.getLoginMemberId(session), request.getItems(),
-        request.getTotalPrice(), request.getShopId());
+        request.getShopId());
   }
   
   /**

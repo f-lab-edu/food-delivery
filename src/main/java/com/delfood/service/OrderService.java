@@ -49,20 +49,7 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public OrderResponse order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient,
-      long shopId) {
-    
-    // 해당 아이템들이 해당 샵의 아이템인지 확인
-
-    
-    // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
-    long totalPriceFromServer = totalPrice(memberId, items);
-    if (totalPriceFromServer != totalPriceFromClient) {
-      log.error("Total Price Mismatch! client price : {}, server price : {}",
-          totalPriceFromClient,
-          totalPriceFromServer);
-      throw new TotalPriceMismatchException("Total Price Mismatch!");
-    }
+  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId) {
     
     // 주문 준비 작업. 결제 전.
     Long orderId = preOrder(memberId, items, shopId);
@@ -210,5 +197,8 @@ public class OrderService {
     return orderMapper.findById(orderId);
   }
   
+  public boolean isShopItems(List<OrderItemDTO> items, Long shopId) {
+    return orderMapper.isShopItem(items, shopId);
+  }
 
 }

@@ -239,4 +239,17 @@
         </foreach>)
     </select>
     
+    
+    <select id="isShopItem" resultType="boolean">
+        SELECT MIN(shop.id = #{shopId})
+        FROM   MENU_GROUP menuGroup 
+               INNER JOIN SHOP shop ON (menuGroup.shop_id = shop.id)
+               LEFT OUTER JOIN MENU menu  ON (menu.menu_group_id = menuGroup.id)
+               LEFT OUTER JOIN OPTION opt ON (menu.id = opt.menu_id)
+        WHERE  menu.id IN(<foreach collection="items" item="item" separator=",">#{item.menuId}</foreach>)
+        AND    opt.id IN (
+               <foreach collection="items" item="item" separator=",">
+                   <foreach collection="item.options" item="option" separator=",">#{option.optionId}</foreach>
+               </foreach>)
+    </select>
 </mapper>

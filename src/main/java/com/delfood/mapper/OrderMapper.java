@@ -27,4 +27,6 @@ public interface OrderMapper {
   List<MenuInfo> findItemsBill(List<OrderItemDTO> items);
 
   List<OrderDTO> findByMemberId(String memberId);
+
+  boolean isShopItem(List<OrderItemDTO> items, Long shopId);
 }
