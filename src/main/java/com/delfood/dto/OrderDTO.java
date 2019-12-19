@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
 @Alias("order")
+@NoArgsConstructor // Mybatis에서 기본 생성자가 없으면 예외처리를 한다
 public class OrderDTO {
 
   public enum OrderStatus {

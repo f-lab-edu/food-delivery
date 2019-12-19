@@ -221,7 +221,7 @@
         <collection property="options" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo$OptionInfo">
             <id property="id" column="optionId"/>
             <result property="name" column="optionName"/>
-            <result property="price" column="optionPrice"/>
+            <result property="price" column="opti`onPrice"/>
         </collection>
     </resultMap>
     
