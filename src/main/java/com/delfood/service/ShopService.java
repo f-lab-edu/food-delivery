@@ -1,6 +1,5 @@
 package com.delfood.service;
 
-import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
@@ -8,12 +7,9 @@ import com.delfood.error.exception.shop.CanNotCloseShopException;
 import com.delfood.error.exception.shop.CanNotOpenShopException;
 import com.delfood.mapper.DeliveryLocationMapper;
 import com.delfood.mapper.ShopMapper;
-import com.delfood.mapper.WorkMapper;
-import lombok.extern.log4j.Log4j2;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
