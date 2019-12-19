@@ -64,7 +64,7 @@ public class OrderController {
   @MemberLoginCheck
   public OrderResponse order(HttpSession session, @RequestBody OrderRequest request) {
     return orderService.order(SessionUtil.getLoginMemberId(session), request.getItems(),
-        request.getTotalPrice());
+        request.getTotalPrice(), request.getShopId());
   }
   
   /**
@@ -107,6 +107,7 @@ public class OrderController {
   // request
   @Getter
   private static class OrderRequest {
+    private Long shopId;
     private List<OrderItemDTO> items;
     private long totalPrice;
   }

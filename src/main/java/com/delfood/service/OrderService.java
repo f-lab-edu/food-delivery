@@ -35,12 +35,6 @@ public class OrderService {
   private MemberService memberService;
   
   @Autowired
-  private MenuService menuService;
-  
-  @Autowired
-  private OptionService optionService;
-  
-  @Autowired
   private ShopService shopService;
   
   @Autowired
@@ -55,7 +49,12 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public OrderResponse order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient) {
+  public OrderResponse order(String memberId, List<OrderItemDTO> items, long totalPriceFromClient,
+      long shopId) {
+    
+    // 해당 아이템들이 해당 샵의 아이템인지 확인
+
+    
     // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
     long totalPriceFromServer = totalPrice(memberId, items);
     if (totalPriceFromServer != totalPriceFromClient) {
@@ -66,7 +65,7 @@ public class OrderService {
     }
     
     // 주문 준비 작업. 결제 전.
-    Long orderId = preOrder(memberId, items);
+    Long orderId = preOrder(memberId, items, shopId);
     
     // 결제 진행
     
@@ -89,16 +88,20 @@ public class OrderService {
    * @return
    */
   @Transactional
-  private Long preOrder(String memberId, List<OrderItemDTO> items) {
-    OrderDTO order = new OrderDTO();
+  private Long preOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
     MemberDTO memberInfo = memberService.getMemberInfo(memberId);
-    order.setMemberId(memberId);
-    order.setAddressCode(memberInfo.getAddressCode());
-    order.setAddressDetail(memberInfo.getAddressDetail());
-
+    OrderDTO order = OrderDTO
+        .builder()
+        .memberId(memberId)
+        .addressCode(memberInfo.getAddressCode())
+        .addressDetail(memberInfo.getAddressDetail())
+        .shopId(shopId)
+        .deliveryCost(addressService.deliveryPrice(memberId, shopId))
+        .build();
+    
     orderMapper.addOrder(order);
     Long orderId = order.getId();
-
+    
     log.debug("addOrder Finished");
     log.debug("order id : {}", orderId);
 
@@ -147,30 +150,9 @@ public class OrderService {
                                     .deliveryPrice(deliveryPrice)
                                     .menus(orderMapper.findItemsBill(items))
                                     .build();
-    
-//    /// 계산서에 각 항목별로 가격과 이름 등을 추가
-//    for (OrderItemDTO item : items) {
-//      MenuDTO menuInfo = menuService.getMenuInfo(item.getMenuId());
-//      MenuInfo billMenuInfo = MenuInfo.builder()
-//          .id(menuInfo.getId())
-//          .name(menuInfo.getName())
-//          .price(menuInfo.getPrice())
-//          .build();
-//      
-//      // 항목별 옵션 정보 추가
-//      for (OrderItemOptionDTO orderItemOption : item.getOptions()) {
-//        OptionDTO optionInfo = optionService.getOptionInfo(orderItemOption.getOptionId());
-//        OptionInfo billOptionInfo = OptionInfo.builder()
-//                                              .id(optionInfo.getId())
-//                                              .name(optionInfo.getName())
-//                                              .price(optionInfo.getPrice())
-//                                              .build();
-//        billMenuInfo.getOptions().add(billOptionInfo);
-//      }
-//      bill.getMenus().add(billMenuInfo);
-//    }
     return bill;
   }
+  
   
   /**
    * 총 가격을 계산한다.

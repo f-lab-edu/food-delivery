@@ -2,25 +2,24 @@ package com.delfood.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
 import org.apache.ibatis.type.Alias;
+import org.codehaus.commons.nullanalysis.Nullable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
-@Setter
-@ToString
 @Alias("order")
 public class OrderDTO {
-  
+
   public enum OrderStatus {
     BEFORE_PAYMENT, ORDER_REQUEST, ORDER_APPROVAL, IN_DELIVERY, DELIVERY_COMPLETE
   }
   
-  @NonNull
   private Long id;
   
   // 응답 데이터의 형식을 지정해준다.
@@ -46,12 +45,24 @@ public class OrderDTO {
   
   private String addressDetail;
   
-  @NonNull
   private Long deliveryCost;
   
   private Long shopId;
   
+  // 조회할 때만 사용하는 컬럼.
+  @Nullable
   private String shopName;
   
   List<OrderItemDTO> items;
+  
+  @Builder
+  public OrderDTO(String memberId, String addressCode, String addressDetail, Long shopId,
+      long deliveryCost) {
+    this.orderStatus = OrderStatus.BEFORE_PAYMENT;
+    this.memberId = memberId;
+    this.addressCode = addressCode;
+    this.addressDetail = addressDetail;
+    this.shopId = shopId;
+    this.deliveryCost = deliveryCost;
+  }
 }
