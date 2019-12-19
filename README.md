@@ -12,17 +12,15 @@ Rest API형 서버로써 클라이언트는 프로토타입으로 제작하여 �
 <b>코드 컨벤션</b><br>
 - Google code Style을 준수
 - STS Check Style 플러그인을 적용하여 코드 컨벤션을 유지 
-https://google.github.io/styleguide/javaguide.html
+- 링크 https://google.github.io/styleguide/javaguide.html
 <br><br>
-<b>장애 방지</b><br>
+<b>성능 최적화</b><br>
 - 서버 부하를 줄이기 위해 캐싱 서버 적극 활용
 - DB서버와의 통신을 최소화(당연한 이야기지만 N+1 쿼리를 지양)
-- 클라이언트에서 주는 데이터를 한번 더 검사하여 데이터의 무결성을 보장
-<br>
+<br><br>
 <b>그 외</b><br>
 - Project Wiki를 참고해주세요!
 <br><br>
-
 
 ## 사용 기술 및 환경
 Spring boot, Maven, Mybatis, Redis, Docker, MariaDB, Jenkins, Java8, Naver Cloud Platform
@@ -50,7 +48,3 @@ kakao oven - <https://ovenapp.io/view/OI44WSGwSZRSMcyiveGcSWGvw38YKizI/bco8b\>
 ## 프로젝트 DB ERD
 2019-11-08 수정 (쿠폰 스키마 추가)
 ![배달의민족_20191108_33_53](https://user-images.githubusercontent.com/46917538/68458221-9429fc80-0245-11ea-9cc3-92f7a35fd534.png)
-
-### 이전 DB ERD
-2019-10-27 수정(건물정보 TB를 추가하여 주소를 외래키로 관리)
-![배달의민족_20191027_28_25](https://user-images.githubusercontent.com/46917538/67629389-4235be00-f8b8-11e9-9ba5-abfec4c9d7b9.png)
