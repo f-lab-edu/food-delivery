@@ -7,6 +7,7 @@ import com.delfood.service.OptionService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,8 +36,8 @@ public class MenuController {
    * @return
    */
   @GetMapping("/menuGroups/{menuGroupId}/menus/{menuId}")
-  public MenuDTO menu(@PathVariable Long menuId) {
-    return menuService.getMenuInfo(menuId);
+  public ResponseEntity<MenuDTO> menu(@PathVariable Long menuId) {
+    return new ResponseEntity<MenuDTO>(menuService.getMenuInfo(menuId), HttpStatus.OK);
   }
   
   
@@ -58,6 +59,7 @@ public class MenuController {
     if (menuInfo.getOptionList() != null) {
       optionService.addOptionList(menuInfo.getOptionList(), menuId);
     }
+    
     return HttpStatus.CREATED;
   }
   

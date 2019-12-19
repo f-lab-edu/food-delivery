@@ -1,5 +1,6 @@
 package com.delfood.error;
 
+import com.delfood.error.exception.DuplicateException;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
@@ -68,6 +69,12 @@ public class ErrorController {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(value = {CanNotOpenShopException.class, CanNotCloseShopException.class})
   public ErrorMsg handleCannotShopException(RuntimeException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
+  
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ExceptionHandler(DuplicateException.class)
+  public ErrorMsg handleDuplicatedMenuGroupNameException(DuplicateException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
 }

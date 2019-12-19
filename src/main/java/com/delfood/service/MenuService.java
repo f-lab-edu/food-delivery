@@ -33,11 +33,16 @@ public class MenuService {
    * @author jinyoung
    * 
    * @param menuInfo 메뉴 추가에 필요한 정보
-   * @return 
+   * @return 만들어진 메뉴 아이디
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public Long addMenu(MenuDTO menuInfo) {
-    return menuMapper.insertMenu(menuInfo);
+    Long menuId = menuMapper.insertMenu(menuInfo);
+    if (menuId == null) {
+      log.error("insert menu error! menuInfo : {}",menuInfo);
+      throw new NullPointerException("insert menu error!" + menuInfo);
+    }
+    return menuId;
   }
   
   /**
@@ -47,6 +52,7 @@ public class MenuService {
    * 
    * @param id 삭제할 메뉴의 아이디
    */
+  @Transactional(rollbackFor = RuntimeException.class)
   public void deleteMenu(Long id) {
     int result = menuMapper.deleteMenu(id);
     if (result != 1) {
@@ -63,17 +69,9 @@ public class MenuService {
    * @param menuGroupId 메뉴 그룹 아이디
    * @param menuId 메뉴 아이디
    */
-  public void checkMenu(Long menuGroupId, Long menuId) {
+  public boolean checkMenu(Long menuGroupId, Long menuId) {
     int result = menuMapper.checkMenu(menuGroupId, menuId);
-    if (result == 0) {
-      log.error("menuGroupId({}) is not match menuId({})", menuGroupId, menuId);
-      throw new RuntimeException("menuGroupId is not match menuId");
-    }
-    
-    if (result != 1) {
-      log.error("check Menu error! Menu id {}, MenuGroup id {} ", menuId, menuGroupId);
-      throw new RuntimeException("check Menu error!");
-    }
+    return result == 1 ? true : false; 
   }
   
   /**
@@ -92,12 +90,7 @@ public class MenuService {
       throw new RuntimeException("The menu of targets is not correct.");
     }
     
-    for (int i = 1; i <= idList.size(); i++) {
-      if ((menuMapper.updateMenuPriority(idList.get(i - 1), i)) == 0) {
-        log.error("Invalid menu id {}", idList.get(i - 1));
-        throw new RuntimeException("Invalid menu id");
-      }
-    }
+    menuMapper.updateMenuPriority(menuGroupId, idList);
   }
 
   /**

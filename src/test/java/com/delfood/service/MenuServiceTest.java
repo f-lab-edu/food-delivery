@@ -1,9 +1,12 @@
 package com.delfood.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
+
 
 import com.delfood.dto.MenuDTO;
 import com.delfood.dto.MenuDTO.Status;
@@ -18,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -93,7 +97,7 @@ public class MenuServiceTest {
   @Test
   public void updateMenuPriorityTest_메뉴_순서_변경_성공() {
     given(mapper.totalCount(1L)).willReturn(3);
-    given(mapper.updateMenuPriority(anyLong(), anyInt())).willReturn(1);
+    given(mapper.updateMenuPriority(anyLong(), anyList())).willReturn(1);
     List<Long> idList = LongStream.of(1,2,3).boxed().collect(Collectors.toList());
     
     service.updateMenuPriority(1L, idList);
@@ -110,7 +114,7 @@ public class MenuServiceTest {
   @Test(expected = RuntimeException.class)
   public void updateMenuPriorityTest_메뉴_순서_변경_실패2() {
     given(mapper.totalCount(1L)).willReturn(3);
-    given(mapper.updateMenuPriority(anyLong(), anyInt())).willReturn(0);
+    given(mapper.updateMenuPriority(anyLong(), anyList())).willReturn(0);
     List<Long> idList = LongStream.of(1,2,3).boxed().collect(Collectors.toList());
     
     service.updateMenuPriority(1L, idList);

@@ -57,4 +57,5 @@ public class MenuDTO {
     return menuInfo.getName() == null || menuInfo.getPrice() == null
         || menuInfo.getMenuGroupId() == null;
   }
+
 }
