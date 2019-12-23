@@ -71,10 +71,5 @@ public class ErrorController {
   public ErrorMsg handleCannotShopException(RuntimeException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
-  
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(TotalPriceMismatchException.class)
-  public ErrorMsg handleTotalPriceMismatchException(TotalPriceMismatchException e) {
-    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
-  }
+
 }

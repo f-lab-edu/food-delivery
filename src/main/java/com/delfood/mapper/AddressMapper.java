@@ -3,6 +3,7 @@ package com.delfood.mapper;
 import com.delfood.controller.reqeust.GetAddressByZipRequest;
 import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
 import com.delfood.dto.AddressDTO;
+import com.delfood.dto.address.Position;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,9 @@ public interface AddressMapper {
 
   public List<AddressDTO> findByRoadName(GetAddressesByRoadRequest searchInfo);
 
-  public double findDistanceMeterByAddressCode(String startAddressCode, String endAddressCode);
+  public Position findPositionByMemberId(String memberId);
 
-  public double findDistancemeterByMemberIdAndShopId(String memberId, Long shopId);
+  public Position findPositionByShopId(Long shopId);
+
+  public Position findPositionByAddressCode(String addressCode);
 }

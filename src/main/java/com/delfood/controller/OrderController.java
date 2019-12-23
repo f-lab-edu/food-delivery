@@ -48,7 +48,7 @@ public class OrderController {
    * @param orderId 주문번호
    * @return
    */
-  @GetMapping("orderBill/{orderId}")
+  @GetMapping("{orderId}/bill")
   @MemberLoginCheck
   public OrderBillDTO orderInfo(@PathVariable("orderId") Long orderId) {
     return orderService.getPreOrderBill(orderId);

@@ -126,6 +126,7 @@
                shop.id shopId,
                shop.name shopName,
                item.id itemId,
+               menu.id menuId,
                menu.name menuName,
                menu.price menuPrice,
                item.count itemCount,
@@ -221,7 +222,7 @@
         <collection property="options" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo$OptionInfo">
             <id property="id" column="optionId"/>
             <result property="name" column="optionName"/>
-            <result property="price" column="opti`onPrice"/>
+            <result property="price" column="optionPrice"/>
         </collection>
     </resultMap>
     

@@ -3,6 +3,7 @@ package com.delfood.service;
 import com.delfood.controller.reqeust.GetAddressByZipRequest;
 import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
 import com.delfood.dto.AddressDTO;
+import com.delfood.dto.address.Position;
 import com.delfood.mapper.AddressMapper;
 import lombok.extern.log4j.Log4j2;
 import java.util.List;
@@ -35,8 +36,17 @@ public class AddressService {
     return addressMapper.findByRoadName(searchInfo);
   }
   
+  /**
+   * 주소코드를 이용하여 거리를 계산한다.
+   * @param startAddressCode 시작 주소코드
+   * @param endAddressCode 도착 주소코드
+   * @return
+   */
   public double getDistanceMeter(String startAddressCode, String endAddressCode) {
-    return addressMapper.findDistanceMeterByAddressCode(startAddressCode, endAddressCode);
+    Position startPosition = addressMapper.findPositionByAddressCode(startAddressCode);
+    Position endPosition = addressMapper.findPositionByAddressCode(endAddressCode);
+    
+    return startPosition.distanceMeter(endPosition);
   }
   
   /**
@@ -58,8 +68,16 @@ public class AddressService {
     return deliveryCost + extraCharge;
   }
   
+  /**
+   * 회원과 매장의 아이디를 기준으로 배달료를 계산한다.
+   * @param memberId 회원 id
+   * @param shopId 매장 id
+   * @return
+   */
   public long deliveryPrice(String memberId, Long shopId) {
-    double distanceMeter = addressMapper.findDistancemeterByMemberIdAndShopId(memberId, shopId);
+    Position memberPosition = addressMapper.findPositionByMemberId(memberId);
+    Position shopPosition = addressMapper.findPositionByShopId(shopId);    
+    double distanceMeter = memberPosition.distanceMeter(shopPosition);
     return deliveryPrice(distanceMeter);
   }
 }
