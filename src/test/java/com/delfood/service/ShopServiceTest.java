@@ -228,8 +228,8 @@ public class ShopServiceTest {
     given(shopMapper.countByIdIsNotOpen(shopId1)).willReturn(1L);
     given(shopMapper.countByIdIsNotOpen(shopId2)).willReturn(0L);
     
-    assertThat(shopService.notOpenCheck(shopId1)).isTrue();
-    assertThat(shopService.notOpenCheck(shopId2)).isFalse();
+    assertThat(shopService.isClose(shopId1)).isTrue();
+    assertThat(shopService.isClose(shopId2)).isFalse();
   }
   
   /**
