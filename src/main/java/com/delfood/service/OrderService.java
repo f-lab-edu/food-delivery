@@ -6,6 +6,7 @@ import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
 import com.delfood.dto.ItemsBillDTO.MenuInfo.OptionInfo;
+import com.delfood.dto.MemberDTO.Status;
 import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.MemberDTO;
 import com.delfood.dto.MenuDTO;
@@ -13,6 +14,8 @@ import com.delfood.dto.OptionDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
+import com.delfood.dto.PaymentDTO;
+import com.delfood.dto.PaymentDTO.Type;
 import com.delfood.dto.OrderBillDTO;
 import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
@@ -41,6 +44,12 @@ public class OrderService {
   @Autowired
   private AddressService addressService;
   
+  @Autowired
+  private MockPayService mockPayService;
+  
+  @Autowired
+  private PaymentService paymentService;
+  
   /**
    * <b>미완성 로직</b><br>
    * 주문 요청을 진행한다.
@@ -55,11 +64,19 @@ public class OrderService {
     // 주문 준비 작업. 결제 전.
     Long orderId = preOrder(memberId, items, shopId);
     
-    // 결제 진행
-    
-    
     // 계산서 발행
     ItemsBillDTO bill = getBill(memberId, items);
+    
+    // 가상 결제 진행
+    PaymentDTO paymentInfo = PaymentDTO.builder()
+        .type(Type.CARD)
+        .amountPayment(bill.getTotalPrice()) // 추후 할인 금액을 빼줘야함
+        .orderId(orderId)
+        .amountDiscount(0L) // 쿠폰 로직 제작 후 작성 예정
+        .build();
+    
+    PaymentDTO payResult = mockPayService.pay(paymentInfo);
+    paymentService.insertPayment(payResult);
     
     // 사장님에게 알림(푸시)
     

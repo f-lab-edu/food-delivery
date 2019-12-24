@@ -36,6 +36,7 @@ public class ItemsBillDTO {
       @NonNull ShopInfo shopInfo,
       double distanceMeter,
       long deliveryPrice,
+      long itemsPrice,
       List<MenuInfo> menus) {
     this.memberId = memberId;
     this.addressInfo = addressInfo;
@@ -44,6 +45,7 @@ public class ItemsBillDTO {
                                     .deliveryPrice(deliveryPrice)
                                     .build();
     this.menus = menus;
+    this.totalPrice = totalPrice();
   }
   
   @Getter
@@ -107,6 +109,17 @@ public class ItemsBillDTO {
   @Getter
   public static class DeliveryInfo {
     private long deliveryPrice;
+  }
+  
+  /**
+   * 메뉴 가격, 옵션 가격, 배달 가격을 합친 총 가격을 계산한다.
+   * @author jun
+   * @return
+   */
+  public long totalPrice() {
+    return menus.stream().mapToLong(menu -> menu.getPrice()
+        + menu.getOptions().stream().mapToLong(option -> option.getPrice()).sum()).sum()
+        + deliveryInfo.getDeliveryPrice();
   }
 
 }

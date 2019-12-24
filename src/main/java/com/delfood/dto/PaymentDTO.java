@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 import org.codehaus.commons.nullanalysis.NotNull;
 import org.codehaus.commons.nullanalysis.Nullable;
 
 @Getter
+@ToString(of = {"id", "type", "amountPayment", "payTime", "orderId", "status", "amountDiscount",
+    "doSuccess"})
 public class PaymentDTO {
   private Long id;
   @NotNull
@@ -60,11 +63,11 @@ public class PaymentDTO {
     doSuccess = true;
   }
 
-  enum Type {
+  public enum Type {
     CARD, CASH
   }
   
-  enum Status {
+  public enum Status {
     READY, SUCCESS, FAIL
   }
   
