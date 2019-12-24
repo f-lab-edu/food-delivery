@@ -17,6 +17,7 @@ import com.delfood.dto.OrderBillDTO;
 import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import java.util.ArrayList;
 import java.util.List;
@@ -183,20 +184,29 @@ public class OrderService {
    * @param memberId 고객아이디
    * @return
    */
-  public List<OrderDTO> getMemberOrder(String memberId) {
-    return orderMapper.findByMemberId(memberId);
+  public List<OrderDTO> getMemberOrder(String memberId, Long lastViewedOrderId) {
+    return orderMapper.findByMemberId(memberId, lastViewedOrderId);
   }
   
   /**
    * 주문 번호를 기반으로 주문 상세를 조회한다.
    * @author jun
    * @param orderId 주문 아이디
+   * @param memberId 고객 아이디
    * @return
    */
   public OrderDTO getOrder(Long orderId) {
-    return orderMapper.findById(orderId);
+    OrderDTO orderInfo = orderMapper.findById(orderId);
+    return orderInfo;
   }
   
+  /**
+   * 해당 매장의 아이템인지 확인한다.
+   * @author jun
+   * @param items 해당 매장의 아이템인지 확인할 아이템들
+   * @param shopId 매장 아이디
+   * @return
+   */
   public boolean isShopItems(List<OrderItemDTO> items, Long shopId) {
     return orderMapper.isShopItem(items, shopId);
   }

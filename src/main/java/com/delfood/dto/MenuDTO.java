@@ -30,13 +30,10 @@ public class MenuDTO {
   
   private String photo; // 사진 (경로 저장)
   
-  @NonNull
   private LocalDateTime createdAt; // 등록일
   
-  @NonNull
   private LocalDateTime updatedAt; // 최종 수정일
   
-  @NonNull
   private Status status; // 상태
   
   private Long priority; // 우선순위

@@ -141,6 +141,10 @@
                         INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
                         INNER JOIN MEMBER member ON (odr.member_id = member.id)
         WHERE member.id = #{memberId}
+        <if test="lastViewedOrderId != null">
+        AND   odr.id > #{lastViewedOrderId}
+        </if>
+        ORDER BY odr.id DESC
     </select>
     
     

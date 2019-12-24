@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.codehaus.commons.nullanalysis.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -95,6 +96,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("bill")
+  @MemberLoginCheck
   public ItemsBillDTO getBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
     return orderService.getBill(SessionUtil.getLoginMemberId(session), items);
   }
@@ -108,8 +110,8 @@ public class OrderController {
    */
   @GetMapping
   @MemberLoginCheck
-  public List<OrderDTO> myOrders(HttpSession session) {
-    return orderService.getMemberOrder(SessionUtil.getLoginMemberId(session));
+  public List<OrderDTO> myOrders(HttpSession session, @Nullable Long lastViewedOrderId) {
+    return orderService.getMemberOrder(SessionUtil.getLoginMemberId(session), lastViewedOrderId);
   }
   
   /**
@@ -122,7 +124,12 @@ public class OrderController {
   @GetMapping("{orderId}")
   @MemberLoginCheck
   public OrderDTO getOrder(HttpSession session, @PathVariable Long orderId) {
-    return orderService.getOrder(orderId);
+    OrderDTO orderInfo = orderService.getOrder(orderId);
+    String memberId = SessionUtil.getLoginMemberId(session);
+    if (memberId.equals(orderInfo.getMemberId()) == false) {
+      throw new IllegalArgumentException("해당 회원의 주문이 아닙니다!");
+    }
+    return orderInfo;
   }
   
   // request

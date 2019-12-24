@@ -59,6 +59,10 @@ public class OptionService {
       throw new RuntimeException("delete option error!");
     }
   }
+  
+  public OptionDTO getOption(Long id) {
+    return optionMapper.findById(id);
+  }
 
   public long totalPrice(List<OrderItemOptionDTO> options) {
     return optionMapper.totalPrice(options);
