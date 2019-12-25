@@ -33,6 +33,9 @@ public class FcmDao {
    */
   public void addMemberToken(String memberId, String token) {
     String key = RedisKeyFactory.generateFcmMemberKey(memberId);
+    if (getMemberTokens(memberId).contains(token)) { // 토큰이 이미 있을 경우
+      return;
+    }
     redisTemplate.opsForList().rightPush(key, token);
     redisTemplate.expire(key, MEMBER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
   }
@@ -45,6 +48,9 @@ public class FcmDao {
    */
   public void addOwnerToken(String ownerId, String token) {
     String key = RedisKeyFactory.generateFcmOwnerKey(ownerId);
+    if (getOwnerTokens(ownerId).contains(token)) { // 토큰이 이미 있을 경우
+      return;
+    }
     redisTemplate.opsForList().rightPush(key, token);
     redisTemplate.expire(key, OWNER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
   }

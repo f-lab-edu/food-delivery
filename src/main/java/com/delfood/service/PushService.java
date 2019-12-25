@@ -157,21 +157,23 @@ public class PushService {
   
   /**
    * 회원 토큰정보를 저장한다.
+   * 동일 토큰이 존재할시 추가하지 않는다.
    * @author jun
    * @param memberId 고객 아이디
    * @param token 토큰 정보
    */
-  public void setMemberToken(String memberId, String token) {
+  public void addMemberToken(String memberId, String token) {
     fcmDao.addMemberToken(memberId, token);
   }
   
   /**
    * 사장님 토큰정보를 저장한다.
+   * 동일 토큰이 존재할 시 추가하지 않는다.
    * @author jun
    * @param ownerId 사장님 아이디
    * @param token 토큰 정보
    */
-  public void setOwnerToken(String ownerId, String token) {
+  public void addOwnerToken(String ownerId, String token) {
     fcmDao.addOwnerToken(ownerId, token);
   }
   

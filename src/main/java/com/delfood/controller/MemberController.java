@@ -4,6 +4,7 @@ import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.MemberDTO;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.MemberService;
+import com.delfood.service.PushService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
@@ -57,6 +58,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
   @Autowired
   private MemberService memberService;
+  
+  @Autowired
+  private PushService pushService;
 
   /**
    * 로그인한 사용자가 마이페이지를 눌렀을 때 보여줄 사용자 정보를 반환한다.
@@ -218,6 +222,13 @@ public class MemberController {
 
     return responseEntity;
 
+  }
+  
+  @PostMapping("token")
+  @MemberLoginCheck
+  public void addToken(HttpSession session, String token) {
+    String memberId = SessionUtil.getLoginMemberId(session);
+    pushService.addMemberToken(memberId, token);
   }
 
 
