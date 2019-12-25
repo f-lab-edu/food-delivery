@@ -1,7 +1,5 @@
 package com.delfood.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopDTO.DeliveryType;
@@ -12,10 +10,6 @@ import com.delfood.error.exception.shop.CanNotCloseShopException;
 import com.delfood.error.exception.shop.CanNotOpenShopException;
 import com.delfood.mapper.DeliveryLocationMapper;
 import com.delfood.mapper.ShopMapper;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,6 +17,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.client.HttpStatusCodeException;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShopServiceTest {
@@ -38,7 +40,7 @@ public class ShopServiceTest {
   
   @Mock
   private DeliveryLocationMapper deliveryLocationMapper;
-  
+
   /**
    * shop 정보 생성.
    * @return

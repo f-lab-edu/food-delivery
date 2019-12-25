@@ -136,7 +136,7 @@ public class ShopService {
   @Transactional
   public void openShop(Long shopId) {
     // 매장이 오픈중일 때
-    if (isClose(shopId) == false) {
+    if (!isClose(shopId)) {
       throw new CanNotOpenShopException("영업이 이미 진행중입니다.");
     }
     
@@ -157,7 +157,7 @@ public class ShopService {
   @Transactional
   public void closeShop(Long shopId) {
     // 해당 매장이 영업중이 아닐시
-    if (isClose(shopId) == true) {
+    if (isClose(shopId)) {
       throw new CanNotCloseShopException("이미 영업을 종료한 매장입니다. 영업 종료를 시도할 수 없습니다.");
     }
     workService.closeWork(shopId);
