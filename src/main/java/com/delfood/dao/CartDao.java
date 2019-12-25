@@ -20,7 +20,7 @@ public class CartDao {
   @Autowired
   private ObjectMapper objectMapper;
   
-  @Value("${cart.expire.second}")
+  @Value("${expire.cart}")
   private long cartExpireSecond;
      
   /**
