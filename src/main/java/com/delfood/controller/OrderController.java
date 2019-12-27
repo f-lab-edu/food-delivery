@@ -125,6 +125,11 @@ public class OrderController {
   @MemberLoginCheck
   public OrderDTO getOrder(HttpSession session, @PathVariable Long orderId) {
     OrderDTO orderInfo = orderService.getOrder(orderId);
+    if (orderInfo == null) {
+      log.info("존재하지 않는 주문번호 조회. 주문 번호 : {}", orderId);
+      throw new NullPointerException("존재하지 않는 주문 정보입니다.");
+    }
+    
     String memberId = SessionUtil.getLoginMemberId(session);
     if (memberId.equals(orderInfo.getMemberId()) == false) {
       throw new IllegalArgumentException("해당 회원의 주문이 아닙니다!");
