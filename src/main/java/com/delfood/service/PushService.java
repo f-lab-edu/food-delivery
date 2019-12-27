@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,8 @@ public class PushService {
   @Autowired
   private FcmDao fcmDao;
   
-  private static final String FCM_PRIVATE_KEY_PATH =
-      "delfood-8385c-firebase-adminsdk-p6vk2-9d667ced9e.json";
+  @Value("${fcm.key.path}")
+  private String FCM_PRIVATE_KEY_PATH;
 
   /**
    * FCM 기본 설정을 진행한다.
@@ -69,7 +70,7 @@ public class PushService {
    * @author jun
    * @param messageInfo 전송할 푸시 정보
    */
-  public void send(PushMessageForOne messageInfo) {
+  public void sendByToken(PushMessageForOne messageInfo) {
     Message message = Message.builder()
         .setToken(messageInfo.getToken())
         .putData("title", messageInfo.getTitle())
@@ -89,13 +90,13 @@ public class PushService {
   /**
    * 해당 토픽을 가진 사용자들에게 메세지를 전송한다.
    * @author jun
-   * @param messageInfo 전송할 푸시 정보
+   * @param topicMessageInfo 전송할 푸시 정보
    */
-  public void send(PushMessageForTopic messageInfo) {
+  public void sendByTopic(PushMessageForTopic topicMessageInfo) {
     Message message = Message.builder()
-        .setTopic(messageInfo.getTopic())
-        .putData("title", messageInfo.getTitle())
-        .putData("message", messageInfo.getMessage())
+        .setTopic(topicMessageInfo.getTopic())
+        .putData("title", topicMessageInfo.getTitle())
+        .putData("message", topicMessageInfo.getMessage())
         .putData("time", LocalDateTime.now().toString())
         .build();
     String response;

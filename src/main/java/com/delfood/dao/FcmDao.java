@@ -2,15 +2,18 @@ package com.delfood.dao;
 
 import com.delfood.utils.RedisKeyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.management.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Log4j2
 public class FcmDao {
   
   @Autowired
@@ -33,11 +36,22 @@ public class FcmDao {
    */
   public void addMemberToken(String memberId, String token) {
     String key = RedisKeyFactory.generateFcmMemberKey(memberId);
-    if (getMemberTokens(memberId).contains(token)) { // 토큰이 이미 있을 경우
-      return;
+    redisTemplate.watch(key);
+    try {
+      if (getMemberTokens(memberId).contains(token)) { // 토큰이 이미 있을 경우
+        return;
+      }
+      redisTemplate.multi();
+      
+      redisTemplate.opsForList().rightPush(key, token);
+      redisTemplate.expire(key, MEMBER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
+      
+      redisTemplate.exec();
+    } catch (Exception e) {
+      log.error("Redis Add Member Token ERROR! key : {}", key);
+      redisTemplate.discard();
+      throw new RuntimeException("Redis ERROR");
     }
-    redisTemplate.opsForList().rightPush(key, token);
-    redisTemplate.expire(key, MEMBER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
   }
   
   /**
@@ -48,11 +62,22 @@ public class FcmDao {
    */
   public void addOwnerToken(String ownerId, String token) {
     String key = RedisKeyFactory.generateFcmOwnerKey(ownerId);
-    if (getOwnerTokens(ownerId).contains(token)) { // 토큰이 이미 있을 경우
-      return;
+    redisTemplate.watch(key);
+    try {
+      if (getOwnerTokens(ownerId).contains(token)) { // 토큰이 이미 있을 경우
+        return;
+      }
+      redisTemplate.multi();
+      
+      redisTemplate.opsForList().rightPush(key, token);
+      redisTemplate.expire(key, OWNER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
+      
+      redisTemplate.exec();
+    } catch (Exception e) {
+      log.error("Redis Add Owner Token ERROR! key : {}", key);
+      redisTemplate.discard();
+      throw new RuntimeException("Redis ERROR");
     }
-    redisTemplate.opsForList().rightPush(key, token);
-    redisTemplate.expire(key, OWNER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
   }
   
   /**
