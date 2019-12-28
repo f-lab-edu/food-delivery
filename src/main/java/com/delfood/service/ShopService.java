@@ -1,6 +1,5 @@
 package com.delfood.service;
 
-import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
@@ -8,12 +7,9 @@ import com.delfood.error.exception.shop.CanNotCloseShopException;
 import com.delfood.error.exception.shop.CanNotOpenShopException;
 import com.delfood.mapper.DeliveryLocationMapper;
 import com.delfood.mapper.ShopMapper;
-import com.delfood.mapper.WorkMapper;
-import lombok.extern.log4j.Log4j2;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -140,7 +136,7 @@ public class ShopService {
   @Transactional
   public void openShop(Long shopId) {
     // 매장이 오픈중일 때
-    if (notOpenCheck(shopId) == false) {
+    if (!isClose(shopId)) {
       throw new CanNotOpenShopException("영업이 이미 진행중입니다.");
     }
     
@@ -161,7 +157,7 @@ public class ShopService {
   @Transactional
   public void closeShop(Long shopId) {
     // 해당 매장이 영업중이 아닐시
-    if (notOpenCheck(shopId) == true) {
+    if (isClose(shopId)) {
       throw new CanNotCloseShopException("이미 영업을 종료한 매장입니다. 영업 종료를 시도할 수 없습니다.");
     }
     workService.closeWork(shopId);
@@ -179,7 +175,7 @@ public class ShopService {
    * @param shopId 체크할 매장의 id
    * @return 매장이 오픈상태가 아니라면 true
    */
-  public boolean notOpenCheck(Long shopId) {
+  public boolean isClose(Long shopId) {
     long isNotOpenResult = shopMapper.countByIdIsNotOpen(shopId);
     return isNotOpenResult == 1;
   }
