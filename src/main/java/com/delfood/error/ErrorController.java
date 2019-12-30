@@ -4,6 +4,7 @@ import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.error.exception.cart.DuplicateItemException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
+import com.delfood.error.exception.mockPay.MockPayException;
 import com.delfood.error.exception.shop.CanNotCloseShopException;
 import com.delfood.error.exception.shop.CanNotOpenShopException;
 import org.springframework.http.HttpStatus;
@@ -75,6 +76,12 @@ public class ErrorController {
   @ResponseStatus(HttpStatus.CONFLICT)
   @ExceptionHandler(DuplicateItemException.class)
   public ErrorMsg handleDuplicatedItemException(DuplicateItemException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
+  
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(MockPayException.class)
+  public ErrorMsg handleMockPayException(MockPayException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
 }
