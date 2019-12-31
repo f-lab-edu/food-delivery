@@ -2,11 +2,10 @@ package com.delfood.dao;
 
 import com.delfood.utils.RedisKeyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.management.RuntimeErrorException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,10 +22,10 @@ public class FcmDao {
   private ObjectMapper objectMapper;
   
   @Value("${expire.fcm.member}")
-  private static Long MEMBER_TOKEN_EXPIRE_SECOND;
+  private static Long memberTokenExpireSecond;
   
   @Value("${expire.fcm.owner}")
-  private static Long OWNER_TOKEN_EXPIRE_SECOND;
+  private static Long ownerTokenExpireSecond;
   
   /**
    * 고객이 발급받은 토큰을 저장한다.
@@ -44,13 +43,15 @@ public class FcmDao {
       redisTemplate.multi();
       
       redisTemplate.opsForList().rightPush(key, token);
-      redisTemplate.expire(key, MEMBER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
+      redisTemplate.expire(key, memberTokenExpireSecond, TimeUnit.SECONDS);
       
       redisTemplate.exec();
     } catch (Exception e) {
       log.error("Redis Add Member Token ERROR! key : {}", key);
+      log.error("ERROR Info : {} ", e.getMessage());
       redisTemplate.discard();
-      throw new RuntimeException("Redis ERROR");
+      throw new RuntimeException(
+          "Cannot add member token. key : " + key + ", ERROR Info " + e.getMessage());
     }
   }
   
@@ -70,13 +71,15 @@ public class FcmDao {
       redisTemplate.multi();
       
       redisTemplate.opsForList().rightPush(key, token);
-      redisTemplate.expire(key, OWNER_TOKEN_EXPIRE_SECOND, TimeUnit.SECONDS);
+      redisTemplate.expire(key, ownerTokenExpireSecond, TimeUnit.SECONDS);
       
       redisTemplate.exec();
     } catch (Exception e) {
       log.error("Redis Add Owner Token ERROR! key : {}", key);
+      log.error("ERROR Info : {} ", e.getMessage());
       redisTemplate.discard();
-      throw new RuntimeException("Redis ERROR");
+      throw new RuntimeException(
+          "Cannot add owner token. key : " + key + ", ERROR Info " + e.getMessage());
     }
   }
   

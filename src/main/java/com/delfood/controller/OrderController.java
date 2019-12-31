@@ -127,7 +127,7 @@ public class OrderController {
     OrderDTO orderInfo = orderService.getOrder(orderId);
     if (orderInfo == null) {
       log.info("존재하지 않는 주문번호 조회. 주문 번호 : {}", orderId);
-      throw new NullPointerException("존재하지 않는 주문 정보입니다.");
+      throw new IllegalArgumentException("존재하지 않는 주문 정보입니다.");
     }
     
     String memberId = SessionUtil.getLoginMemberId(session);
