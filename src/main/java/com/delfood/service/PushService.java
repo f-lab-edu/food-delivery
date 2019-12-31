@@ -24,6 +24,7 @@ import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -114,6 +115,7 @@ public class PushService {
    * @param messageInfo 푸시 정보
    * @param memberId 고객 아이디
    */
+  @Async("asyncTask")
   public void sendMessageToMember(PushMessage messageInfo, String memberId) {
     List<String> tokens = fcmDao.getMemberTokens(memberId);
     List<Message> messages = tokens.stream().map(token -> Message.builder()
@@ -137,6 +139,7 @@ public class PushService {
    * @param messageInfo 전송할 푸시 정보
    * @param ownerId 사장님 아이디
    */
+  @Async("asyncTask")
   public void sendMessageToOwner(PushMessage messageInfo, String ownerId) {
     List<String> tokens = fcmDao.getOwnerTokens(ownerId);
     List<Message> messages = tokens.stream().map(token -> Message.builder()
