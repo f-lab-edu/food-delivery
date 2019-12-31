@@ -1,10 +1,12 @@
 package com.delfood.controller;
 
+import com.delfood.aop.MemberLoginCheck;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.dto.OwnerDTO;
 import com.delfood.dto.OwnerDTO.Status;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.OwnerService;
+import com.delfood.service.PushService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class OwnerController {
   @Autowired
   private OwnerService ownerService;
+  
+  @Autowired
+  private PushService pushService;
 
   /**
    * 사장님 회원가입 메서드.
@@ -165,6 +170,13 @@ public class OwnerController {
       throw new NullPointerException();
     }
     ownerService.updateOwnerPassword(id, passwordBeforeChange, passwordAfterChange);
+  }
+  
+  @PostMapping("token")
+  @OwnerLoginCheck
+  public void addToken(HttpSession session, String token) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    pushService.addOwnerToken(ownerId, token);
   }
 
 
