@@ -5,9 +5,13 @@ import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
+import com.delfood.dto.ShopDTO;
+import com.delfood.dto.push.PushMessage;
 import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.OrderBillDTO;
 import com.delfood.service.OrderService;
+import com.delfood.service.PushService;
+import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -30,6 +34,12 @@ public class OrderController {
 
   @Autowired
   OrderService orderService;
+  
+  @Autowired
+  ShopService shopService;
+  
+  @Autowired
+  PushService pushService;
   
   /**
    * 아이템들의 가격과 정보를 조회한다.
@@ -84,9 +94,16 @@ public class OrderController {
           totalPriceFromServer);
       throw new TotalPriceMismatchException("Total Price Mismatch!");
     }
-
-    return orderService.order(SessionUtil.getLoginMemberId(session), request.getItems(),
-        request.getShopId());
+    
+    OrderResponse orderResponse = orderService.order(SessionUtil.getLoginMemberId(session),
+        request.getItems(), request.getShopId());
+    
+    // 사장님에게 푸시 메세지 전송
+    PushMessage pushMsg = new PushMessage("DelFood 주문", "새로운 주문이 들어왔습니다.");
+    String ownerId = shopService.getShop(request.getShopId()).getOwnerId();
+    pushService.sendMessageToOwner(pushMsg, ownerId);
+    
+    return orderResponse;
   }
   
   /**
