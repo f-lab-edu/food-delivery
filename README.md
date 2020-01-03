@@ -32,9 +32,17 @@ Wiki에 기술 이슈에 대한 고민과 해결 방법을 포스팅한 개인 �
 <br>
 ## CI
 Jenkins : <http://106.10.51.119:8080/job/Delfood/><br>
+Naver Cloud Platform(Cloud server)를 사용하고 있습니다.<br>
 PR시마다 자동 Build 및 Test 적용<br>
 비로그인 상태로도 확인이 가능합니다.<br>
 <br>
+## Database
+- MariaDB<br>
+cafe24 web hosting 서비스를 사용하고 있습니다.
+- Redis<br>
+docker 컨테이너를 사용하고 있습니다.
+<br>
+
 ## 화면 설계
 kakao oven - <https://ovenapp.io/view/OI44WSGwSZRSMcyiveGcSWGvw38YKizI/bco8b\>   
 
