@@ -16,6 +16,7 @@ import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.dto.PaymentDTO;
 import com.delfood.dto.PaymentDTO.Type;
+import com.delfood.dto.push.PushMessage;
 import com.delfood.dto.OrderBillDTO;
 import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
@@ -50,6 +51,9 @@ public class OrderService {
   @Autowired
   private PaymentService paymentService;
   
+  @Autowired
+  private PushService pushService;
+  
   /**
    * <b>미완성 로직</b><br>
    * 주문 요청을 진행한다.
@@ -79,7 +83,9 @@ public class OrderService {
     paymentService.insertPayment(payResult);
     
     // 사장님에게 알림(푸시)
-    
+    PushMessage pushMsg = PushMessage.getMessasge(PushMessage.Type.addOrderRequest);
+    String ownerId = shopService.getShop(shopId).getOwnerId();
+    pushService.sendMessageToOwner(pushMsg, ownerId); // Exception이 발생하지 않는다.
     
     return new OrderResponse(bill, orderId);
   }
@@ -209,7 +215,6 @@ public class OrderService {
    * 주문 번호를 기반으로 주문 상세를 조회한다.
    * @author jun
    * @param orderId 주문 아이디
-   * @param memberId 고객 아이디
    * @return
    */
   public OrderDTO getOrder(Long orderId) {

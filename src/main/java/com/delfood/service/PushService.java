@@ -71,6 +71,7 @@ public class PushService {
    * @author jun
    * @param messageInfo 전송할 푸시 정보
    */
+  @Async("asyncTask")
   public void sendByToken(PushMessageForOne messageInfo) {
     Message message = Message.builder()
         .setToken(messageInfo.getToken())
@@ -84,7 +85,7 @@ public class PushService {
       response = FirebaseMessaging.getInstance().send(message);
       log.info("Sent message: " + response);
     } catch (FirebaseMessagingException e) {
-      throw new RuntimeException(e.getMessage());
+      log.error("cannot send message by token. error info : {}", e.getMessage());
     }
   }
   
@@ -106,7 +107,7 @@ public class PushService {
       response = FirebaseMessaging.getInstance().send(message);
       log.info("Sent message: " + response);
     } catch (FirebaseMessagingException e) {
-      throw new RuntimeException(e.getMessage());
+      log.error("cannot send message by topic. error info : {}", e.getMessage());
     }
   }
   
@@ -130,7 +131,8 @@ public class PushService {
       response = FirebaseMessaging.getInstance().sendAll(messages);
       log.info("Sent message: " + response);
     } catch (FirebaseMessagingException e) {
-      throw new RuntimeException(e.getMessage());
+      log.error("cannot send to member push message. error info : {}", e.getMessage());
+      addErrorMemberPush(memberId, messages);
     }
   }
   
@@ -154,7 +156,8 @@ public class PushService {
       response = FirebaseMessaging.getInstance().sendAll(messages);
       log.info("Sent message: " + response);
     } catch (FirebaseMessagingException e) {
-      throw new RuntimeException(e.getMessage());
+      log.error("cannot send message to owner. error info : {}", e.getMessage());
+      addErrorOwnerPush(ownerId, messages);
     }
   }
   
@@ -198,5 +201,13 @@ public class PushService {
    */
   public List<String> getOwnerTokens(String ownerId) {
     return fcmDao.getOwnerTokens(ownerId);
+  }
+  
+  public void addErrorMemberPush(String memberId, List<Message> messages) {
+    fcmDao.addMemberErrorPush(memberId, messages);
+  }
+  
+  public void addErrorOwnerPush(String ownerId, List<Message> messages) {
+    fcmDao.addMemberErrorPush(ownerId, messages);
   }
 }

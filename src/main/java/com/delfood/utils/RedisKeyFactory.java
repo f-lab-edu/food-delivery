@@ -2,7 +2,7 @@ package com.delfood.utils;
 
 public class RedisKeyFactory {
   public enum Key {
-    CART, FCM_MEMBER, FCM_OWNER 
+    CART, FCM_MEMBER, FCM_OWNER, FCM_MEMBER_ERROR, FCM_OWNER_ERROR 
   }
   
   // 인스턴스화 방지
@@ -32,5 +32,13 @@ public class RedisKeyFactory {
    */
   public static String getIdFromKey(String key) {
     return key.substring(0, key.indexOf(":"));
+  }
+
+  public static String generateFcmMemberErrorKey(String memberId) {
+    return generateKey(memberId, Key.FCM_MEMBER_ERROR);
+  }
+
+  public static String generateFcmOwnerErrorKey(String ownerId) {
+    return generateKey(ownerId, Key.FCM_OWNER_ERROR);
   }
 }

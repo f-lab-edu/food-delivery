@@ -98,11 +98,6 @@ public class OrderController {
     OrderResponse orderResponse = orderService.order(SessionUtil.getLoginMemberId(session),
         request.getItems(), request.getShopId());
     
-    // 사장님에게 푸시 메세지 전송
-    PushMessage pushMsg = new PushMessage("DelFood 주문", "새로운 주문이 들어왔습니다.");
-    String ownerId = shopService.getShop(request.getShopId()).getOwnerId();
-    pushService.sendMessageToOwner(pushMsg, ownerId);
-    
     return orderResponse;
   }
   
