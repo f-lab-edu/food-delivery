@@ -28,39 +28,35 @@ public class CartServiceTest {
   @Mock
   CartDao cartDao;
   
-  public ItemDTO generateItem111() {
-    CacheMenuDTO menuInfo = new CacheMenuDTO(111L, "테스트 메뉴 111", 11000L);
+  /**
+   * id에 따른 Item을 생산하여 리턴한다.
+   * @author jun
+   * @param id 해당 아이디를 기반으로 메뉴와 옵션을 생산하여 아이템을 제작한다.
+   * @return
+   */
+  public ItemDTO generateItem(long id) {
+    final long menuId = id * 111;
+    final long shopId = 222L;
+    final long menuPrice = 11000L;
+    final long optionId = id;
+    final long[] optionPrices = {100L, 200L, 300L};
     
+    CacheMenuDTO menuInfo = new CacheMenuDTO(menuId, "테스트 메뉴 " + menuId, menuPrice);
+
     List<CacheOptionDTO> options = new ArrayList<ItemDTO.CacheOptionDTO>();
-    CacheOptionDTO optionInfo1 = new CacheOptionDTO(1L, "111 옵션 1", 100L);
-    CacheOptionDTO optionInfo2 = new CacheOptionDTO(1L, "111 옵션 2", 200L);
-    CacheOptionDTO optionInfo3 = new CacheOptionDTO(1L, "111 옵션 3", 300L);
+    CacheOptionDTO optionInfo1 = new CacheOptionDTO(optionId, menuId + " 옵션 1", optionPrices[0]);
+    CacheOptionDTO optionInfo2 =
+        new CacheOptionDTO(optionId * 2L, menuId + " 옵션 2", optionPrices[1]);
+    CacheOptionDTO optionInfo3 =
+        new CacheOptionDTO(optionId * 3L, menuId + " 옵션 3", optionPrices[2]);
     options.add(optionInfo1);
     options.add(optionInfo2);
     options.add(optionInfo3);
-    
-    CacheShopDTO shopInfo = new CacheShopDTO(222L, "테스트 매장 이름");
-    
-    ItemDTO itemInfo = new ItemDTO(menuInfo, options, 1, 11600L, shopInfo);
-    
-    return itemInfo;
-  }
-  
-  public ItemDTO generateItem222() {
-    CacheMenuDTO menuInfo = new CacheMenuDTO(222L, "테스트 메뉴 222", 11000L);
-    
-    List<CacheOptionDTO> options = new ArrayList<ItemDTO.CacheOptionDTO>();
-    CacheOptionDTO optionInfo1 = new CacheOptionDTO(2L, "222 옵션 1", 100L);
-    CacheOptionDTO optionInfo2 = new CacheOptionDTO(2L, "222 옵션 2", 200L);
-    CacheOptionDTO optionInfo3 = new CacheOptionDTO(2L, "222 옵션 3", 300L);
-    options.add(optionInfo1);
-    options.add(optionInfo2);
-    options.add(optionInfo3);
-    
-    CacheShopDTO shopInfo = new CacheShopDTO(222L, "테스트 매장 이름");
-    
-    ItemDTO itemInfo = new ItemDTO(menuInfo, options, 1, 11600L, shopInfo);
-    
+
+    CacheShopDTO shopInfo = new CacheShopDTO(shopId, "테스트 매장 이름");
+
+    ItemDTO itemInfo = new ItemDTO(menuInfo, options, 1, menuPrice + 600L, shopInfo);
+
     return itemInfo;
   }
   
@@ -84,15 +80,15 @@ public class CartServiceTest {
   
   @Test
   public void addOrdersItemTest_장바구니에_메뉴_추가() {
-    ItemDTO item1 = generateItem111();
-    ItemDTO item2 = generateItem222();
+    ItemDTO item1 = generateItem(1L);
+    ItemDTO item2 = generateItem(2L);
     given(cartDao.findPeekByMemberId("eric")).willReturn(item1);
     cartService.addOrdersItem(item2, "eric");
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void addOrdersItemTest_장바구니에_다른매장_메뉴_추가() {
-    ItemDTO item1 = generateItem111();
+    ItemDTO item1 = generateItem(1L);
     ItemDTO item2 = generateItemAnotherShop();
     given(cartDao.findPeekByMemberId("eric")).willReturn(item1);
     cartService.addOrdersItem(item2, "eric");
@@ -100,20 +96,20 @@ public class CartServiceTest {
   
   @Test(expected = IndexOutOfBoundsException.class)
   public void addOrdersItemTest_너무많은메뉴추가() {
-    given(cartDao.findPeekByMemberId("eric")).willReturn(generateItem111());
+    given(cartDao.findPeekByMemberId("eric")).willReturn(generateItem(1L));
     given(cartDao.findAllByMemberId("eric")).willReturn(Arrays.asList(
-        new ItemDTO[] {generateItem111(), generateItem111(), generateItem111(), generateItem111(),
-            generateItem111(), generateItem111(), generateItem111(), generateItem111(),
-            generateItem111(), generateItem111(), generateItem111(), generateItem111()}));
-    cartService.addOrdersItem(generateItem222(), "eric");
+        new ItemDTO[] {generateItem(1L), generateItem(1L), generateItem(1L), generateItem(1L),
+            generateItem(1L), generateItem(1L), generateItem(1L), generateItem(1L),
+            generateItem(1L), generateItem(1L), generateItem(1L), generateItem(1L)}));
+    cartService.addOrdersItem(generateItem(2L), "eric");
   }
   
   @Test(expected = DuplicateItemException.class)
   public void addOrdersItemTest_같메뉴추가() {
-    given(cartDao.findPeekByMemberId("eric")).willReturn(generateItem111());
+    given(cartDao.findPeekByMemberId("eric")).willReturn(generateItem(1L));
     given(cartDao.findAllByMemberId("eric")).willReturn(Arrays.asList(
-        new ItemDTO[] {generateItem111()}));
-    cartService.addOrdersItem(generateItem111(), "eric");
+        new ItemDTO[] {generateItem(1L)}));
+    cartService.addOrdersItem(generateItem(1L), "eric");
   }
   
   @Test
@@ -139,34 +135,34 @@ public class CartServiceTest {
   @Test
   public void containsEqualItemTest_장바구니_동일아이템_포함여부_검사() {
     given(cartDao.findAllByMemberId("eric"))
-        .willReturn(Arrays.asList(new ItemDTO[] {generateItem111()}));
+        .willReturn(Arrays.asList(new ItemDTO[] {generateItem(1L)}));
     
-    assertThat(cartService.containsEqualItem("eric", generateItem111())).isEqualTo(true);
-    assertThat(cartService.containsEqualItem("eric", generateItem222())).isEqualTo(false);
+    assertThat(cartService.containsEqualItem("eric", generateItem(1L))).isEqualTo(true);
+    assertThat(cartService.containsEqualItem("eric", generateItem(2L))).isEqualTo(false);
   }
   
   @Test
   public void allPriceTest_장바구니_총가격_계산() {
     given(cartDao.findAllByMemberId("eric"))
-        .willReturn(Arrays.asList(new ItemDTO[] {generateItem111(), generateItem222()}));
+        .willReturn(Arrays.asList(new ItemDTO[] {generateItem(1L), generateItem(2L)}));
     assertThat(cartService.allPrice("eric")).isEqualTo(23200L);
   }
   
   @Test
   public void priceTest_아이템_가격계산() {
-    ItemDTO itemInfo = generateItem111();
+    ItemDTO itemInfo = generateItem(1L);
     assertThat(cartService.price(itemInfo)).isEqualTo(11600L);
   }
   
   @Test
   public void menuPriceTest_아이템_메뉴만_가격계산() {
-    ItemDTO itemInfo = generateItem111();
+    ItemDTO itemInfo = generateItem(1L);
     assertThat(CartService.menuPrice(itemInfo)).isEqualTo(11000L);
   }
   
   @Test
   public void menuPriceTest_아이템_옵션만_가격계산() {
-    ItemDTO itemInfo = generateItem111();
+    ItemDTO itemInfo = generateItem(1L);
     assertThat(CartService.optionsPrice(itemInfo)).isEqualTo(600L);
   }
   
