@@ -172,4 +172,20 @@
         AND     owner_id = #{ownerId}
         AND     work_condition = 'OPEN'
     </select>
+
+    <select id="findByIdList" resultType="com.delfood.dto.ShopDTO">
+        <include refid="selectShop"></include>
+        WHERE id IN (
+        <foreach collection="shopIdList" separator="," item="shopId">
+            #{shopId}
+        </foreach>
+        )
+        ORDER BY FIELD(id,
+        <foreach collection="shopIdList" separator="," item="shopId">
+            #{shopId}
+        </foreach>
+        )
+    </select>
+
+
 </mapper>

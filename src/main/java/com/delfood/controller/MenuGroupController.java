@@ -2,9 +2,11 @@ package com.delfood.controller;
 
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.aop.OwnerShopCheck;
+import com.delfood.dao.RecentShopViewDao;
 import com.delfood.dto.MenuGroupDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.service.MenuGroupService;
+import com.delfood.service.RecentShopViewService;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
 
@@ -33,7 +35,10 @@ public class MenuGroupController {
   
   @Autowired
   MenuGroupService menuGroupService;
-  
+
+  @Autowired
+  RecentShopViewService recentShopViewService;
+
   /**
    * 메뉴 관리
    * - 매장 목록을 보여준다.
@@ -56,18 +61,22 @@ public class MenuGroupController {
   
   /**
    * 매장 이름, 주소 및 모든 메뉴 정보를 조회한다.
-   * 메뉴 그룹 > 메뉴 > 상위 옵션 2개
-   * 
+   *
    * @author jinyoung
    * 
    * @param shopId 매장 아이디
    */
   @GetMapping("/shops/{shopId}/menuGroups/all")
-  @OwnerShopCheck
-  public ResponseEntity<ShopMenuInfoResponse> shopMenuInfo(@PathVariable("shopId") long shopId) {
+  public ResponseEntity<ShopMenuInfoResponse> shopMenuInfo(@PathVariable("shopId") long shopId,
+                                                           HttpSession session) {
 
     ShopDTO shopInfo = shopService.getMyShopInfo(shopId);
-    
+
+    String memberId = SessionUtil.getLoginMemberId(session);
+    if (memberId != null) {
+      recentShopViewService.add(memberId, shopId);
+    }
+
     if (shopInfo == null) {
       return new ResponseEntity<MenuGroupController.ShopMenuInfoResponse>(HttpStatus.NOT_FOUND); 
     }
@@ -160,9 +169,9 @@ public class MenuGroupController {
   @PutMapping("/shops/{shopId}/menuGroups/priority")
   @OwnerShopCheck
   public void updateMenuGroupPriority(
-      @PathVariable Long shopId, @RequestBody List<Long> iddList) {
+      @PathVariable Long shopId, @RequestBody List<Long> idList) {
     
-    menuGroupService.updateMenuGroupPriority(shopId, iddList);
+    menuGroupService.updateMenuGroupPriority(shopId, idList);
   }
 
   /**
