@@ -53,9 +53,9 @@
     
     <insert id="addOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO ORDERS
-        (member_id, address_code, address_detail, shop_id)
+        (member_id, address_code, address_detail, shop_id, delivery_cost)
         VALUES
-        (#{memberId}, #{addressCode}, #{addressDetail}, #{shopId})
+        (#{memberId}, #{addressCode}, #{addressDetail}, #{shopId}, #{deliveryCost})
     </insert>
     
     <insert id="addOrderItem" useGeneratedKeys="true" keyProperty="id">

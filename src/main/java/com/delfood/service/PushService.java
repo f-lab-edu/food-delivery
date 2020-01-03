@@ -119,6 +119,12 @@ public class PushService {
   @Async("asyncTask")
   public void sendMessageToMember(PushMessage messageInfo, String memberId) {
     List<String> tokens = fcmDao.getMemberTokens(memberId);
+    
+    if (tokens.size() == 0) { // 토큰 개수가 0개이면 오류가 발생한다.
+      log.debug("해당 회원의 FCM 토큰이 없습니다. 회원 아이디 : {}, 메세지 정보 : {}", memberId, messageInfo);
+      return;
+    }
+    
     List<Message> messages = tokens.stream().map(token -> Message.builder()
         .putData("title", messageInfo.getTitle())
         .putData("message", messageInfo.getMessage())
@@ -144,6 +150,12 @@ public class PushService {
   @Async("asyncTask")
   public void sendMessageToOwner(PushMessage messageInfo, String ownerId) {
     List<String> tokens = fcmDao.getOwnerTokens(ownerId);
+    
+    if (tokens.size() == 0) {
+      log.debug("해당 사장님의 FCM 토큰이 없습니다. 회원 아이디 : {}, 메세지 정보 : {}", ownerId, messageInfo);
+      return;
+    }
+    
     List<Message> messages = tokens.stream().map(token -> Message.builder()
         .putData("title", messageInfo.getTitle())
         .putData("message", messageInfo.getMessage())
