@@ -7,6 +7,7 @@ import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
 import com.delfood.dto.ItemsBillDTO.MenuInfo.OptionInfo;
 import com.delfood.dto.MemberDTO.Status;
+import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.MemberDTO;
 import com.delfood.dto.MenuDTO;
@@ -21,6 +22,7 @@ import com.delfood.dto.OrderBillDTO;
 import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
+import com.google.firebase.database.annotations.Nullable;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import java.util.ArrayList;
@@ -54,8 +56,10 @@ public class OrderService {
   @Autowired
   private PushService pushService;
   
+  @Autowired
+  private CouponIssueService couponIssueService;
+  
   /**
-   * <b>미완성 로직</b><br>
    * 주문 요청을 진행한다.
    * 사용자가 주문 요청시 전달받은 가격과, 서버에서 직접 비교한 가격을 비교하여 다르면 예외처리 할 예정.
    * @param memberId 고객 아이디
@@ -63,13 +67,18 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId) {
+  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId, @Nullable Long couponIssueId) {
     
     // 주문 준비 작업. 결제 전.
     Long orderId = preOrder(memberId, items, shopId);
     
     // 계산서 발행
-    ItemsBillDTO bill = getBill(memberId, items);
+    ItemsBillDTO bill = getBill(memberId, items, couponIssueId);
+    
+    // 쿠폰 사용처리
+    if (bill.getCouponInfo() != null) {
+      couponIssueService.useCouponIssue(bill.getCouponInfo().getCouponIssueId());
+    }
     
     // 가상 결제 진행
     PaymentDTO paymentInfo = PaymentDTO.builder()
@@ -145,11 +154,18 @@ public class OrderService {
    * @return
    */
   @Transactional(readOnly = true)
-  public ItemsBillDTO getBill(String memberId, List<OrderItemDTO> items) {
+  public ItemsBillDTO getBill(String memberId, List<OrderItemDTO> items, Long couponIssueId) {
     // 고객 주소 정보 추출
     AddressDTO addressInfo = memberService.getMemberInfo(memberId).getAddressInfo();
     // 매장 정보 추출
     ShopInfo shopInfo = shopService.getShopByMenuId(items.get(0).getMenuId());
+    
+    // 쿠폰 정보 추출
+    ItemsBillDTO.CouponInfo couponInfo = null;
+    if (couponIssueId != null) {
+      couponInfo = couponIssueService.getCouponInfoByIssueId(couponIssueId);
+    }
+    
     // 배달료 계산
     long deliveryPrice = addressService.deliveryPrice(memberId, shopInfo.getId());
     
@@ -160,6 +176,7 @@ public class OrderService {
                                     .shopInfo(shopInfo)
                                     .deliveryPrice(deliveryPrice)
                                     .menus(orderMapper.findItemsBill(items))
+                                    .couponInfo(couponInfo)
                                     .build();
     return bill;
   }

@@ -34,5 +34,19 @@
         AND i.status = 'DEFAULT'
     </select>
     
+    <select id="findInfoById" resultType="com.delfood.dto.ItemsBillDTO$CouponInfo">
+        SELECT i.id couponIssueId,
+               c.id couponId,
+               i.member_id memberId,
+               c.name name,
+               c.discount_type discountType,
+               c.discount_value discountValue,
+               i.created_at createdAt,
+               c.end_at endAt
+        FROM   COUPON_ISSUE i INNER JOIN COUPON c ON (i.coupon_id = c.id)
+        WHERE  i.status = 'DEFAULT'
+        AND    i.id = #{couponIssueId}
+    </select>
+    
     
 </mapper>

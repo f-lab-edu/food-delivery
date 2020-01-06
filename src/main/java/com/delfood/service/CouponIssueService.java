@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.delfood.dto.CouponIssueDTO;
+import com.delfood.dto.ItemsBillDTO.CouponInfo;
 import com.delfood.error.exception.DuplicateException;
 import com.delfood.mapper.CouponIssueMapper;
 import lombok.extern.log4j.Log4j2;
@@ -85,6 +86,16 @@ public class CouponIssueService {
    */
   public List<CouponIssueDTO> getCouponIssues(String memberId) {
     return couponIssueMapper.findByMemberId(memberId);
+  }
+
+  /**
+   * 발행 쿠폰 아이디를 기준으로 쿠폰 전반 정보를 조회한다.
+   * @author jun
+   * @param couponIssueId 발행 쿠폰 아이디
+   * @return
+   */
+  public CouponInfo getCouponInfoByIssueId(long couponIssueId) {
+    return couponIssueMapper.findInfoById(couponIssueId);
   }
   
   

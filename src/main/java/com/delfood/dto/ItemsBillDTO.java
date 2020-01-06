@@ -1,5 +1,6 @@
 package com.delfood.dto;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
@@ -14,6 +15,10 @@ public class ItemsBillDTO {
   @NonNull
   private List<MenuInfo> menus;
   
+  private long itemsPrice;
+  
+  private long discountPrice;
+  
   private long totalPrice;
   @NonNull
   private String memberId;
@@ -23,6 +28,8 @@ public class ItemsBillDTO {
   private ShopInfo shopInfo;
   
   private DeliveryInfo deliveryInfo;
+  
+  private CouponInfo couponInfo;
   
   /**
    * 해당 인자를 세팅하여 새로운 객체를 반환한다.
@@ -37,7 +44,8 @@ public class ItemsBillDTO {
       double distanceMeter,
       long deliveryPrice,
       long itemsPrice,
-      List<MenuInfo> menus) {
+      List<MenuInfo> menus,
+      CouponInfo couponInfo) {
     this.memberId = memberId;
     this.addressInfo = addressInfo;
     this.shopInfo = shopInfo;
@@ -45,6 +53,7 @@ public class ItemsBillDTO {
                                     .deliveryPrice(deliveryPrice)
                                     .build();
     this.menus = menus;
+    this.couponInfo = couponInfo;
     this.totalPrice = totalPrice();
   }
   
@@ -111,15 +120,70 @@ public class ItemsBillDTO {
     private long deliveryPrice;
   }
   
+  @Getter
+  @NoArgsConstructor
+  public static class CouponInfo {
+    private long couponIssueId;
+    private long couponId;
+    private String memberId;
+    private String name;
+    private CouponDTO.DiscountType discountType;
+    private long discountValue;
+    private LocalDateTime createdAt;
+    private LocalDateTime endAt;
+    
+    /**
+     * 직접 쿠폰 정보를 생설할 경우 사용하는 빌더.
+     * @param couponIssueId 발행 쿠폰 아이디
+     * @param couponId 쿠폰 아이디
+     * @param memberId 회원 아이디
+     * @param name 쿠폰 이름
+     * @param discountType 할인 타입
+     * @param discountValue 할인 가격
+     * @param createAt 발행일
+     * @param endAt 만료일
+     */
+    @Builder
+    public CouponInfo(long couponIssueId, long couponId, String memberId, String name,
+        CouponDTO.DiscountType discountType, long discountValue, LocalDateTime createAt, LocalDateTime endAt) {
+      this.couponIssueId = couponIssueId;
+      this.couponId = couponId;
+      this.memberId = memberId;
+      this.name = name;
+      this.discountType = discountType;
+      this.discountValue = discountValue;
+      this.createdAt = createAt;
+      this.endAt = endAt;
+    }
+  }
+  
   /**
-   * 메뉴 가격, 옵션 가격, 배달 가격을 합친 총 가격을 계산한다.
+   * 메뉴 가격, 옵션 가격, 배달 가격, 할인 가격을 합친 총 가격을 계산한다.
    * @author jun
    * @return
    */
   public long totalPrice() {
-    return menus.stream().mapToLong(menu -> menu.getPrice()
+    long itemsPrice = menus.stream().mapToLong(menu -> menu.getPrice()
         + menu.getOptions().stream().mapToLong(option -> option.getPrice()).sum()).sum()
         + deliveryInfo.getDeliveryPrice();
+    long couponDiscountPrice;
+    
+    if (couponInfo != null) { // 사용하는 쿠폰이 있을 경우
+      if (couponInfo.getDiscountType() == CouponDTO.DiscountType.PERCENT) {
+        // 이렇게하면 소수점 미만이 버림된다.
+        couponDiscountPrice = itemsPrice * couponInfo.getDiscountValue() / 100L; 
+      } else {
+        couponDiscountPrice = couponInfo.getDiscountValue();
+      }
+    } else { // 쿠폰을 사용하지 않을 경우
+      couponDiscountPrice = 0;
+    }
+    
+    this.itemsPrice = itemsPrice;
+    this.discountPrice = couponDiscountPrice;
+    this.totalPrice = itemsPrice - couponDiscountPrice;
+    
+    return totalPrice;
   }
 
 }

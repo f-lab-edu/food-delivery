@@ -7,8 +7,10 @@ import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.push.PushMessage;
+import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.OrderBillDTO;
+import com.delfood.service.CouponIssueService;
 import com.delfood.service.OrderService;
 import com.delfood.service.PushService;
 import com.delfood.service.ShopService;
@@ -17,6 +19,7 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.codehaus.commons.nullanalysis.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,9 @@ public class OrderController {
   
   @Autowired
   PushService pushService;
+  
+  @Autowired
+  CouponIssueService couponIssueService;
   
   /**
    * 아이템들의 가격과 정보를 조회한다.
@@ -84,7 +90,14 @@ public class OrderController {
     if (orderService.isShopItems(request.getItems(), request.getShopId()) == false) {
       log.error("주문하신 매장의 메뉴 또는 옵션이 아닙니다.");
       throw new IllegalArgumentException("주문하신 매장의 메뉴 또는 옵션이 아닙니다.");
-    }    
+    } 
+    
+    // 쿠폰이 유효한지 검증
+    if (couponIssueService.isIssued(request.getCouponIssueId())) {
+      log.info("이미 사용한 쿠폰 사용 시도. 요청 발행 쿠폰 아이디 : {}", request.getCouponIssueId());
+      throw new IssuedCouponExistException("이미 사용한 쿠폰입니다");
+    }
+    
     // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
     long totalPriceFromServer =
         orderService.totalPrice(SessionUtil.getLoginMemberId(session), request.getItems());
@@ -96,7 +109,7 @@ public class OrderController {
     }
     
     OrderResponse orderResponse = orderService.order(SessionUtil.getLoginMemberId(session),
-        request.getItems(), request.getShopId());
+        request.getItems(), request.getShopId(), request.getCouponIssueId());
     
     return orderResponse;
   }
@@ -104,13 +117,18 @@ public class OrderController {
   /**
    * 아이템 리스트들을 상세하게 계산서로 발행한다.
    * @param session 사용자의 세션
-   * @param items 주문하기 전 아이템들
+   * @param billRequest 주문할 아이템들, 쿠폰정보. 쿠폰정보는 Null 가능
    * @return
    */
   @GetMapping("bill")
   @MemberLoginCheck
-  public ItemsBillDTO getBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
-    return orderService.getBill(SessionUtil.getLoginMemberId(session), items);
+  public ItemsBillDTO getBill(HttpSession session, @RequestBody BillRequest billRequest) {
+    if (couponIssueService.isIssued(billRequest.getCouponIssueId())) {
+      log.info("이미 사용한 쿠폰 사용 시도. 요청 발행 쿠폰 아이디 : {}", billRequest.getCouponIssueId());
+      throw new IssuedCouponExistException("이미 사용한 쿠폰입니다");
+    }
+    return orderService.getBill(SessionUtil.getLoginMemberId(session), billRequest.getItems(),
+        billRequest.getCouponIssueId());
   }
   
   /**
@@ -152,8 +170,19 @@ public class OrderController {
   // request
   @Getter
   private static class OrderRequest {
+    @NonNull
     private Long shopId;
+    @NonNull
     private List<OrderItemDTO> items;
+    @Nullable
+    private Long couponIssueId;
     private long totalPrice;
+  }
+  
+  @Getter
+  private static class BillRequest {
+    private List<OrderItemDTO> items;
+    @Nullable
+    private Long couponIssueId;
   }
 }

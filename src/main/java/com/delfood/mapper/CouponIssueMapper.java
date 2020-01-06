@@ -3,6 +3,7 @@ package com.delfood.mapper;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import com.delfood.dto.CouponIssueDTO;
+import com.delfood.dto.ItemsBillDTO.CouponInfo;
 
 @Repository
 public interface CouponIssueMapper {
@@ -52,5 +53,7 @@ public interface CouponIssueMapper {
    * @return
    */
   public List<CouponIssueDTO> findByMemberId(String memberId);
+
+  public CouponInfo findInfoById(long couponIssueId);
 
 }
