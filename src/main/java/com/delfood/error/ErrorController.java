@@ -2,6 +2,7 @@ package com.delfood.error;
 
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.error.exception.cart.DuplicateItemException;
+import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
 import com.delfood.error.exception.mockPay.MockPayException;
@@ -74,6 +75,12 @@ public class ErrorController {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
 
+  
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(IssuedCouponExistException.class)
+  public ErrorMsg handleIssuedCouponExistException(IssuedCouponExistException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
   
   @ResponseStatus(HttpStatus.CONFLICT)
   @ExceptionHandler(DuplicateItemException.class)

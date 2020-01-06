@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.CouponIssueMapper">
+
+    <select id="countCouponIssue" resultType="Integer">
+        SELECT COUNT(*) FROM COUPON_ISSUE
+        WHERE coupon_id = #{couponId}
+    </select>
+
+    <select id="countCouponIssueByMemberIdAndCouponId" resultType="Integer">
+        SELECT COUNT(*) FROM COUPON_ISSUE
+        WHERE coupon_id = #{couponId}
+        AND member_id = #{memberId}
+    </select>
+    
+    <insert id="insertCouponIssue">
+        INSERT INTO COUPON_ISSUE(member_id, coupon_id)
+        VALUES(#{memberId}, #{couponId})
+    </insert>
+    
+    <update id="updateCouponIssueStatusToUsed">
+        UPDATE COUPON_ISSUE
+        SET status = 'USED'
+        WHERE id = #{id}
+    </update>
+    
+    <select id="findByMemberId" resultType="couponIssue">
+        SELECT i.id, i.created_at createdAt, i.status, i.coupon_id couponId, i.member_id memberId, i.payment_id paymentId
+        ,c.name, c.discount_type discountType, c.discount_value discountValue, c.end_at endAt
+        FROM COUPON_ISSUE i
+        JOIN COUPON c
+        ON c.id = i.coupon_id
+        WHERE i.member_id = #{memberId}
+        AND i.status = 'DEFAULT'
+    </select>
+    
+    
+</mapper>
