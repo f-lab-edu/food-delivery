@@ -2,12 +2,15 @@ package com.delfood.dto;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @EqualsAndHashCode(of = {"menuInfo", "options", "shopInfo"})
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemDTO {
   private CacheMenuDTO menuInfo; // id, name, price
   private List<CacheOptionDTO> options; // id, name, price
@@ -30,6 +33,8 @@ public class ItemDTO {
   
   @Getter
   @EqualsAndHashCode
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static class CacheMenuDTO {
     private Long id;
     private String name;
@@ -38,6 +43,8 @@ public class ItemDTO {
   
   @Getter
   @EqualsAndHashCode
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static class CacheShopDTO {
     private Long id;
     private String name;
@@ -45,6 +52,7 @@ public class ItemDTO {
   
   @Getter
   @EqualsAndHashCode
+  @AllArgsConstructor
   public static class CacheOptionDTO {
     private Long id;
     private String name;
