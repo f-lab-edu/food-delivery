@@ -42,10 +42,10 @@ public interface CouponIssueMapper {
   /**
    * 발급 쿠폰의 상태를 USED로 변경한다.
    * @param id 발급 쿠폰 아이디
-   * 
+   * @param paymentId 결제 아이디
    * @author jinyoung
    */
-  public int updateCouponIssueStatusToUsed(Long id);
+  public int updateCouponIssueStatusToUsed(Long id, Long paymentId);
 
   /**
    * 회원이 가진 쿠폰들을 조회한다.
@@ -55,5 +55,7 @@ public interface CouponIssueMapper {
   public List<CouponIssueDTO> findByMemberId(String memberId);
 
   public CouponInfo findInfoById(long couponIssueId);
+
+  public CouponIssueDTO findById(long couponIssueId);
 
 }

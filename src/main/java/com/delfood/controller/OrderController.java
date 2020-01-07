@@ -18,6 +18,7 @@ import com.delfood.utils.SessionUtil;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -49,14 +50,17 @@ public class OrderController {
   
   /**
    * 아이템들의 가격과 정보를 조회한다.
+   * 쿠폰과 배달 가격을 제외한 순수 아이템 가격만 제공한다.
    * @author jun
    * @param items 가격을 계산할 아이템들
    * @return
    */
   @GetMapping("price")
   @MemberLoginCheck
-  public long getItemsBill(HttpSession session, @RequestBody List<OrderItemDTO> items) {
-    return orderService.totalPrice(SessionUtil.getLoginMemberId(session), items);
+  public ItemsBillResponse getItemsBill(HttpSession session,
+      @RequestBody List<OrderItemDTO> items) {
+    long itemsPrice = orderService.totalPrice(SessionUtil.getLoginMemberId(session), items);
+    return ItemsBillResponse.builder().itemsPrice(itemsPrice).build();
   }
   
   /**
@@ -93,21 +97,25 @@ public class OrderController {
     } 
     
     // 쿠폰이 유효한지 검증
-    if (couponIssueService.isIssued(request.getCouponIssueId())) {
+    if (couponIssueService.isUsed(request.getCouponIssueId())) {
       log.info("이미 사용한 쿠폰 사용 시도. 요청 발행 쿠폰 아이디 : {}", request.getCouponIssueId());
       throw new IssuedCouponExistException("이미 사용한 쿠폰입니다");
     }
     
     // 클라이언트가 계산한 금액과 서버에서 계산한 금액이 같은지 비교
-    long totalPriceFromServer =
-        orderService.totalPrice(SessionUtil.getLoginMemberId(session), request.getItems());
-    if (totalPriceFromServer != request.getTotalPrice()) {
+    long totalItemsPriceFromServer = orderService.totalPrice(SessionUtil.getLoginMemberId(session),
+        request.getItems());
+    long discountPriceFromServer =
+        couponIssueService.discountPrice(request.getCouponIssueId(), totalItemsPriceFromServer);
+    long totalPrice = totalItemsPriceFromServer - discountPriceFromServer;
+    if (totalPrice != request.getTotalPrice()) {
       log.error("Total Price Mismatch! client price : {}, server price : {}",
-          request.getTotalPrice(),
-          totalPriceFromServer);
+          request.getTotalPrice(), totalPrice);
+      log.error("totalItemsPriceFromServer : {}, discountPriceFromServer : {}",
+          totalItemsPriceFromServer, discountPriceFromServer);
       throw new TotalPriceMismatchException("Total Price Mismatch!");
     }
-    
+
     OrderResponse orderResponse = orderService.order(SessionUtil.getLoginMemberId(session),
         request.getItems(), request.getShopId(), request.getCouponIssueId());
     
@@ -123,7 +131,7 @@ public class OrderController {
   @GetMapping("bill")
   @MemberLoginCheck
   public ItemsBillDTO getBill(HttpSession session, @RequestBody BillRequest billRequest) {
-    if (couponIssueService.isIssued(billRequest.getCouponIssueId())) {
+    if (couponIssueService.isUsed(billRequest.getCouponIssueId())) {
       log.info("이미 사용한 쿠폰 사용 시도. 요청 발행 쿠폰 아이디 : {}", billRequest.getCouponIssueId());
       throw new IssuedCouponExistException("이미 사용한 쿠폰입니다");
     }
@@ -184,5 +192,14 @@ public class OrderController {
     private List<OrderItemDTO> items;
     @Nullable
     private Long couponIssueId;
+  }
+  
+  
+  // response
+  
+  @Builder
+  @Getter
+  private static class ItemsBillResponse {
+    private long itemsPrice;
   }
 }

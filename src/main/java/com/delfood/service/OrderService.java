@@ -3,31 +3,21 @@ package com.delfood.service;
 import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.ItemsBillDTO;
-import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
-import com.delfood.dto.ItemsBillDTO.MenuInfo.OptionInfo;
-import com.delfood.dto.MemberDTO.Status;
-import com.delfood.error.exception.coupon.IssuedCouponExistException;
-import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.MemberDTO;
-import com.delfood.dto.MenuDTO;
-import com.delfood.dto.OptionDTO;
+import com.delfood.dto.OrderBillDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.dto.PaymentDTO;
 import com.delfood.dto.PaymentDTO.Type;
 import com.delfood.dto.push.PushMessage;
-import com.delfood.dto.OrderBillDTO;
-import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
 import com.google.firebase.database.annotations.Nullable;
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,18 +57,15 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId, @Nullable Long couponIssueId) {
-    
+  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId,
+      @Nullable Long couponIssueId) {
+
     // 주문 준비 작업. 결제 전.
     Long orderId = preOrder(memberId, items, shopId);
     
     // 계산서 발행
     ItemsBillDTO bill = getBill(memberId, items, couponIssueId);
     
-    // 쿠폰 사용처리
-    if (bill.getCouponInfo() != null) {
-      couponIssueService.useCouponIssue(bill.getCouponInfo().getCouponIssueId());
-    }
     
     // 가상 결제 진행
     PaymentDTO paymentInfo = PaymentDTO.builder()
@@ -90,6 +77,12 @@ public class OrderService {
     
     PaymentDTO payResult = mockPayService.pay(paymentInfo);
     paymentService.insertPayment(payResult);
+    
+    
+    // 쿠폰 사용처리
+    if (bill.getCouponInfo() != null) {
+      couponIssueService.useCouponIssue(bill.getCouponInfo().getCouponIssueId(), payResult.getId());
+    }
     
     // 사장님에게 알림(푸시)
     PushMessage pushMsg = PushMessage.getMessasge(PushMessage.Type.addOrderRequest);
@@ -177,13 +170,14 @@ public class OrderService {
                                     .deliveryPrice(deliveryPrice)
                                     .menus(orderMapper.findItemsBill(items))
                                     .couponInfo(couponInfo)
+                                    .ordersItems(items)
                                     .build();
     return bill;
   }
   
   
   /**
-   * 총 가격을 계산한다.
+   * 아이템들의 총 가격을 계산한다.
    * @author jun
    * @param items 계산할 아이템들
    * @return 총 가격
@@ -191,10 +185,7 @@ public class OrderService {
   @Transactional(readOnly = true)
   public long totalPrice(String memberId, List<OrderItemDTO> items) {
     long totalPrice = orderMapper.findItemsPrice(items);
-    long deliveryPrice = addressService.deliveryPrice(memberId,
-        shopService.getShopByMenuId(items.get(0).getMenuId()).getId());
-    
-    return totalPrice + deliveryPrice;
+    return totalPrice;
   }
   
   

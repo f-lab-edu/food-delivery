@@ -29,4 +29,5 @@ public interface OrderMapper {
   List<OrderDTO> findByMemberId(String memberId, Long lastViewedOrderId);
 
   boolean isShopItem(List<OrderItemDTO> items, Long shopId);
+
 }

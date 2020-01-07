@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.delfood.dto.CouponDTO;
 import com.delfood.dto.CouponIssueDTO;
 import com.delfood.dto.ItemsBillDTO.CouponInfo;
 import com.delfood.error.exception.DuplicateException;
@@ -71,8 +72,8 @@ public class CouponIssueService {
    * @author jinyoung
    */
   @Transactional(rollbackFor = RuntimeException.class)
-  public void useCouponIssue(Long id) {
-    int result = couponIssueMapper.updateCouponIssueStatusToUsed(id);
+  public void useCouponIssue(Long id, Long paymentId) {
+    int result = couponIssueMapper.updateCouponIssueStatusToUsed(id, paymentId);
     if (result != 1) {
       log.error("update coupon status error! id : {}", id);
       throw new RuntimeException("update coupon status error!");
@@ -98,6 +99,35 @@ public class CouponIssueService {
     return couponIssueMapper.findInfoById(couponIssueId);
   }
   
+  
+  /**
+   * 쿠폰으로 인한 할인 가격을 계산한다.
+   * 쿠폰이 퍼센트 쿠폰일 시 입력된 가격을 기준으로 퍼센트 할인 가격을 리턴한다.
+   * 쿠폰이 정액 할인 쿠폰일 시 쿠폰의 할인값을 리턴한다.
+   * 쿠폰의 할인 값이 아이템 가격보다 클 시 아이템의 가격을 할인값으로 리턴한다.
+   * 
+   * @author jun
+   * @param couponIssueId
+   * @param price
+   * @return
+   */
+  public long discountPrice(long couponIssueId, long price) {
+    CouponInfo couponInfo = getCouponInfoByIssueId(couponIssueId);
+    long discountPrice = 0;
+    
+    if (couponInfo.getDiscountType() == CouponDTO.DiscountType.PERCENT) {
+      discountPrice = price * couponInfo.getDiscountValue() / 100L;
+    } else {
+      discountPrice = couponInfo.getDiscountValue();
+    }
+    
+    return discountPrice > price ? price : discountPrice;
+  }
+  
+  public boolean isUsed(long couponIssueId) {
+    CouponIssueDTO couponIssueInfo = couponIssueMapper.findById(couponIssueId);
+    return couponIssueInfo.getStatus().equals(CouponIssueDTO.Status.USED);
+  }
   
   
   

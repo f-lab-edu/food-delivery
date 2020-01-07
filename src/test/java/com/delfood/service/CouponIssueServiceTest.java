@@ -44,11 +44,4 @@ public class CouponIssueServiceTest {
     couponIssueService.createCouponIssue(memberId, couponId);
   }
   
-  @Test
-  public void useCouponIssueTest_쿠폰_사용_성공() {
-    long id = 1L;
-    given(couponIssueMapper.updateCouponIssueStatusToUsed(id)).willReturn(1);
-    couponIssueService.useCouponIssue(id);
-  }
-
 }
