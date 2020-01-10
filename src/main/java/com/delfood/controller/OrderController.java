@@ -109,10 +109,10 @@ public class OrderController {
         couponIssueService.discountPrice(request.getCouponIssueId(), totalItemsPriceFromServer);
     long totalPrice = totalItemsPriceFromServer - discountPriceFromServer;
     if (totalPrice != request.getTotalPrice()) {
-      log.error("Total Price Mismatch! client price : {}, server price : {}",
-          request.getTotalPrice(), totalPrice);
-      log.error("totalItemsPriceFromServer : {}, discountPriceFromServer : {}",
-          totalItemsPriceFromServer, discountPriceFromServer);
+      log.error(
+          "Total Price Mismatch! client price : {}, server price : {},"
+          + " totalItemsPriceFromServer : {}, discountPriceFromServer : {}",
+          request.getTotalPrice(), totalPrice, totalItemsPriceFromServer, discountPriceFromServer);
       throw new TotalPriceMismatchException("Total Price Mismatch!");
     }
 

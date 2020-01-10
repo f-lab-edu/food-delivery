@@ -1,6 +1,7 @@
 package com.delfood.service;
 
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,8 +125,20 @@ public class CouponIssueService {
     return discountPrice > price ? price : discountPrice;
   }
   
+  /**
+   * 해당 발행 쿠폰이 사용상태인지 확인한다. 사용한 쿠폰이라면 true를 반환한다.
+   * @author jun
+   * @param couponIssueId 발행 쿠폰 아이디
+   * @return
+   */
   public boolean isUsed(long couponIssueId) {
     CouponIssueDTO couponIssueInfo = couponIssueMapper.findById(couponIssueId);
+    
+    if (Objects.isNull(couponIssueInfo)) {
+      log.error("발행쿠폰 사용여부 체크 오류! 조회한 발행 쿠폰 정보가 없습니다. 발행 쿠폰 아이디 : {}", couponIssueId);
+      throw new IllegalArgumentException("잘못된 쿠폰 발행 번호입니다.");
+    }
+    
     return couponIssueInfo.getStatus().equals(CouponIssueDTO.Status.USED);
   }
   
