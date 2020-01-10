@@ -44,7 +44,7 @@ docker 컨테이너를 사용하고 있습니다.
 <br>
 
 ## 화면 설계
-kakao oven - <https://ovenapp.io/view/OI44WSGwSZRSMcyiveGcSWGvw38YKizI/bco8b\>   
+kakao oven - <https://ovenapp.io/view/OI44WSGwSZRSMcyiveGcSWGvw38YKizI/bco8b>   
 
 ### 고객 화면 프로토타입
 ![image](https://user-images.githubusercontent.com/46917538/66744438-6b694e00-eeb7-11e9-82b7-246f569a74a6.png)
