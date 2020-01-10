@@ -15,8 +15,10 @@ import com.delfood.dto.push.PushMessage;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
 import com.google.firebase.database.annotations.Nullable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,6 +257,40 @@ public class OrderService {
    */
   public void updateStatus(@NonNull Long orderId, OrderDTO.OrderStatus status) {
     orderMapper.updateStatus(orderId, status);
+  }
+
+  /**
+   * 사장님 아이디를 기반으로 주문 정보를 조회한다.
+   * @param ownerId 사장님 아이디
+   * @return
+   */
+  public List<OrderBillDTO> getOwnerOrderRequest(String ownerId) {
+    return orderMapper.findRequestByOwnerId(ownerId);
+  }
+
+  public boolean isOwnerOrder(String ownerId, Long orderId) {
+    String ownerIdByOrderId = orderMapper.findOwnerIdByOrderId(orderId);
+    return Objects.equals(ownerId, ownerIdByOrderId);
+  }
+
+  /**
+   * 해당 주문을 승인하고 도착 예정시간을 설정한다.
+   * 승인 완료 후 고객에게 푸시 메세지를 전송한다.
+   * @author jun
+   * @param orderId 주문 아이디
+   * @param minute 배달까지 몇 분 걸릴지 예상시간
+   */
+  @Transactional
+  public void orderApprove(Long orderId, long minute) {
+    
+    LocalDateTime exArrivalTime = LocalDateTime.now().plusMinutes(minute);
+    orderMapper.updateOrderStatusAndExArrivalTime(orderId, exArrivalTime);
+    String memberId = orderMapper.findMemberIdByOrderId(orderId);
+    
+    // 푸시메세지 전송
+    PushMessage messageInfo = new PushMessage("DelFood 주문 승인",
+        "사장님이 주문을 승인했어요! 도착 예정 시간 " + minute + "분 후");
+    pushService.sendMessageToMember(messageInfo, memberId);
   }
 
 }

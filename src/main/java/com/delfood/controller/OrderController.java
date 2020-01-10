@@ -1,12 +1,11 @@
 package com.delfood.controller;
 
 import com.delfood.aop.MemberLoginCheck;
+import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
-import com.delfood.dto.ShopDTO;
-import com.delfood.dto.push.PushMessage;
 import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.OrderBillDTO;
@@ -15,9 +14,9 @@ import com.delfood.service.OrderService;
 import com.delfood.service.PushService;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.servlet.http.HttpSession;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,6 +24,7 @@ import lombok.extern.log4j.Log4j2;
 import org.codehaus.commons.nullanalysis.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -175,6 +175,48 @@ public class OrderController {
     return orderInfo;
   }
   
+  
+  
+  // 여기서 부터는 사장님 관련 컨트롤러입니다.
+  
+  /**
+   * 사장님이 소유한 가게에 요청된 주문들을 조회한다.
+   * 유효한 주문만 조회된다.
+   * @author jun
+   * @return
+   */
+  @GetMapping("owner")
+  @OwnerLoginCheck
+  public List<OrderBillDTO> getRequestedOrders(HttpSession session) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    List<OrderBillDTO> shopOrders = orderService.getOwnerOrderRequest(ownerId);
+    return shopOrders;
+  }
+  
+  /**
+   * 주문을 승인한다.
+   * @author jun
+   * @param orderId 주문 아이디
+   * @param request 주문 승낙시 입력해야하는 정보
+   * @param session 사장님 세션
+   */
+  @PatchMapping("{orderId}/approve")
+  @OwnerLoginCheck
+  public void orderApprove(@PathVariable(name = "orderId") Long orderId,
+      @RequestBody OrderApproveRequest request,
+      HttpSession session) {
+    String ownerId = SessionUtil.getLoginOwnerId(session);
+    
+    // 해당 주문에 대한 권한이 있는지 확인한다
+    if (orderService.isOwnerOrder(ownerId, orderId) == false) {
+      throw new IllegalArgumentException("해당 주문에 대한 권한이 없습니다.");
+    }   
+    
+    // 주문 승인을 진행한다
+    orderService.orderApprove(orderId, request.getMinute());
+  }
+  
+  
   // request
   @Getter
   private static class OrderRequest {
@@ -194,6 +236,12 @@ public class OrderController {
     private Long couponIssueId;
   }
   
+  @Getter
+  private static class OrderApproveRequest {
+    @NonNull
+    private Long minute; // 몇분이나 걸릴지 입력한 값
+    
+  }
   
   // response
   

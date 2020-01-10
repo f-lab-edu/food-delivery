@@ -6,6 +6,7 @@ import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.OrderBillDTO;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.NonNull;
 
@@ -32,4 +33,12 @@ public interface OrderMapper {
   boolean isShopItem(List<OrderItemDTO> items, Long shopId);
 
   void updateStatus(@NonNull Long orderId, OrderStatus status);
+
+  List<OrderBillDTO> findRequestByOwnerId(String shopId);
+
+  String findOwnerIdByOrderId(Long orderId);
+
+  void updateOrderStatusAndExArrivalTime(Long orderId, LocalDateTime exArrivalTime);
+
+  String findMemberIdByOrderId(Long orderId);
 }
