@@ -9,7 +9,7 @@ public class SimpleCouponInfo {
   private Long couponIssueId;
   private Long couponId;
   private String couponName;
-  private Long discountType;
+  private CouponDTO.DiscountType discountType;
   private Long discountValue;
   private Long discountPrice;
 }

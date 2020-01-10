@@ -1,6 +1,7 @@
 package com.delfood.mapper;
 
 import com.delfood.dto.OrderDTO;
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.dto.ItemsBillDTO.MenuInfo;
@@ -30,4 +31,5 @@ public interface OrderMapper {
 
   boolean isShopItem(List<OrderItemDTO> items, Long shopId);
 
+  void updateStatus(@NonNull Long orderId, OrderStatus status);
 }

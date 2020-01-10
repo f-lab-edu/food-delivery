@@ -17,9 +17,11 @@ import com.delfood.utils.OrderUtil;
 import com.google.firebase.database.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -78,6 +80,9 @@ public class OrderService {
     PaymentDTO payResult = mockPayService.pay(paymentInfo);
     paymentService.insertPayment(payResult);
     
+    // 결제 완료 처리
+    updateStatus(orderId, OrderDTO.OrderStatus.ORDER_REQUEST);
+    
     
     // 쿠폰 사용처리
     if (bill.getCouponInfo() != null) {
@@ -95,12 +100,13 @@ public class OrderService {
   /**
    * 주문 테이블에 insert를 진행한다.
    * 주문 메뉴, 주문 옵션이 추가된다.
+   * 주문도중 에러가 나더라도 주문기록을 남기기 위해 독자적인 트랜잭션을 가진다.
    * 
    * @param memberId 고객 아이디
    * @param items 주문할 아이템들
    * @return
    */
-  @Transactional
+  @Transactional(propagation = Propagation.NESTED)
   private Long preOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
     MemberDTO memberInfo = memberService.getMemberInfo(memberId);
     OrderDTO order = OrderDTO
@@ -239,6 +245,16 @@ public class OrderService {
    */
   public boolean isShopItems(List<OrderItemDTO> items, Long shopId) {
     return orderMapper.isShopItem(items, shopId);
+  }
+  
+  /**
+   * 주문 상태를 변경시킨다.
+   * @author jun
+   * @param orderId 주문 아이디
+   * @param status 변경시킬 주문 상태
+   */
+  public void updateStatus(@NonNull Long orderId, OrderDTO.OrderStatus status) {
+    orderMapper.updateStatus(orderId, status);
   }
 
 }

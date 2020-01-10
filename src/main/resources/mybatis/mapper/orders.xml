@@ -115,7 +115,7 @@
                opt.price optionPrice,
                cpn_isu.id couponIssueId,
                cpn.id couponId,
-               cpn.name coouponName,
+               cpn.name couponName,
                cpn.discount_type discountType,
                cpn.discount_value discountValue,
                pay.amount_discount discountPrice
@@ -154,7 +154,7 @@
                opt.price optionPrice,
                cpn_isu.id couponIssueId,
                cpn.id couponId,
-               cpn.name coouponName,
+               cpn.name couponName,
                cpn.discount_type discountType,
                cpn.discount_value discountValue,
                pay.amount_discount discountPrice
@@ -234,7 +234,7 @@
                odr.order_status orderStatus,
                cpn_isu.id couponIssueId,
                cpn.id couponId,
-               cpn.name coouponName,
+               cpn.name couponName,
                cpn.discount_type discountType,
                cpn.discount_value discountValue,
                pay.amount_discount discountPrice
@@ -301,4 +301,12 @@
                    <foreach collection="item.options" item="option" separator=",">#{option.optionId}</foreach>
                </foreach>)
     </select>
+    
+    
+    <update id="updateStatus">
+        UPDATE ORDERS
+        SET order_status =  #{status}
+        WHERE id = #{orderId}
+    </update>
+    
 </mapper>
