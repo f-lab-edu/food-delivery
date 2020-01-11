@@ -4,6 +4,7 @@ import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.ShopCategoryDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.service.MemberService;
+import com.delfood.service.RecentShopViewService;
 import com.delfood.service.ShopSearchService;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
@@ -30,6 +31,9 @@ public class ShopSearchController {
 
   @Autowired
   private MemberService memberService;
+
+  @Autowired
+  private RecentShopViewService recentShopViewService;
 
   /**
    * 메인화면에서 큰 카테고리들을 조회한다. Ex) 치킨, 피자, 중국집 등
@@ -62,6 +66,17 @@ public class ShopSearchController {
             shopSearchService.shopSearchByCategory(categoryId, townCode));
   }
 
+  /**
+   * 최근 방문한 shop 조회
+   * @param session
+   * @return
+   */
+  @GetMapping("shops/recent")
+  @MemberLoginCheck
+  public List<ShopDTO> recentShopList(HttpSession session) {
+    String memberId = SessionUtil.getLoginMemberId(session);
+    return recentShopViewService.getRecentShopView(memberId);
+  }
 
 
   // ----------------------- Response 객체 -----------------------

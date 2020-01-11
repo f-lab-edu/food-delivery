@@ -3,6 +3,8 @@ package com.delfood.mapper;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -117,9 +119,14 @@ public interface ShopMapper {
    */
   public List<ShopDTO> findByCategoryIdAndTownCode(Long categoryId, String townCode);
 
-
   public List<ShopDTO> findByBeOpen(String ownerId);
 
   public List<ShopDTO> findByBeClose(String ownerId);
 
+  /**
+   * 매장 조회
+   * @param shopIdList 매장 아이디 리스트
+   * @return 매장목록
+   */
+  public List<ShopDTO> findByIdList(@Param("shopIdList") List<Long> shopIdList);
 }
