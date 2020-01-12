@@ -1,5 +1,6 @@
 package com.delfood.aop;
 
+import java.util.Objects;
 import javax.servlet.http.HttpSession;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -91,6 +92,26 @@ public class AuthCheckAspect {
     
     if (memberId == null) {
       throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED, "NO_LOGIN") {};
+    }
+  }
+  
+  /**
+   * 라이더 로그인을 체크한다.
+   * @author jun
+   * @param jp 조인포인트
+   * @throws Throwable 발생 가능한 예외 설정
+   */
+  @Before("@annotation(com.delfood.aop.RiderLoginCheck)")
+  public void riderLoginCheck(JoinPoint jp) throws Throwable {
+    log.debug("AOP - Rider Login Check Started");
+
+    HttpSession session =
+        ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest()
+            .getSession();
+    String riderId = SessionUtil.getLoginRiderId(session);
+    
+    if (Objects.isNull(riderId)) {
+      throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED, "RIDER_NO_LOGIN") {};
     }
   }
 }
