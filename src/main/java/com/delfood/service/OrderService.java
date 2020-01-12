@@ -65,7 +65,7 @@ public class OrderService {
       @Nullable Long couponIssueId) {
 
     // 주문 준비 작업. 결제 전.
-    Long orderId = preOrder(memberId, items, shopId);
+    Long orderId = doOrder(memberId, items, shopId);
     
     // 계산서 발행
     ItemsBillDTO bill = getBill(memberId, items, couponIssueId);
@@ -109,7 +109,7 @@ public class OrderService {
    * @return
    */
   @Transactional(propagation = Propagation.NESTED)
-  private Long preOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
+  private Long doOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
     MemberDTO memberInfo = memberService.getMemberInfo(memberId);
     OrderDTO order = OrderDTO
         .builder()
