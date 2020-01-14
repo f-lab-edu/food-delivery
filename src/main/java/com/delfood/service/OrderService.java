@@ -3,31 +3,27 @@ package com.delfood.service;
 import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.ItemsBillDTO;
-import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
-import com.delfood.dto.ItemsBillDTO.MenuInfo.OptionInfo;
-import com.delfood.dto.MemberDTO.Status;
-import com.delfood.error.exception.order.TotalPriceMismatchException;
 import com.delfood.dto.MemberDTO;
-import com.delfood.dto.MenuDTO;
-import com.delfood.dto.OptionDTO;
+import com.delfood.dto.OrderBillDTO;
 import com.delfood.dto.OrderDTO;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.dto.PaymentDTO;
 import com.delfood.dto.PaymentDTO.Type;
 import com.delfood.dto.push.PushMessage;
-import com.delfood.dto.OrderBillDTO;
-import com.delfood.mapper.OptionMapper;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
+import com.google.firebase.database.annotations.Nullable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -54,8 +50,10 @@ public class OrderService {
   @Autowired
   private PushService pushService;
   
+  @Autowired
+  private CouponIssueService couponIssueService;
+  
   /**
-   * <b>미완성 로직</b><br>
    * 주문 요청을 진행한다.
    * 사용자가 주문 요청시 전달받은 가격과, 서버에서 직접 비교한 가격을 비교하여 다르면 예외처리 할 예정.
    * @param memberId 고객 아이디
@@ -63,13 +61,15 @@ public class OrderService {
    * @return
    */
   @Transactional
-  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId) {
-    
+  public OrderResponse order(String memberId, List<OrderItemDTO> items, long shopId,
+      @Nullable Long couponIssueId) {
+
     // 주문 준비 작업. 결제 전.
-    Long orderId = preOrder(memberId, items, shopId);
+    Long orderId = doOrder(memberId, items, shopId);
     
     // 계산서 발행
-    ItemsBillDTO bill = getBill(memberId, items);
+    ItemsBillDTO bill = getBill(memberId, items, couponIssueId);
+    
     
     // 가상 결제 진행
     PaymentDTO paymentInfo = PaymentDTO.builder()
@@ -82,6 +82,15 @@ public class OrderService {
     PaymentDTO payResult = mockPayService.pay(paymentInfo);
     paymentService.insertPayment(payResult);
     
+    // 결제 완료 처리
+    updateStatus(orderId, OrderDTO.OrderStatus.ORDER_REQUEST);
+    
+    
+    // 쿠폰 사용처리
+    if (bill.getCouponInfo() != null) {
+      couponIssueService.useCouponIssue(bill.getCouponInfo().getCouponIssueId(), payResult.getId());
+    }
+    
     // 사장님에게 알림(푸시)
     PushMessage pushMsg = PushMessage.getMessasge(PushMessage.Type.addOrderRequest);
     String ownerId = shopService.getShop(shopId).getOwnerId();
@@ -93,13 +102,14 @@ public class OrderService {
   /**
    * 주문 테이블에 insert를 진행한다.
    * 주문 메뉴, 주문 옵션이 추가된다.
+   * 주문도중 에러가 나더라도 주문기록을 남기기 위해 독자적인 트랜잭션을 가진다.
    * 
    * @param memberId 고객 아이디
    * @param items 주문할 아이템들
    * @return
    */
-  @Transactional
-  private Long preOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
+  @Transactional(propagation = Propagation.NESTED)
+  private Long doOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
     MemberDTO memberInfo = memberService.getMemberInfo(memberId);
     OrderDTO order = OrderDTO
         .builder()
@@ -145,11 +155,18 @@ public class OrderService {
    * @return
    */
   @Transactional(readOnly = true)
-  public ItemsBillDTO getBill(String memberId, List<OrderItemDTO> items) {
+  public ItemsBillDTO getBill(String memberId, List<OrderItemDTO> items, Long couponIssueId) {
     // 고객 주소 정보 추출
     AddressDTO addressInfo = memberService.getMemberInfo(memberId).getAddressInfo();
     // 매장 정보 추출
     ShopInfo shopInfo = shopService.getShopByMenuId(items.get(0).getMenuId());
+    
+    // 쿠폰 정보 추출
+    ItemsBillDTO.CouponInfo couponInfo = null;
+    if (couponIssueId != null) {
+      couponInfo = couponIssueService.getCouponInfoByIssueId(couponIssueId);
+    }
+    
     // 배달료 계산
     long deliveryPrice = addressService.deliveryPrice(memberId, shopInfo.getId());
     
@@ -160,13 +177,15 @@ public class OrderService {
                                     .shopInfo(shopInfo)
                                     .deliveryPrice(deliveryPrice)
                                     .menus(orderMapper.findItemsBill(items))
+                                    .couponInfo(couponInfo)
+                                    .ordersItems(items)
                                     .build();
     return bill;
   }
   
   
   /**
-   * 총 가격을 계산한다.
+   * 아이템들의 총 가격을 계산한다.
    * @author jun
    * @param items 계산할 아이템들
    * @return 총 가격
@@ -174,10 +193,7 @@ public class OrderService {
   @Transactional(readOnly = true)
   public long totalPrice(String memberId, List<OrderItemDTO> items) {
     long totalPrice = orderMapper.findItemsPrice(items);
-    long deliveryPrice = addressService.deliveryPrice(memberId,
-        shopService.getShopByMenuId(items.get(0).getMenuId()).getId());
-    
-    return totalPrice + deliveryPrice;
+    return totalPrice;
   }
   
   
@@ -231,6 +247,50 @@ public class OrderService {
    */
   public boolean isShopItems(List<OrderItemDTO> items, Long shopId) {
     return orderMapper.isShopItem(items, shopId);
+  }
+  
+  /**
+   * 주문 상태를 변경시킨다.
+   * @author jun
+   * @param orderId 주문 아이디
+   * @param status 변경시킬 주문 상태
+   */
+  public void updateStatus(@NonNull Long orderId, OrderDTO.OrderStatus status) {
+    orderMapper.updateStatus(orderId, status);
+  }
+
+  /**
+   * 사장님 아이디를 기반으로 주문 정보를 조회한다.
+   * @param ownerId 사장님 아이디
+   * @return
+   */
+  public List<OrderBillDTO> getOwnerOrderRequest(String ownerId) {
+    return orderMapper.findRequestByOwnerId(ownerId);
+  }
+
+  public boolean isOwnerOrder(String ownerId, Long orderId) {
+    String ownerIdByOrderId = orderMapper.findOwnerIdByOrderId(orderId);
+    return Objects.equals(ownerId, ownerIdByOrderId);
+  }
+
+  /**
+   * 해당 주문을 승인하고 도착 예정시간을 설정한다.
+   * 승인 완료 후 고객에게 푸시 메세지를 전송한다.
+   * @author jun
+   * @param orderId 주문 아이디
+   * @param minute 배달까지 몇 분 걸릴지 예상시간
+   */
+  @Transactional
+  public void orderApprove(Long orderId, long minute) {
+    
+    LocalDateTime exArrivalTime = LocalDateTime.now().plusMinutes(minute);
+    orderMapper.updateOrderStatusAndExArrivalTime(orderId, exArrivalTime);
+    String memberId = orderMapper.findMemberIdByOrderId(orderId);
+    
+    // 푸시메세지 전송
+    PushMessage messageInfo = new PushMessage("DelFood 주문 승인",
+        "사장님이 주문을 승인했어요! 도착 예정 시간 " + minute + "분 후");
+    pushService.sendMessageToMember(messageInfo, memberId);
   }
 
 }

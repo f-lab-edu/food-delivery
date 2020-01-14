@@ -55,7 +55,10 @@ public class OrderDTO {
   @Nullable
   private String shopName;
   
-  List<OrderItemDTO> items;
+  private List<OrderItemDTO> items;
+  
+  @Nullable
+  private SimpleCouponInfo couponInfo;
   
   @Builder
   public OrderDTO(String memberId, String addressCode, String addressDetail, Long shopId,

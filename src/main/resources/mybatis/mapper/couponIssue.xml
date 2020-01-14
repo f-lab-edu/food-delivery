@@ -20,7 +20,8 @@
     
     <update id="updateCouponIssueStatusToUsed">
         UPDATE COUPON_ISSUE
-        SET status = 'USED'
+        SET status = 'USED',
+            payment_id = #{paymentId}
         WHERE id = #{id}
     </update>
     
@@ -34,5 +35,24 @@
         AND i.status = 'DEFAULT'
     </select>
     
+    <select id="findInfoById" resultType="com.delfood.dto.ItemsBillDTO$CouponInfo">
+        SELECT i.id couponIssueId,
+               c.id couponId,
+               i.member_id memberId,
+               c.name name,
+               c.discount_type discountType,
+               c.discount_value discountValue,
+               i.created_at createdAt,
+               c.end_at endAt
+        FROM   COUPON_ISSUE i INNER JOIN COUPON c ON (i.coupon_id = c.id)
+        WHERE  i.status = 'DEFAULT'
+        AND    i.id = #{couponIssueId}
+    </select>
+    
+    <select id="findById" resultType="com.delfood.dto.CouponIssueDTO">
+        SELECT  id, member_id memberId, coupon_id couponId, created_at createdAt, status, payment_id paymentId
+        FROM    COUPON_ISSUE
+        WHERE   id = #{id}
+    </select>
     
 </mapper>
