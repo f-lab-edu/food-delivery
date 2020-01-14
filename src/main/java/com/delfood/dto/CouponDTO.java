@@ -16,7 +16,6 @@ import org.apache.ibatis.type.Alias;
 @Alias("coupon")
 public class CouponDTO {
   
-  @JsonFormat(shape = Shape.OBJECT)
   public enum DiscountType {
     WON, PERCENT
   }
