@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.RiderLoginCheck;
 import com.delfood.dto.rider.RiderDTO;
 import com.delfood.service.rider.RiderInfoService;
@@ -99,8 +101,8 @@ public class RiderController {
    * @param session 사용자의 세션
    * @param request 변경전 비밀번호, 변경할 비밀번호 정보
    */
-  @PatchMapping("update/password")
-  @RiderLoginCheck
+  @PatchMapping("password")
+  @LoginCheck(type = UserType.RIDER)
   public void updatePassword(HttpSession session, @RequestBody UpdatePasswordRequest request) {
     String id = SessionUtil.getLoginRiderId(session);
     riderInfoService.changePassword(id, request.getPasswordBeforechange(),
@@ -114,14 +116,14 @@ public class RiderController {
    * @param password 유효성 검사를 위한 계정 비밀번호
    */
   @DeleteMapping
-  @RiderLoginCheck
+  @LoginCheck(type = UserType.RIDER)
   public void deleteRiderAccount(HttpSession session, String password) {
     String id = SessionUtil.getLoginRiderId(session);
     riderInfoService.deleteAccount(id, password);
     SessionUtil.logoutRider(session);
   }
   
-  @PatchMapping("update/mail")
+  @PatchMapping("mail")
   public void updateMail(HttpSession session, @RequestBody UpdateMailRequest request) {
     String id = SessionUtil.getLoginRiderId(session);
     riderInfoService.changeMail(id, request.getPassword(), request.getUpdateMail());

@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.dto.OwnerDTO;
@@ -107,7 +109,7 @@ public class OwnerController {
    * @return
    */
   @GetMapping("logout")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public void logout(HttpSession session) {
     SessionUtil.logoutOwner(session);
   }
@@ -120,7 +122,7 @@ public class OwnerController {
    * @return
    */
   @GetMapping("myInfo")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public OwnerInfoResponse ownerInfo(HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
     OwnerDTO ownerInfo = ownerService.getOwner(id);
@@ -135,7 +137,7 @@ public class OwnerController {
    * @return
    */
   @PatchMapping
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public void updateOwnerInfo(
       @RequestBody UpdateOwnerMailAndTelRequest updateRequest, HttpSession session) {
 
@@ -159,7 +161,7 @@ public class OwnerController {
    * @return
    */
   @PatchMapping("password")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public void updatePassword(
       @RequestBody UpdateOwnerPasswordRequest passwordResquest, HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
@@ -173,7 +175,7 @@ public class OwnerController {
   }
   
   @PostMapping("token")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public void addToken(HttpSession session, String token) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     pushService.addOwnerToken(ownerId, token);
