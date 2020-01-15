@@ -32,7 +32,8 @@ public class PushMessage {
     requiredOrderRequest(new PushMessage("DelFood 주문취소", "매장에서 주문을 취소하였습니다")),
     deliveryMatch(new PushMessage("DelFood 배달원 매칭", "배달원이 매칭되었습니다")),
     deliveryStart(new PushMessage("DelFood 배달 시작", "음식 배달이 시작되었습니다")),
-    deliverySuccess(new PushMessage("DelFood 배달 완료", "배달이 완료되었습니다"));
+    deliverySuccess(new PushMessage("DelFood 배달 완료", "배달이 완료되었습니다")),
+    deliveryRequest(new PushMessage("DelFood 배달 요청", "근처 매장에서 배달을 요청했습니다."));
     
     private PushMessage pushMessage;
   }
