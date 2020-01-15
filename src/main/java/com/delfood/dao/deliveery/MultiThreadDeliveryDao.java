@@ -98,6 +98,7 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
    * @param idList 라이더의 아이디들
    * @return 지워진 라이더 개수
    */
+  @Override
   public long deleteAll(List<String> idList) {
     long deleteCount = 0;
     for (String id : idList) {
