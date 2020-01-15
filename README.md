@@ -22,6 +22,25 @@ Rest API형 서버로써 클라이언트는 프로토타입으로 제작하여 �
 - Project Wiki를 참고해주세요!
 <br><br>
 
+### 브랜치 관리 전략
+Git Flow를 사용하여 브랜치를 관리합니다.<br>
+모든 브랜치는 Pull Request에 리뷰를 진행한 후 merge를 진행합니다.<br>
+메인 브렌치인 Develop에는 아직 많은 내용이 merge되지 않았습니다. 현재 개발 진행사항을 확인하고 싶다면 PR를 확인해주세요.<br><br>
+DelFood PR : https://github.com/f-lab-edu/food-delivery/pulls
+<br>
+<br><br>
+![image](https://user-images.githubusercontent.com/46917538/72450182-44475300-37fd-11ea-8a1b-ecce20fd6fcb.png)
+<br><br>
+- Master : 배포시 사용합니다. 아직 배포단계에 이르지 않아 Master 브랜치에 내용이 없습니다.
+- Develop : 완전히 개발이 끝난 부분에 대해서만 Merge를 진행합니다.
+- Feature : 기능 개발을 진행할 때 사용합니다.
+- Release : 배포를 준비할 때 사용합니다.
+- Hot-Fix : 배포를 진행한 후 발생한 버그를 수정해야 할 때 사용합니다.
+<br><br>
+<b>브랜치 관리 전략 참고 문헌</b><br>
+- 우아한 형제들 기술 블로그(http://woowabros.github.io/experience/2017/10/30/baemin-mobile-git-branch-strategy.html)
+- Bitbucket Gitflow Workflow(https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
+
 ## 사용 기술 및 환경
 Spring boot, Maven, Mybatis, Redis, Docker, MariaDB, Jenkins, Java8, Naver Cloud Platform
 <br>
