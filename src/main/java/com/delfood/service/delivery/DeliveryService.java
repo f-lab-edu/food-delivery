@@ -3,7 +3,6 @@ package com.delfood.service.delivery;
 import com.delfood.dao.deliveery.DeliveryDao;
 import com.delfood.dto.address.Position;
 import com.delfood.dto.push.PushMessage;
-import com.delfood.dto.push.PushMessage.Type;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.service.PushService;
 import lombok.NonNull;
@@ -58,7 +57,7 @@ public class DeliveryService {
           double distanceE2 = position.distanceMeter(e2.getPosition());
           return distanceE1 - distanceE2 > 0 ? 1 : distanceE1 - distanceE2 < 0 ? -1 : 0;
         }).forEach(e -> pushService
-            .sendMessageToRider(PushMessage.getMessasge(Type.deliveryRequest), e.getId()));
+            .sendMessageToRider(PushMessage.DELIVERY_REQUEST, e.getId()));
   }
 
 }
