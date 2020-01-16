@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.MemberDTO;
 import com.delfood.error.exception.DuplicateIdException;
@@ -69,7 +71,7 @@ public class MemberController {
    * @return MemberDTO
    */
   @GetMapping("myInfo")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public MemberInfoResponse memberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     MemberDTO memberInfo = memberService.getMemberInfo(id);
@@ -149,7 +151,7 @@ public class MemberController {
    * @return 로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환 로그아웃 성공시 200 코드를 반환
    */
   @GetMapping("logout")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void logout(HttpSession session) {
     SessionUtil.logoutMember(session);
   }
@@ -162,7 +164,7 @@ public class MemberController {
    * @return
    */
   @PatchMapping("password")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void updateMemberInfo(HttpSession session,
       @RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest) {
     String passwordBeforeChange = passwordRequest.getPasswordBeforeChange();
@@ -183,7 +185,7 @@ public class MemberController {
    * @return
    */
   @DeleteMapping("myInfo")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void deleteMemberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     memberService.deleteMember(id);
@@ -198,7 +200,7 @@ public class MemberController {
    * @param session 현재 로그인한 고객의 세션
    */
   @PatchMapping("address")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(
       @RequestBody @NotNull UpdateMemberAddressRequest memberInfo, HttpSession session) {
     ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
@@ -225,7 +227,7 @@ public class MemberController {
   }
   
   @PostMapping("token")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void addToken(HttpSession session, String token) {
     String memberId = SessionUtil.getLoginMemberId(session);
     pushService.addMemberToken(memberId, token);

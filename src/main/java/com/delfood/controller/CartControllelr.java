@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.ItemDTO;
 import com.delfood.service.CartService;
@@ -23,31 +25,31 @@ public class CartControllelr {
   private CartService cartService;
   
   @PostMapping("/members/cart/menus")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void addMenu(@RequestBody ItemDTO item, HttpSession session) {
     cartService.addOrdersItem(item, SessionUtil.getLoginMemberId(session));
   }
   
   @GetMapping("/members/cart/menus")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public List<ItemDTO> getCart(HttpSession session) {
     return cartService.getItems(SessionUtil.getLoginMemberId(session));
   }
   
   @DeleteMapping("/members/cart/menus")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void clearCart(HttpSession session) {
     cartService.claer(SessionUtil.getLoginMemberId(session));
   }
   
   @DeleteMapping("/members/cart/menus/{index}")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void deleteCartMenu(HttpSession session, @PathVariable long index) {
     cartService.deleteCartMenu(SessionUtil.getLoginMemberId(session), index);
   }
   
   @GetMapping("/members/cart/price")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public CartPriceResponse cartPrice(HttpSession session) {
     String memberId = SessionUtil.getLoginMemberId(session);
     return new CartPriceResponse(cartService.getItems(memberId), cartService.allPrice(memberId));

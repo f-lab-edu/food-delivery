@@ -1,7 +1,9 @@
 package com.delfood.dao;
 
+import com.delfood.dto.push.PushMessageForOne;
 import com.delfood.utils.RedisKeyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.messaging.Message;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -108,6 +110,15 @@ public class FcmDao {
         .map(e -> objectMapper.convertValue(e, String.class))
         .collect(Collectors.toList());
   }
+
+  public void addMemberErrorPush(String memberId, List<Message> messages) {
+    redisTemplate.opsForList().rightPush(RedisKeyFactory.generateFcmMemberErrorKey(memberId),
+        messages);
+  }
   
+  public void addOwnerErrorPush(String ownerId, List<Message> messages) {
+    redisTemplate.opsForList().rightPush(RedisKeyFactory.generateFcmOwnerErrorKey(ownerId),
+        messages);
+  }
   
 }

@@ -12,6 +12,7 @@ public class OrderBillDTO {
   private String memberId;
   private OrderStatus orderStatus;
   private LocalDateTime startTime;
+  private SimpleCouponInfo couponInfo;
   private Long deliveryCost;
   private SimpleAddressInfo addressInfo;
   private List<MenuInfo> menus;
@@ -27,4 +28,5 @@ public class OrderBillDTO {
     private Integer buildingSideNumber;
     private String addressDetail;
   }
+  
 }
