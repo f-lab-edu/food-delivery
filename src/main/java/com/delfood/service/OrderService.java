@@ -92,7 +92,7 @@ public class OrderService {
     }
     
     // 사장님에게 알림(푸시)
-    PushMessage pushMsg = PushMessage.getMessasge(PushMessage.Type.addOrderRequest);
+    PushMessage pushMsg = PushMessage.ADD_ORDER_REQUEST;
     String ownerId = shopService.getShop(shopId).getOwnerId();
     pushService.sendMessageToOwner(pushMsg, ownerId); // Exception이 발생하지 않는다.
     
