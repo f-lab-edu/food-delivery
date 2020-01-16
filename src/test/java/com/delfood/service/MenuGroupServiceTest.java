@@ -2,7 +2,7 @@ package com.delfood.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-
+import static org.mockito.Mockito.mockitoSession;
 import com.delfood.dto.MenuGroupDTO;
 import com.delfood.dto.MenuGroupDTO.Status;
 import com.delfood.error.exception.TargetNotFoundException;
@@ -158,7 +158,7 @@ public class MenuGroupServiceTest {
     List<MenuGroupDTO> menuGroups = generateMenuGroups();
     given(mapper.totalCount(1L))
       .willReturn(menuGroups.size());
-    given(mapper.updateMenuGroupPriority(Mockito.anyLong(), Mockito.anyInt()))
+    given(mapper.updateMenuGroupPriority(Mockito.anyLong(), Mockito.anyList()))
       .willReturn(1);
     List<Long> idList = generateIdList();
     
@@ -170,7 +170,7 @@ public class MenuGroupServiceTest {
     List<MenuGroupDTO> menuGroups = generateMenuGroups();
     given(mapper.totalCount(1L))
       .willReturn(menuGroups.size());
-    given(mapper.updateMenuGroupPriority(Mockito.anyLong(), Mockito.anyInt()))
+    given(mapper.updateMenuGroupPriority(Mockito.anyLong(), Mockito.anyList()))
       .willReturn(0);
     List<Long> idList = generateIdList();
     

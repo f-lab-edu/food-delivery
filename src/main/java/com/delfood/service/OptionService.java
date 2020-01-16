@@ -25,7 +25,7 @@ public class OptionService {
   public void addOption(OptionDTO optionInfo) {
     if (optionInfo.hasNullDataBeforeCreate(optionInfo)) {
       log.error("insert option has null data {}", optionInfo);
-      throw new RuntimeException("insert option has null data!");
+      throw new NullPointerException("insert option has null data!");
     }
     
     if (optionMapper.insertOption(optionInfo) != 1) {
@@ -44,6 +44,12 @@ public class OptionService {
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void addOptionList(List<OptionDTO> optionList, Long menuId) {
+    for (OptionDTO optionInfo : optionList) {
+      if (optionInfo.hasNullDataBeforeCreate(optionInfo)) {
+        log.error("insert option has null data {}", optionInfo);
+        throw new NullPointerException("insert option has null data!");
+      }
+    }
     optionMapper.insertOptionList(optionList, menuId);
   }
   

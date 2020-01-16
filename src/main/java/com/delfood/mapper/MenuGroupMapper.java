@@ -82,10 +82,10 @@ public interface MenuGroupMapper {
    * 
    * @author jinyoung
    * 
-   * @param id 메뉴그룹 아이디
-   * @param priority 우선순위
+   * @param shopId 매장 아이디
+   * @param idList 아이디 리스트
    * @return
    */
-  public int updateMenuGroupPriority(Long id, int priority);
+  public int updateMenuGroupPriority(Long shopId, List<Long> idList);
   
 }

@@ -1,16 +1,16 @@
 package com.delfood.service;
 
-import lombok.extern.log4j.Log4j2;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.delfood.dto.MenuGroupDTO;
+import com.delfood.error.exception.DuplicateException;
 import com.delfood.error.exception.TargetNotFoundException;
 import com.delfood.error.exception.TooManyModifiedException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
-import com.delfood.error.exception.menuGroup.InvalidMenuGroupIdException;
 import com.delfood.mapper.MenuGroupMapper;
-import com.delfood.dto.MenuGroupDTO;
+import java.util.List;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Log4j2
@@ -29,6 +29,12 @@ public class MenuGroupService {
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void addMenuGroup(MenuGroupDTO menuGroupInfo) {
+    if (this.nameCheck(menuGroupInfo.getName())) {
+      log.error("MenuGroup name is duplicated name : {}", menuGroupInfo.getName());
+      throw new DuplicateException("MenuGroup name is duplicated! name : " 
+            + menuGroupInfo.getName());
+    }
+    
     int result = menuGroupMapper.insertMenuGroup(menuGroupInfo);
     if (result != 1) {
       log.error("insert MenuGroup ERROR! {}", menuGroupInfo);
@@ -67,7 +73,8 @@ public class MenuGroupService {
    */
   @Transactional(rollbackFor = RuntimeException.class)
   public void updateMenuGroupNameAndContent(String name, String content, Long id) {
-    int result = menuGroupMapper.updateNameAndContent(name, content, id);
+    String contentStr = content == null ? "" : content;
+    int result = menuGroupMapper.updateNameAndContent(name, contentStr, id);
     if (result != 1) {
       log.error("updateNameAndContent ERROR! name : {}, content : {}, id : {}",name,content,id);
       throw new RuntimeException("Error during update menuGroup name and content!");
@@ -121,12 +128,8 @@ public class MenuGroupService {
       throw new InvalidMenuGroupCountException("The menugroup of targets is not correct.");
     }
     
-    for (int i = 1; i <= idList.size(); i++) {
-      if ((menuGroupMapper.updateMenuGroupPriority(idList.get(i - 1), i)) == 0) {
-        log.error("Invalid menu group. {}", idList);
-        throw new InvalidMenuGroupIdException("Invalid menu group");
-      }
-    }
+    menuGroupMapper.updateMenuGroupPriority(shopId, idList);
+    
   }
   
 }

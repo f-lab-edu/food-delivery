@@ -3,11 +3,13 @@ package com.delfood.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.EqualsAndHashCode;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
+@Builder
 @Getter
 @Setter
 @EqualsAndHashCode(of = {"id"})

@@ -1,7 +1,7 @@
 package com.delfood.mapper;
 
 import com.delfood.dto.MenuDTO;
-
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -47,11 +47,11 @@ public interface MenuMapper {
    * 메뉴 순서 변경.
    * 
    * @author jinyoung
-   * @param id 메뉴 아이디
-   * @param priority 우선순위
+   * @param idList 메뉴 아이디 리스트
+   * @param menuGroupId 메뉴그룹 아이디
    * @return
    */
-  public int updateMenuPriority(Long id, int priority);
+  public int updateMenuPriority(Long menuGroupId, List<Long> idList);
 
   /**
    * 메뉴 정보 변경.
