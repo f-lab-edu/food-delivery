@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.CouponIssueDTO;
 import com.delfood.service.CouponIssueService;
@@ -31,7 +33,7 @@ public class CouponIssueController {
    */
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void addCouponIssue(HttpSession session, @RequestBody Long couponId) {
     
     couponIssueService.createCouponIssue(SessionUtil.getLoginMemberId(session), couponId);
@@ -43,7 +45,7 @@ public class CouponIssueController {
    * @return
    */
   @GetMapping
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public List<CouponIssueDTO> getCouponIssues(HttpSession session) {
     return couponIssueService.getCouponIssues(SessionUtil.getLoginMemberId(session));
   }

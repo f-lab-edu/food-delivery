@@ -1,6 +1,7 @@
 package com.delfood.error;
 
 import com.delfood.error.exception.DuplicateIdException;
+import com.delfood.error.exception.IdDeletedException;
 import com.delfood.error.exception.cart.DuplicateItemException;
 import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;
@@ -91,6 +92,12 @@ public class ErrorController {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(MockPayException.class)
   public ErrorMsg handleMockPayException(MockPayException e) {
+    return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
+  }
+  
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ExceptionHandler(IdDeletedException.class)
+  public ErrorMsg handleIdDeletedException(IdDeletedException e) {
     return new ErrorMsg(e.getLocalizedMessage(), getSimpleName(e));
   }
 }
