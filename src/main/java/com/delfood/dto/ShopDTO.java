@@ -2,6 +2,7 @@ package com.delfood.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -11,6 +12,7 @@ import lombok.ToString;
 @Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 @ToString
 public class ShopDTO {
 
@@ -18,7 +20,6 @@ public class ShopDTO {
   public enum DeliveryType {
     SELF_DELIVERY, COMPANY_DELIVERY
   }
-
 
 
   public enum Status {
@@ -44,11 +45,9 @@ public class ShopDTO {
   private String name;
 
   // 배달형태
-  @NonNull
   private DeliveryType deliveryType;
 
   // 주력메뉴 치킨, 피자, 분식 등
-  @NonNull
   private Long signatureMenuId;
 
   // 가게 전화번호
@@ -61,15 +60,12 @@ public class ShopDTO {
   private String addressDetail;
 
   // 사업자번호
-  @NonNull
   private String bizNumber;
 
   // 가게 소개
-  @NonNull
   private String info;
 
   // 최소 주문금액
-  @NonNull
   private Long minOrderPrice;
 
   // 안내 및 혜택
@@ -91,7 +87,6 @@ public class ShopDTO {
   private Status status;
 
   // 주문 타입 바로결제, 전화결제 등 결정
-  @NonNull
   private OrderType orderType;
 
   // 원산지 정보 원산지 표기정보를 작성

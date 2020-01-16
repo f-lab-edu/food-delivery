@@ -3,7 +3,7 @@ package com.delfood.dto;
 import com.delfood.dto.MenuDTO.Status;
 
 import java.time.LocalDateTime;
-
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -14,6 +14,7 @@ import org.apache.ibatis.type.Alias;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode(of = {"id"})
 @Alias("option")
 public class OptionDTO {
   
@@ -30,7 +31,6 @@ public class OptionDTO {
   @NonNull
   private Long price; // 가격    
   
-  @NonNull
   private Status status; // 상태
   
   private Long menuId; // 메뉴 아이디

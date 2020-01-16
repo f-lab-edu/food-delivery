@@ -1,7 +1,8 @@
 package com.delfood.mapper;
 
 import com.delfood.dto.OptionDTO;
-
+import com.delfood.dto.OrderItemDTO;
+import com.delfood.dto.OrderItemOptionDTO;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -36,4 +37,20 @@ public interface OptionMapper {
    * @return
    */
   public int deleteOption(Long id);
+
+  /**
+   * 옵션 가격을 계산한다.
+   * @param options 계산할 옵아이템들
+   * @return
+   */
+  public long totalPrice(List<OrderItemOptionDTO> options);
+
+  /**
+   * 옵션 조회.
+   * 
+   * @author jun
+   * @param id 옵션 아이디
+   * @return
+   */
+  public OptionDTO findById(Long id);
 }

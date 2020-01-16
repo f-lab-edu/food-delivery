@@ -2,19 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.MenuMapper">
 
-    <resultMap type="menu" id="menuResult">
-        <result property="id" column="id"/>
-        <result property="name" column="name"/>
-        <result property="price" column="price"/>
-        <result property="photo" column="photo"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
-        <result property="status" column="status"/>
-        <result property="priority" column="priority"/>
-        <result property="contcent" column="contcent"/>
-        <result property="menuGroupId" column="menuGroupId"/>
-        <collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="menu" select="findOptionbyMenuId"></collection>
-    </resultMap>
+	<resultMap type="menu" id="menuResult">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="price" column="price"/>
+		<result property="photo" column="photo"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
+		<result property="status" column="status"/>
+		<result property="priority" column="priority"/>
+		<result property="contcent" column="contcent"/>
+		<result property="menuGroupId" column="menuGroupId"/>
+		<collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="option" select="findOptionbyMenuId"></collection>
+	</resultMap>
 
     <sql id="selectMenu">
         SELECT id, name, price, photo, created_at createdAt,
@@ -82,4 +82,29 @@
         AND menu_group_id = #{menuGroupId}
     </select>
 
+	<select id="findById" resultType="menu">
+		SELECT id, name, price, photo, content
+		FROM MENU
+		WHERE id = #{id}
+	</select>
+	
+	<select id="totalCount" resultType="integer">
+		SELECT COUNT(id)
+		FROM MENU
+		WHERE status != "DELETED"
+		AND menu_group_id = #{menuGroupId}
+	</select>
+	
+	<select id="findMenuWithOptionsById" resultMap="menuResult">
+        SELECT *
+        FROM MENU
+        WHERE id = #{id}
+    </select>
+    
+    <select id="findOptionbyMenuId" resultType="option">
+        SELECT id, name, price, status, menu_id menuId
+        FROM OPTION
+        WHERE menu_id = #{id}
+    </select>
+	
 </mapper>

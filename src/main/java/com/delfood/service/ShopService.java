@@ -1,6 +1,8 @@
 package com.delfood.service;
 
+import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
+import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopUpdateDTO;
 import com.delfood.error.exception.shop.CanNotCloseShopException;
@@ -285,5 +287,9 @@ public class ShopService {
     List<ShopDTO> openShops = shopMapper.findByBeOpen(ownerId);
     openShops.stream().forEach(e -> openShop(e.getId()));
     return openShops;
+  }
+
+  public ItemsBillDTO.ShopInfo getShopByMenuId(Long menuId) {
+    return shopMapper.findIdAndNameByMenuId(menuId);
   }
 }

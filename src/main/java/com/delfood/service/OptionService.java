@@ -1,6 +1,8 @@
 package com.delfood.service;
 
 import com.delfood.dto.OptionDTO;
+import com.delfood.dto.OrderItemDTO;
+import com.delfood.dto.OrderItemOptionDTO;
 import com.delfood.mapper.OptionMapper;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -62,6 +64,18 @@ public class OptionService {
       log.error("delete option error! id : {}",id);
       throw new RuntimeException("delete option error!");
     }
+  }
+  
+  public OptionDTO getOption(Long id) {
+    return optionMapper.findById(id);
+  }
+
+  public long totalPrice(List<OrderItemOptionDTO> options) {
+    return optionMapper.totalPrice(options);
+  }
+  
+  public OptionDTO getOptionInfo(Long id) {
+    return optionMapper.findById(id);
   }
 
   

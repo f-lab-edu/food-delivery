@@ -172,4 +172,11 @@
         AND     owner_id = #{ownerId}
         AND     work_condition = 'OPEN'
     </select>
+    
+    <select id="findIdAndNameByMenuId" resultType="com.delfood.dto.ItemsBillDTO$ShopInfo">
+        SELECT s.id, s.name, address_code addressCode
+        FROM   SHOP s JOIN MENU_GROUP g ON (s.id = g.shop_id)
+                      JOIN   MENU m ON (g.id = m.menu_group_id)
+        WHERE  m.id = #{menuId}
+    </select>
 </mapper>

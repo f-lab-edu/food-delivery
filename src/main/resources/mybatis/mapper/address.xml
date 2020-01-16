@@ -74,5 +74,26 @@
         ORDER BY building_management_number
         LIMIT   10
     </select>
-        
+    
+    <select id="findPositionByMemberId" resultType="com.delfood.dto.address.Position">
+        SELECT building_center_point_x_coordinate xPos, building_center_point_y_coordinate yPos
+        FROM   ADDRESS
+        WHERE  building_management_number = (SELECT MEMBER.address_code
+                                             FROM   MEMBER
+                                             WHERE  MEMBER.id = #{memberId})
+    </select>
+    
+    <select id="findPositionByShopId" resultType="com.delfood.dto.address.Position">
+        SELECT building_center_point_x_coordinate xPos, building_center_point_y_coordinate yPos
+        FROM   ADDRESS
+        WHERE  building_management_number = (SELECT SHOP.address_code
+                                             FROM   SHOP
+                                             WHERE  SHOP.id = #{shopId})
+    </select>
+    
+    <select id="findPositionByAddressCode" resultType="com.delfood.dto.address.Position">
+        SELECT building_center_point_x_coordinate xPos, building_center_point_y_coordinate yPos
+        FROM   ADDRESS
+        WHERE  building_management_number = #{addressCode} 
+    </select>
 </mapper>
