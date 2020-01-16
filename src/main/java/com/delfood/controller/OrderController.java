@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.controller.response.OrderResponse;
@@ -56,7 +58,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("price")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public ItemsBillResponse getItemsBill(HttpSession session,
       @RequestBody List<OrderItemDTO> items) {
     long itemsPrice = orderService.totalPrice(SessionUtil.getLoginMemberId(session), items);
@@ -70,7 +72,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("{orderId}/bill")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public OrderBillDTO orderInfo(@PathVariable("orderId") Long orderId) {
     return orderService.getPreOrderBill(orderId);
   }
@@ -83,7 +85,7 @@ public class OrderController {
    * @return
    */
   @PostMapping
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public OrderResponse order(HttpSession session, @RequestBody OrderRequest request) {
     if (request.getItems().isEmpty()) {
       // items가 null일때도 NullpointerException이 발생한다
@@ -129,7 +131,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("bill")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public ItemsBillDTO getBill(HttpSession session, @RequestBody BillRequest billRequest) {
     if (couponIssueService.isUsed(billRequest.getCouponIssueId())) {
       log.info("이미 사용한 쿠폰 사용 시도. 요청 발행 쿠폰 아이디 : {}", billRequest.getCouponIssueId());
@@ -147,7 +149,7 @@ public class OrderController {
    * @return
    */
   @GetMapping
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public List<OrderDTO> myOrders(HttpSession session, @Nullable Long lastViewedOrderId) {
     return orderService.getMemberOrder(SessionUtil.getLoginMemberId(session), lastViewedOrderId);
   }
@@ -160,7 +162,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("{orderId}")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public OrderDTO getOrder(HttpSession session, @PathVariable Long orderId) {
     OrderDTO orderInfo = orderService.getOrder(orderId);
     if (orderInfo == null) {
@@ -186,7 +188,7 @@ public class OrderController {
    * @return
    */
   @GetMapping("owner")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public List<OrderBillDTO> getRequestedOrders(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     List<OrderBillDTO> shopOrders = orderService.getOwnerOrderRequest(ownerId);
@@ -201,7 +203,7 @@ public class OrderController {
    * @param session 사장님 세션
    */
   @PatchMapping("{orderId}/approve")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public void orderApprove(@PathVariable(name = "orderId") Long orderId,
       @RequestBody OrderApproveRequest request,
       HttpSession session) {

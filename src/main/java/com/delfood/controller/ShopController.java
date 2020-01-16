@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.delfood.aop.LoginCheck;
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.aop.OwnerShopCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.DeliveryLocationDTO;
 import com.delfood.dto.OwnerDTO;
@@ -48,7 +50,7 @@ public class ShopController {
    * @return
    */
   @PostMapping
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public ResponseEntity<AddShopResponse> addShop(HttpSession session,
       @RequestBody ShopDTO shopInfo) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
@@ -71,7 +73,7 @@ public class ShopController {
    * @return 페이지에 따른 사장님 매장, 총 매장 개수
    */
   @GetMapping
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public MyShopsResponse myShops(MyShopsRequest myShopsRequest,
       HttpSession session) {
     String id = SessionUtil.getLoginOwnerId(session);
@@ -90,7 +92,7 @@ public class ShopController {
    * @return
    */
   @PatchMapping("{id}")
-  @OwnerShopCheck
+  @OwnerShopCheck("id")
   public void updateShop(@PathVariable Long id,
       @RequestBody(required = true) final ShopUpdateDTO updateInfo, HttpSession session) {
     final ShopUpdateDTO copyData = ShopUpdateDTO.copyWithId(updateInfo, id);
@@ -107,7 +109,7 @@ public class ShopController {
    * @return
    */
   @PatchMapping("open/{id}")
-  @OwnerShopCheck
+  @OwnerShopCheck("id")
   public ShopDTO openShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
     shopService.openShop(id);
@@ -123,7 +125,7 @@ public class ShopController {
    * @return 오픈한 매장의 id, 이름
    */
   @PatchMapping("open/")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public List<ShopDTO> openAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     List<ShopDTO> openShops = shopService.openAllShops(ownerId);
@@ -140,7 +142,7 @@ public class ShopController {
    * @return
    */
   @PatchMapping("close/{id}")
-  @OwnerShopCheck
+  @OwnerShopCheck("id")
   public ShopDTO closeShop(
       @PathVariable(value = "id", required = true) Long id, HttpSession session) {
     shopService.closeShop(id);
@@ -156,7 +158,7 @@ public class ShopController {
    * @return 운영 종료를 진행한 매장의 id, 이름
    */
   @PatchMapping("close/")
-  @OwnerLoginCheck
+  @LoginCheck(type = UserType.OWNER)
   public List<ShopDTO> closeAllShops(HttpSession session) {
     String ownerId = SessionUtil.getLoginOwnerId(session);
     return shopService.closeAllShops(ownerId);
@@ -170,7 +172,7 @@ public class ShopController {
    * @return
    */
   @GetMapping("{shopId}")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public ShopInfoResponse shopInfo(
       @PathVariable(value = "shopId", required = true) Long shopId, HttpSession session) {
     ShopDTO shopInfo = shopService.getShop(shopId);

@@ -1,5 +1,7 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.ShopCategoryDTO;
 import com.delfood.dto.ShopDTO;
@@ -52,7 +54,7 @@ public class ShopSearchController {
    * @return
    */
   @GetMapping("/available/shops")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public GetShopByCategoryIdAndTownCodeResponse getShopsByCategoryIdAndTownCode(
       @RequestParam(required = true) Long categoryId, HttpSession session) {
     String memberId = SessionUtil.getLoginMemberId(session);

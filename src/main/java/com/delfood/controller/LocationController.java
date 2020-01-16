@@ -43,7 +43,7 @@ public class LocationController {
    * @return
    */
   @PostMapping("deliveries/{shopId}/possibles")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   @ResponseStatus(HttpStatus.CREATED)
   public void addDeliveryLocation(
       @PathVariable(name = "shopId") Long shopId,
@@ -60,7 +60,7 @@ public class LocationController {
    * @return
    */
   @GetMapping("deliveries/{shopId}/possibles")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public List<DeliveryLocationDTO> getDeliveryLocations(
       @PathVariable(name = "shopId") Long shopId) {
     return shopService.getDeliveryLocations(shopId);
@@ -76,7 +76,7 @@ public class LocationController {
    * @return
    */
   @DeleteMapping("deliveries/{shopId}/possibles/{deliveryLocationId}")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public void deleteDeliveryLocation(
       @PathVariable(value = "shopId") Long shopId,
       @PathVariable(value = "deliveryLocationId") Long deliveryLocationId,
