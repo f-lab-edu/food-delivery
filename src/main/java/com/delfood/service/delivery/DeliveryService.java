@@ -1,15 +1,19 @@
 package com.delfood.service.delivery;
 
 import com.delfood.dao.deliveery.DeliveryDao;
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
 import com.delfood.dto.push.PushMessage;
+import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
 import com.delfood.dto.rider.DeliveryRiderDTO;
+import com.delfood.service.OrderService;
 import com.delfood.service.PushService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DeliveryService {
@@ -22,6 +26,9 @@ public class DeliveryService {
   
   @Autowired
   private PushService pushService;
+  
+  @Autowired
+  private OrderService orderService;
   
   /**
    * 라이더의 정보를 업데이트한다.
@@ -59,5 +66,34 @@ public class DeliveryService {
         }).forEach(e -> pushService
             .sendMessageToRider(PushMessage.DELIVERY_REQUEST, e.getId()));
   }
-
+  
+  /**
+   * 배달원을 매칭한다.
+   * @author jun
+   * @param riderId
+   * @param orderId
+   * @return
+   */
+  @Transactional
+  public AcceptDeliveryRequestDTO acceptDeliveryRequest(String riderId, Long orderId) {
+    OrderStatus status = deliveryDao.getOrderStatus(orderId);
+    AcceptDeliveryRequestDTO result;
+    if (OrderStatus.ORDER_REQUEST.equals(status)) {
+      deliveryDao.setOrderStatus(orderId, OrderStatus.IN_DELIVERY);
+      orderService.updateStatus(orderId, OrderStatus.IN_DELIVERY);
+      result = AcceptDeliveryRequestDTO.builder()
+                 .orderId(orderId)
+                 .riderId(riderId)
+                 .result(AcceptDeliveryRequestDTO.RequestResult.SUCCESS)
+                 .build();
+    } else {
+      result = AcceptDeliveryRequestDTO.builder()
+                .orderId(orderId)
+                .riderId(riderId)
+                .result(AcceptDeliveryRequestDTO.RequestResult.FAIL)
+                .build();
+    }
+    
+    return result;
+  }
 }

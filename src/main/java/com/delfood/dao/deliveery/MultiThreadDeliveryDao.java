@@ -1,28 +1,42 @@
 package com.delfood.dao.deliveery;
 
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
 import com.delfood.dto.rider.DeliveryRiderDTO;
+import com.delfood.service.OrderService;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import javax.annotation.concurrent.ThreadSafe;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository(value = "multiThreadDeliveryDao")
+@ThreadSafe
 public class MultiThreadDeliveryDao implements DeliveryDao{
   private Map<String, DeliveryRiderDTO> riders;
+  private Map<Long, OrderStatus> orders;
   
   @Value("rider.expire")
   private static Long expireTime;
   
+  @Autowired
+  private OrderService orderService;
+  
   @PostConstruct
   public void init() {
     this.riders = new ConcurrentHashMap<String, DeliveryRiderDTO>();
+    this.orders = new ConcurrentHashMap<Long, OrderStatus>();
   }
   
   /**
@@ -107,5 +121,46 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
     return deleteCount;
   }
 
- 
+  /**
+   * 주문의 상태를 조회한다.
+   * 주문 정보가 내부 메모리에 없다면 DB에서 조회한 후 메모리에 저장한다.
+   * @author jun
+   * @param orderId 조회할 주문 아이디
+   */
+  @Override
+  public OrderStatus getOrderStatus(Long orderId) {
+    OrderStatus status = orders.get(orderId);
+    if (Objects.isNull(status)) {
+      status = orderService.getOrderStatus(orderId);
+      setOrderStatus(orderId, status);
+      return status;
+    }
+    
+    return status;
+  }
+  
+  /**
+   * 주문 정보를 내부에 저장한다.
+   * @author jun
+   * @param orderId 저장할 주문 아이디
+   * @param status 주문의 상태
+   */
+  @Override
+  public void setOrderStatus(Long orderId, OrderStatus status) {
+    if (orders.containsKey(orderId)) {
+      orders.replace(orderId, status);
+    } else {
+      orders.put(orderId, status);
+    }
+  }
+  
+  /**
+   * 주문 정보를 삭제한다.
+   * @param orderId 삭제할 주문 정보 아이디
+   * @author jun
+   */
+  @Override
+  public void deleteOrderStatus(Long orderId) {
+    orders.remove(orderId);
+  }
 }

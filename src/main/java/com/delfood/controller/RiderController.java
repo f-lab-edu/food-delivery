@@ -4,6 +4,7 @@ import com.delfood.aop.LoginCheck;
 import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.RiderLoginCheck;
 import com.delfood.dto.rider.RiderDTO;
+import com.delfood.service.delivery.DeliveryService;
 import com.delfood.service.rider.RiderInfoService;
 import com.delfood.utils.SessionUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,6 +37,9 @@ public class RiderController {
   
   @Autowired
   private ObjectMapper objectMapper;
+  
+  @Autowired
+  private DeliveryService deliveryService;
   
   /**
    * 아이디 중복 체크.
@@ -129,7 +133,12 @@ public class RiderController {
     riderInfoService.changeMail(id, request.getPassword(), request.getUpdateMail());
   }
   
-
+  @PostMapping("delivery/accept")
+  @LoginCheck(type = UserType.RIDER)
+  public void deliveryAccept(@RequestBody DeliveryAcceptRequest request, HttpSession session) {
+    String riderId = SessionUtil.getLoginRiderId(session);
+	deliveryService.acceptDeliveryRequest(riderId, request.getOrderId());
+  }
 
   // Request
   @Getter
@@ -140,7 +149,12 @@ public class RiderController {
     @NonNull
     private String password;
   }
-  
+
+  @Getter
+  private static class DeliveryAcceptRequest {
+    private Long orderId;
+  }
+
   @Getter
   private static class UpdatePasswordRequest {
     @NonNull

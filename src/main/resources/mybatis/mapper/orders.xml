@@ -370,4 +370,10 @@
         WHERE   odr.id = #{orderId}
     </select>
     
+    <select id="getOrderStatus" resultType="com.delfood.dto.OrderDTO$OrderStatus">
+        SELECT  odr.order_status orderStatus
+        FROM    ORDERS odr
+        WHERE   odr.id = #{orderId}
+    </select>
+    
 </mapper>

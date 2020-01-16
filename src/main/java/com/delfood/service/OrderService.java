@@ -4,6 +4,7 @@ import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.MemberDTO;
 import com.delfood.dto.OrderBillDTO;
 import com.delfood.dto.OrderDTO;
@@ -291,6 +292,11 @@ public class OrderService {
     PushMessage messageInfo = new PushMessage("DelFood 주문 승인",
         "사장님이 주문을 승인했어요! 도착 예정 시간 " + minute + "분 후");
     pushService.sendMessageToMember(messageInfo, memberId);
+  }
+
+  @Transactional(readOnly = true)
+  public OrderStatus getOrderStatus(Long orderId) {
+    return orderMapper.getOrderStatus(orderId);
   }
 
 }

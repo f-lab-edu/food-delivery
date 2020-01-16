@@ -1,5 +1,6 @@
 package com.delfood.dao.deliveery;
 
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import java.util.List;
@@ -19,5 +20,10 @@ public interface DeliveryDao {
   List<DeliveryRiderDTO> toList();
 
   long deleteAll(List<String> idList);
+
+  OrderStatus getOrderStatus(Long orderId);
   
+  void setOrderStatus(Long orderId, OrderStatus status);
+  
+  void deleteOrderStatus(Long orderId);
 }
