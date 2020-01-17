@@ -9,7 +9,7 @@ public interface DeliveryDao {
   
   void updateRiderInfo(DeliveryRiderDTO riderInfo);
 
-  long deleteRiderInfo(String riderId);
+  boolean deleteRiderInfo(String riderId);
 
   boolean hasRiderInfo(String riderId);
 
@@ -17,9 +17,9 @@ public interface DeliveryDao {
 
   DeliveryRiderDTO getRiderInfo(String riderId);
 
-  List<DeliveryRiderDTO> toList();
+  List<DeliveryRiderDTO> getRiderList();
 
-  long deleteAll(List<String> idList);
+  void deleteAll(List<String> idList);
 
   OrderStatus getOrderStatus(Long orderId);
   

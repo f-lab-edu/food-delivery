@@ -58,20 +58,19 @@ public class DeliveryService {
    * @param distance 중심점에서 몇 미터까지 메세지를 보낼지 정한다.
    */
   public void deliveryRequestByDistance(Position position, long distance) {
-    deliveryDao.toList().stream().filter(e -> e.getPosition().distanceMeter(position) < distance)
-        .sorted((e1, e2) -> {
+    deliveryDao.getRiderList().stream()
+        .filter(e -> e.getPosition().distanceMeter(position) < distance).sorted((e1, e2) -> {
           double distanceE1 = position.distanceMeter(e1.getPosition());
           double distanceE2 = position.distanceMeter(e2.getPosition());
           return distanceE1 - distanceE2 > 0 ? 1 : distanceE1 - distanceE2 < 0 ? -1 : 0;
-        }).forEach(e -> pushService
-            .sendMessageToRider(PushMessage.DELIVERY_REQUEST, e.getId()));
+        }).forEach(e -> pushService.sendMessageToRider(PushMessage.DELIVERY_REQUEST, e.getId()));
   }
   
   /**
    * 배달원을 매칭한다.
    * @author jun
-   * @param riderId
-   * @param orderId
+   * @param riderId 라이더 아이디
+   * @param orderId 주문 아이디
    * @return
    */
   @Transactional

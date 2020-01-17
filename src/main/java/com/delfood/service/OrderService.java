@@ -294,7 +294,6 @@ public class OrderService {
     pushService.sendMessageToMember(messageInfo, memberId);
   }
 
-  @Transactional(readOnly = true)
   public OrderStatus getOrderStatus(Long orderId) {
     return orderMapper.getOrderStatus(orderId);
   }

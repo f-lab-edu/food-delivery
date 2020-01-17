@@ -21,11 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-@Repository(value = "multiThreadDeliveryDao")
+@Repository("multiThreadDeliveryDao")
 @ThreadSafe
-public class MultiThreadDeliveryDao implements DeliveryDao{
-  private Map<String, DeliveryRiderDTO> riders;
-  private Map<Long, OrderStatus> orders;
+public class LocalMemoryDeliveryDao implements DeliveryDao{
+  private ConcurrentHashMap<String, DeliveryRiderDTO> riders;
+  private ConcurrentHashMap<Long, OrderStatus> orders;
   
   @Value("rider.expire")
   private static Long expireTime;
@@ -47,11 +47,7 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
    */
   @Override
   public void updateRiderInfo(DeliveryRiderDTO riderInfo) {
-    if (riders.containsKey(riderInfo.getId())) {
-      riders.replace(riderInfo.getId(), riderInfo);
-    } else {
-      riders.put(riderInfo.getId(), riderInfo);
-    }
+    riders.put(riderInfo.getId(), riderInfo);
   }
   
   /**
@@ -60,8 +56,8 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
    * @param riderId 제거할 라이더의 아이디
    */
   @Override
-  public long deleteRiderInfo(String riderId) {
-    return riders.remove(riderId) == null ? 0 : 1;
+  public boolean deleteRiderInfo(String riderId) {
+    return riders.remove(riderId) != null;
   }
   
   /**
@@ -81,7 +77,7 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
    * @return
    */
   @Override
-  public List<DeliveryRiderDTO> toList() {
+  public List<DeliveryRiderDTO> getRiderList() {
     return riders.values().stream().collect(Collectors.toList());
   }
   
@@ -110,15 +106,12 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
   /**
    * 리스트로 받은 아이디를 기반으로 라이더를 배달 매칭에서 제거한다.
    * @param idList 라이더의 아이디들
-   * @return 지워진 라이더 개수
    */
   @Override
-  public long deleteAll(List<String> idList) {
-    long deleteCount = 0;
+  public void deleteAll(List<String> idList) {
     for (String id : idList) {
-      deleteCount += deleteRiderInfo(id);
+      deleteRiderInfo(id);
     }
-    return deleteCount;
   }
 
   /**
@@ -129,14 +122,15 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
    */
   @Override
   public OrderStatus getOrderStatus(Long orderId) {
-    OrderStatus status = orders.get(orderId);
-    if (Objects.isNull(status)) {
-      status = orderService.getOrderStatus(orderId);
-      setOrderStatus(orderId, status);
+    synchronized (orders) {
+      OrderStatus status = orders.get(orderId);
+      if (Objects.isNull(status)) {
+        status = orderService.getOrderStatus(orderId);
+        setOrderStatus(orderId, status);
+        return status;
+      }
       return status;
     }
-    
-    return status;
   }
   
   /**
@@ -147,11 +141,7 @@ public class MultiThreadDeliveryDao implements DeliveryDao{
    */
   @Override
   public void setOrderStatus(Long orderId, OrderStatus status) {
-    if (orders.containsKey(orderId)) {
-      orders.replace(orderId, status);
-    } else {
-      orders.put(orderId, status);
-    }
+    orders.put(orderId, status);
   }
   
   /**
