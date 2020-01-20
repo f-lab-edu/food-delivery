@@ -122,15 +122,11 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
    */
   @Override
   public OrderStatus getOrderStatus(Long orderId) {
-    synchronized (orders) {
-      OrderStatus status = orders.get(orderId);
-      if (Objects.isNull(status)) {
-        status = orderService.getOrderStatus(orderId);
-        setOrderStatus(orderId, status);
-        return status;
-      }
+    return orders.computeIfAbsent(orderId, key -> {
+      OrderStatus status = orderService.getOrderStatus(orderId);
+      setOrderStatus(orderId, status);
       return status;
-    }
+    });
   }
   
   /**
