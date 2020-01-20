@@ -144,4 +144,8 @@ public class RiderInfoService {
     
     riderInfoMapper.updateMail(id, mail);
   }
+
+  public boolean hasDelivery(String riderId) {
+    return riderInfoMapper.hasDelivery(riderId);
+  }
 }

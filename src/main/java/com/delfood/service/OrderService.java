@@ -298,4 +298,20 @@ public class OrderService {
     return orderMapper.getOrderStatus(orderId);
   }
 
+  /**
+   * 해당 주문에 라이더를 배치한다.
+   * @param orderId 주문번호
+   * @param riderId 라이더 아이디
+   */
+  public void setRider(Long orderId, String riderId) {
+    log.info("주문번호 '{}'번에 라이더 '{}'가 매칭되었습니다.", orderId, riderId);
+    orderMapper.updateRider(orderId, riderId);
+  }
+
+  public void completeOrder(@NonNull Long orderId, LocalDateTime completeTime) {
+    log.info("주문번호 '{}'번 완료되었습니다.", orderId);
+    orderMapper.updateStatusAndArrivalTime(orderId, completeTime);
+  }
+
+
 }

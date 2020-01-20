@@ -376,4 +376,18 @@
         WHERE   odr.id = #{orderId}
     </select>
     
+    <update id="updateRider">
+      UPDATE ORDERS
+      SET    rider_id = #{riderId}.
+             order_status = 'IN_DELIVERY'
+      WHERE  id = #{orderId}
+    </update>
+    
+    <update id="updateStatusAndArrivalTime">
+      UPDATE ORDERS
+      SET    order_status = 'DELIVERY_COMPLETE',
+             arrival_time = #{completeTime}
+      WHERE  id = #{orderId}
+    </update>
+    
 </mapper>

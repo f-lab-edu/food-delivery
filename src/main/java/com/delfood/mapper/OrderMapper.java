@@ -43,4 +43,8 @@ public interface OrderMapper {
   String findMemberIdByOrderId(Long orderId);
 
   OrderStatus getOrderStatus(Long orderId);
+
+  void updateRider(Long orderId, String riderId);
+
+  void updateStatusAndArrivalTime(@NonNull Long orderId, LocalDateTime completeTime);
 }

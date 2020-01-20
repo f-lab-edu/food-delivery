@@ -5,10 +5,16 @@ import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
 import com.delfood.dto.push.PushMessage;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
+import com.delfood.dto.rider.DeliveryInfoDTO;
 import com.delfood.dto.rider.DeliveryRiderDTO;
+import com.delfood.mapper.DeliveryMapper;
+import com.delfood.mapper.RiderInfoMapper;
 import com.delfood.service.OrderService;
 import com.delfood.service.PushService;
 import lombok.NonNull;
+import java.time.LocalDateTime;
+import java.util.List;
+import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,6 +35,12 @@ public class DeliveryService {
   
   @Autowired
   private OrderService orderService;
+  
+  @Autowired
+  private RiderInfoMapper riderInfoMapper;
+  
+  @Autowired
+  private DeliveryMapper deliveryMapper;
   
   /**
    * 라이더의 정보를 업데이트한다.
@@ -74,12 +86,13 @@ public class DeliveryService {
    * @return
    */
   @Transactional
-  public AcceptDeliveryRequestDTO acceptDeliveryRequest(String riderId, Long orderId) {
+  public AcceptDeliveryRequestDTO acceptDeliveryRequest(@NonNull String riderId,
+      @NonNull Long orderId) {
     OrderStatus status = deliveryDao.getOrderStatus(orderId);
     AcceptDeliveryRequestDTO result;
     if (OrderStatus.ORDER_REQUEST.equals(status)) {
       deliveryDao.setOrderStatus(orderId, OrderStatus.IN_DELIVERY);
-      orderService.updateStatus(orderId, OrderStatus.IN_DELIVERY);
+      orderService.setRider(orderId, riderId);
       result = AcceptDeliveryRequestDTO.builder()
                  .orderId(orderId)
                  .riderId(riderId)
@@ -95,4 +108,40 @@ public class DeliveryService {
     
     return result;
   }
+  
+  /**
+   * 배달을 완료한다.
+   * 현재 서버시간을 기준으로 배달 완료 시간이 기록된다.
+   * 주문의 상태를 '배달 완료'로 변경시킨다.
+   * @author jun
+   * @param orderId 주문번호
+   */
+  public void deliveryComplete(@NonNull Long orderId) {
+    LocalDateTime completeTime = LocalDateTime.now();
+    orderService.completeOrder(orderId, completeTime);
+  }
+
+  /**
+   * 해당 라이더가 주문을 맡았는지 조회한다.
+   * @param riderId 라이더 아이디
+   * @param orderId 주문번호
+   * @return
+   */
+  public boolean isRiderOrder(@NonNull String riderId, @NonNull Long orderId) {
+    return riderInfoMapper.isRiderOrder(riderId, orderId);
+  }
+
+  public void delete(String riderId) {
+    deliveryDao.deleteRiderInfo(riderId);
+  }
+
+  public List<DeliveryInfoDTO> getMyAllDeliveries(String riderId,
+      @Nullable Long lastViewedOrderId) {
+    return deliveryMapper.findByRiderId(riderId, lastViewedOrderId);
+  }
+  
+  public DeliveryInfoDTO getCurrentDelivery(String riderId) {
+    return deliveryMapper.findCurrentDeliveryByRiderId(riderId);
+  }
+
 }

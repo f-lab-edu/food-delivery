@@ -47,4 +47,18 @@
                 updated_at = NOW()
         WHERE   id = #{id}
     </update>
+    
+    <select id="isRiderOrder" resultType="boolean">
+      SELECT COUNT(*) = 1
+      FROM   ORDERS
+      WHERE  id = #{orderId}
+      AND    rider_id = #{riderId}
+    </select>
+    
+    <select id="hasDelivery" resultMap="boolean">
+      SELECT COUNT(*) > 0
+      FROM   ORDERS
+      WHERE  rider_id = #{riderId}
+      AND    order_status = 'IN_DELIVERY'
+    </select>
 </mapper>
