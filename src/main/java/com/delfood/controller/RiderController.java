@@ -1,6 +1,7 @@
 package com.delfood.controller;
 
 import com.delfood.aop.LoginCheck;
+import com.delfood.aop.OwnerShopCheck;
 import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.RiderLoginCheck;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
@@ -217,11 +218,9 @@ public class RiderController {
    * @param session 현제 세션
    * @return
    */
-  @GetMapping("delivery/{orderId}")
+  @GetMapping("delivery")
   @LoginCheck(type = UserType.RIDER)
-  public List<DeliveryInfoDTO> getAllDeliveryList(
-      @PathVariable(name = "orderId", required = false, value = "0") Long lastViewedOrderId,
-      HttpSession session) {
+  public List<DeliveryInfoDTO> getAllDeliveryList(Long lastViewedOrderId, HttpSession session) {
     String riderId = SessionUtil.getLoginRiderId(session);
     return deliveryService.getMyAllDeliveries(riderId, lastViewedOrderId);
   }
@@ -231,7 +230,7 @@ public class RiderController {
    * @param session 현제 세션
    * @return
    */
-  @GetMapping("delivery")
+  @GetMapping("delivery/current")
   @LoginCheck(type = UserType.RIDER)
   public DeliveryInfoDTO getCurrentDelivery(HttpSession session) {
     String riderId = SessionUtil.getLoginRiderId(session);
