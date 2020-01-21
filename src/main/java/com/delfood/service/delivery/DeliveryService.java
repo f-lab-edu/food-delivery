@@ -6,12 +6,14 @@ import com.delfood.dto.address.Position;
 import com.delfood.dto.push.PushMessage;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
 import com.delfood.dto.rider.DeliveryInfoDTO;
+import com.delfood.dto.rider.DeliveryOrderInfo;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.mapper.DeliveryMapper;
 import com.delfood.mapper.RiderInfoMapper;
 import com.delfood.service.OrderService;
 import com.delfood.service.PushService;
 import lombok.NonNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -142,6 +144,11 @@ public class DeliveryService {
   
   public DeliveryInfoDTO getCurrentDelivery(String riderId) {
     return deliveryMapper.findCurrentDeliveryByRiderId(riderId);
+  }
+
+  public List<DeliveryOrderInfo> getTodayDeliveryBills(String riderId) {
+    LocalDate today = LocalDate.now();
+    return deliveryMapper.findTodayBillsByRiderId(riderId, today);
   }
 
 }

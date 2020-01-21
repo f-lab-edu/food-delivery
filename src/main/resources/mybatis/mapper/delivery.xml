@@ -73,4 +73,11 @@
       AND     odr.status = 'IN_DELIVERY'
       ORDER BY odr.id DESC
     </select>
+    
+    <select id="findTodayBillsByRiderId" resultType="com.delfood.dto.rider.DeliveryOrderInfo">
+      SELECT odr.id orderId, odr.delivery_cost deliveryCost, odr.order_status orderStatus
+      FROM   ORDER odr INNER JOIN PAYMENT pay ON (odr.id = pay.order_id)
+      WHERE  odr.rider_id = #{riderId}
+      AND    start_time >= #{today}
+    </select>
 </mapper>

@@ -8,6 +8,7 @@ import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO.RequestResult;
 import com.delfood.dto.rider.DeliveryInfoDTO;
+import com.delfood.dto.rider.DeliveryOrderInfo;
 import com.delfood.dto.rider.RiderDTO;
 import com.delfood.error.exception.DuplicateException;
 import com.delfood.error.exception.TargetNotFoundException;
@@ -17,9 +18,11 @@ import com.delfood.service.rider.RiderInfoService;
 import com.delfood.utils.SessionUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpSession;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -241,6 +244,22 @@ public class RiderController {
     return currentDelivery;
   }
   
+  /**
+   * 오늘 배달한 배달료를 조회한다.
+   * @param session 현제 세션
+   * @return
+   */
+  @GetMapping("delivery/bills/today")
+  @LoginCheck(type = UserType.RIDER)
+  public TodayDeliveryBillsResponse getTodayDeliveyBills(HttpSession session) {
+    String riderId = SessionUtil.getLoginRiderId(session);
+    List<DeliveryOrderInfo> todayDeliveryBills = deliveryService.getTodayDeliveryBills(riderId);
+    return TodayDeliveryBillsResponse.builder()
+        .deliveries(todayDeliveryBills)
+        .riderId(riderId)
+        .build();
+  }
+  
   // Request
   @Getter
   private static class SignInRequest {
@@ -278,6 +297,25 @@ public class RiderController {
   private static class DeliveryCompleteRequest {
     @NonNull
     private Long orderId;
+  }
+  
+  @Getter
+  private static class TodayDeliveryBillsResponse {
+    private List<DeliveryOrderInfo> deliveries;
+    private long totalCost;
+    private String riderId;
+    
+    @Builder
+    public TodayDeliveryBillsResponse(@NonNull List<DeliveryOrderInfo> deliveries,
+        @NonNull String riderId) {
+      this.deliveries = deliveries;
+      this.riderId = riderId;
+      initCost();
+    }
+    
+    private void initCost() {
+      this.totalCost = deliveries.stream().mapToLong(e -> e.getDeliveryCost()).sum();
+    }
   }
   
   
