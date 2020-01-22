@@ -56,6 +56,11 @@ public class RiderInfoService {
     String encryptedPassword = SHA256Util.encryptSHA256(password);
     RiderDTO riderInfo = getRiderInfo(id, encryptedPassword);
     
+    if (Objects.isNull(riderInfo)) {
+      throw new IllegalArgumentException("라이더의 아이디와 비밀번호가 일치하지 않습니다.");
+    }
+      
+      
     if (RiderDTO.Status.DELETED.equals(riderInfo.getStatus())) {
       log.info("signIn - 삭제 회원 로그인 시도. id : {}, password : {}", id, encryptedPassword);
       throw new IdDeletedException("Rider의 계정이 삭제 상태입니다. 로그인할 수 없습니다.");

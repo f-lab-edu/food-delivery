@@ -378,7 +378,7 @@
     
     <update id="updateRider">
       UPDATE ORDERS
-      SET    rider_id = #{riderId}.
+      SET    rider_id = #{riderId},
              order_status = 'IN_DELIVERY'
       WHERE  id = #{orderId}
     </update>

@@ -124,7 +124,8 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
   public OrderStatus getOrderStatus(Long orderId) {
     return orders.computeIfAbsent(orderId, key -> {
       OrderStatus status = orderService.getOrderStatus(orderId);
-      setOrderStatus(orderId, status);
+      // 데드락 발생으로 인한 임시 주석
+//      setOrderStatus(orderId, status);
       return status;
     });
   }

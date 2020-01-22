@@ -21,7 +21,7 @@
       <association property="orderInfo">
         <id property="orderId" column="orderId"/>
         <result property="deliveryCost" column="deliveryCost"/>
-        <result property="orderStatus" column="orderStauts"/>
+        <result property="orderStatus" column="orderStatus"/>
       </association>
     </resultMap>
     
@@ -39,11 +39,11 @@
               odr.address_detail addressDetail,
               shop.id shopId,
               shop.name shopName,
-              odr.id order_id,
+              odr.id orderId,
               odr.delivery_cost deliveryCost,
               odr.order_status orderStatus
       FROM    ORDERS odr INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
-                         INNER JOIN ADDRESS addr ON (odr.address_code = ADDRESS.building_management_number)
+                         INNER JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
       WHERE   odr.rider_id = #{riderId}
       <if test="lastViewedOrderId != null">
       AND     odr.id > #{lastViewedOrderId}
@@ -64,20 +64,20 @@
               odr.address_detail addressDetail,
               shop.id shopId,
               shop.name shopName,
-              odr.id order_id,
+              odr.id orderId,
               odr.delivery_cost deliveryCost,
               odr.order_status orderStatus
       FROM    ORDERS odr INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
-                         INNER JOIN ADDRESS addr ON (odr.address_code = ADDRESS.building_management_number)
+                         INNER JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
       WHERE   odr.rider_id = #{riderId}
-      AND     odr.status = 'IN_DELIVERY'
+      AND     odr.order_status = 'IN_DELIVERY'
       ORDER BY odr.id DESC
     </select>
     
     <select id="findTodayBillsByRiderId" resultType="com.delfood.dto.rider.DeliveryOrderInfo">
       SELECT odr.id orderId, odr.delivery_cost deliveryCost, odr.order_status orderStatus
-      FROM   ORDER odr INNER JOIN PAYMENT pay ON (odr.id = pay.order_id)
+      FROM   ORDERS odr INNER JOIN PAYMENT pay ON (odr.id = pay.order_id)
       WHERE  odr.rider_id = #{riderId}
-      AND    start_time >= #{today}
+      AND    start_time >= curdate()
     </select>
 </mapper>

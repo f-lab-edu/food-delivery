@@ -13,9 +13,11 @@ import com.delfood.mapper.RiderInfoMapper;
 import com.delfood.service.OrderService;
 import com.delfood.service.PushService;
 import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +25,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Log4j2
 @Service
 public class DeliveryService {
   
@@ -91,8 +94,15 @@ public class DeliveryService {
   public AcceptDeliveryRequestDTO acceptDeliveryRequest(@NonNull String riderId,
       @NonNull Long orderId) {
     OrderStatus status = deliveryDao.getOrderStatus(orderId);
+    
+    if (Objects.isNull(status)) {
+      log.info("잘못된 주문번호를 수락 시도. 라이더 아이디 : {}, 주문 번호 : {}", riderId, orderId);
+      throw new IllegalArgumentException("존재하지 않는 주문 번호입니다.");
+    }
+    
     AcceptDeliveryRequestDTO result;
-    if (OrderStatus.ORDER_REQUEST.equals(status)) {
+    if (OrderStatus.ORDER_APPROVAL.equals(status)) {
+      log.info("매칭 성공");
       deliveryDao.setOrderStatus(orderId, OrderStatus.IN_DELIVERY);
       orderService.setRider(orderId, riderId);
       result = AcceptDeliveryRequestDTO.builder()
@@ -101,6 +111,7 @@ public class DeliveryService {
                  .result(AcceptDeliveryRequestDTO.RequestResult.SUCCESS)
                  .build();
     } else {
+      log.info("매칭 실패");
       result = AcceptDeliveryRequestDTO.builder()
                 .orderId(orderId)
                 .riderId(riderId)

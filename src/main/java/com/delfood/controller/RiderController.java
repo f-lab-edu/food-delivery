@@ -99,7 +99,6 @@ public class RiderController {
     if (Objects.isNull(SessionUtil.getLoginRiderId(session)) == false) {
       logout(session);
     }
-    
     RiderDTO riderInfo = riderInfoService.signIn(request.getId(), request.getPassword());
     SessionUtil.setLoginRiderId(session, riderInfo.getId());
     return riderInfo;
@@ -149,6 +148,7 @@ public class RiderController {
    * @param request 요청 정보
    */
   @PatchMapping("mail")
+  @LoginCheck(type = UserType.RIDER)
   public void updateMail(HttpSession session, @RequestBody UpdateMailRequest request) {
     String id = SessionUtil.getLoginRiderId(session);
     riderInfoService.changeMail(id, request.getPassword(), request.getUpdateMail());

@@ -55,7 +55,7 @@
       AND    rider_id = #{riderId}
     </select>
     
-    <select id="hasDelivery" resultMap="boolean">
+    <select id="hasDelivery" resultType="boolean">
       SELECT COUNT(*) > 0
       FROM   ORDERS
       WHERE  rider_id = #{riderId}
