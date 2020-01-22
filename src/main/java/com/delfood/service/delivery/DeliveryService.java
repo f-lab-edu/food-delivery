@@ -80,11 +80,13 @@ public class DeliveryService {
           double distanceE1 = position.distanceMeter(e1.getPosition());
           double distanceE2 = position.distanceMeter(e2.getPosition());
           return distanceE1 - distanceE2 > 0 ? 1 : distanceE1 - distanceE2 < 0 ? -1 : 0;
-        }).forEach(e -> pushService.sendMessageToRider(PushMessage.DELIVERY_REQUEST, e.getId()));
+        })
+        .forEach(e -> pushService.sendMessageToRider(PushMessage.DELIVERY_REQUEST, e.getRiderId()));
   }
-  
+
   /**
    * 배달원을 매칭한다.
+   * 
    * @author jun
    * @param riderId 라이더 아이디
    * @param orderId 주문 아이디
@@ -159,7 +161,7 @@ public class DeliveryService {
 
   public List<DeliveryOrderInfo> getTodayDeliveryBills(String riderId) {
     LocalDate today = LocalDate.now();
-    return deliveryMapper.findTodayBillsByRiderId(riderId, today);
+    return deliveryMapper.findTodayBillsByRiderId(riderId);
   }
 
 }

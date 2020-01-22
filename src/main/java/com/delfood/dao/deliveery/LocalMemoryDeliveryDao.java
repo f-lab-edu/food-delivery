@@ -47,7 +47,7 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
    */
   @Override
   public void updateRiderInfo(DeliveryRiderDTO riderInfo) {
-    riders.put(riderInfo.getId(), riderInfo);
+    riders.put(riderInfo.getRiderId(), riderInfo);
   }
   
   /**
@@ -91,7 +91,7 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
     riders.values().stream()
         .filter(
             e -> ChronoUnit.SECONDS.between(e.getUpdatedAt(), LocalDateTime.now()) > expireTime)
-        .forEach(e -> riders.remove(e.getId()));
+        .forEach(e -> riders.remove(e.getRiderId()));
   }
   
   /**
@@ -124,8 +124,6 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
   public OrderStatus getOrderStatus(Long orderId) {
     return orders.computeIfAbsent(orderId, key -> {
       OrderStatus status = orderService.getOrderStatus(orderId);
-      // 데드락 발생으로 인한 임시 주석
-//      setOrderStatus(orderId, status);
       return status;
     });
   }

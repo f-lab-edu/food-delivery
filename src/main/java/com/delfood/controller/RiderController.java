@@ -4,6 +4,7 @@ import com.delfood.aop.LoginCheck;
 import com.delfood.aop.OwnerShopCheck;
 import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.RiderLoginCheck;
+import com.delfood.dto.address.Position;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO.RequestResult;
@@ -189,19 +190,20 @@ public class RiderController {
    * 라이더의 현제 위치 정보를 업데이트한다.
    * 새로운 정보를 덧씌우는 것이기 때문에 put으로 매핑하였다.
    * @author jun
-   * @param info 요청 정보
+   * @param request 요청 정보
    * @param session 현재 세션
    */
   @PutMapping("delivery/available")
   @LoginCheck(type = UserType.RIDER)
-  public void updateDeliveryRiderInfo(DeliveryRiderDTO info, HttpSession session) {
+  public void updateDeliveryRiderInfo(UpdateDeliveryRiderInfoRequest request, HttpSession session) {
     String riderId = SessionUtil.getLoginRiderId(session);
     
     if (riderInfoService.hasDelivery(riderId)) {
       throw new DuplicateException("이미 진행중인 배달이 있습니다. 한번에 하나의 배달만 가능합니다.");
     }
     
-    deliveryService.updateRider(info);
+    deliveryService.updateRider(
+        DeliveryRiderDTO.builder().position(request.getPosition()).riderId(riderId).build());
   }
   
   /**
@@ -247,7 +249,7 @@ public class RiderController {
   /**
    * 오늘 배달한 배달료를 조회한다.
    * @param session 현제 세션
-   * @return
+   * @return    
    */
   @GetMapping("delivery/bills/today")
   @LoginCheck(type = UserType.RIDER)
@@ -298,6 +300,15 @@ public class RiderController {
     @NonNull
     private Long orderId;
   }
+  
+  @Getter
+  private static class UpdateDeliveryRiderInfoRequest {
+    @NonNull
+    private Position position;
+  }
+  
+  
+  // response
   
   @Getter
   private static class TodayDeliveryBillsResponse {

@@ -13,5 +13,5 @@ public interface DeliveryMapper {
 
   DeliveryInfoDTO findCurrentDeliveryByRiderId(String riderId);
 
-  List<DeliveryOrderInfo> findTodayBillsByRiderId(String riderId, LocalDate today);
+  List<DeliveryOrderInfo> findTodayBillsByRiderId(String riderId);
 }
