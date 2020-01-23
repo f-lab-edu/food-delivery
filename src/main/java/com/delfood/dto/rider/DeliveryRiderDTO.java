@@ -6,16 +6,19 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Getter
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor
 public class DeliveryRiderDTO {
+  @NonNull
   private String riderId;
   
+  @NonNull
   private Position position;
   
-  private LocalDateTime updatedAt;
+  @NonNull
+  private LocalDateTime updatedAt = LocalDateTime.now();
   
   @Builder
   public DeliveryRiderDTO(String riderId, Position position, LocalDateTime updatedAt) {

@@ -4,7 +4,7 @@ import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.service.OrderService;
-
+import lombok.extern.log4j.Log4j2;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository("multiThreadDeliveryDao")
 @ThreadSafe
+@Log4j2
 public class LocalMemoryDeliveryDao implements DeliveryDao{
   private ConcurrentHashMap<String, DeliveryRiderDTO> riders;
   private ConcurrentHashMap<Long, OrderStatus> orders;
@@ -89,11 +90,13 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
   @Override
   public void deleteNonUpdatedRiders() {
     riders.values().stream()
-        .filter(
-            e -> ChronoUnit.SECONDS.between(e.getUpdatedAt(), LocalDateTime.now()) > expireTime)
-        .forEach(e -> riders.remove(e.getRiderId()));
+        .filter(e -> ChronoUnit.SECONDS.between(e.getUpdatedAt(), LocalDateTime.now()) > expireTime)
+        .forEach(e -> {
+          log.info("라이더 : {} 가 매칭 대기 목록에서 자동 삭제됨.", e.getRiderId());
+          riders.remove(e.getRiderId());
+        });
   }
-  
+
   /**
    * 라이더의 정보를 조회한다.
    * @author jun

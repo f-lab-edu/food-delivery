@@ -53,6 +53,8 @@ public class DeliveryService {
    * @param riderInfo 추가할 라이더의 정보
    */
   public void updateRider(@NonNull DeliveryRiderDTO riderInfo) {
+    log.info("라이더 정보 수신 후 업데이트 진행. 라이더 아이디 : {}, 위치 : x - {}, y - {}", riderInfo.getRiderId(),
+        riderInfo.getPosition().getCoordinateX(), riderInfo.getPosition().getCoordinateY());
     deliveryDao.updateRiderInfo(riderInfo);
   }
 
@@ -65,6 +67,7 @@ public class DeliveryService {
    */
   @Scheduled(fixedRate = SCHEDULE_DELETE_DELIVERY_RIDER_SECOND) // 5분에 한번씩 실행시킨다
   public void deleteBySchedule() {
+    log.info("업데이트 되지 않는 라이더 삭제 시작");
     deliveryDao.deleteNonUpdatedRiders();
   }
   
@@ -133,7 +136,11 @@ public class DeliveryService {
    */
   public void deliveryComplete(@NonNull Long orderId) {
     LocalDateTime completeTime = LocalDateTime.now();
+    if (OrderStatus.IN_DELIVERY.equals(deliveryDao.getOrderStatus(orderId)) == false) {
+      throw new IllegalArgumentException("주문이 현제 배달중인 상태가 아닙니다.");
+    }
     orderService.completeOrder(orderId, completeTime);
+    deliveryDao.setOrderStatus(orderId, OrderStatus.DELIVERY_COMPLETE);
   }
 
   /**

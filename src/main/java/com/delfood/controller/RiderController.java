@@ -170,7 +170,7 @@ public class RiderController {
   }
 
   /**
-   * 해당 주문의 배달을 완료했다는 요청을 받는다.
+   * 해당 주문의 배달을 완료한다.
    * @author jun
    * @param request 요청 정보
    * @param session 현제 세션
@@ -195,9 +195,11 @@ public class RiderController {
    */
   @PutMapping("delivery/available")
   @LoginCheck(type = UserType.RIDER)
-  public void updateDeliveryRiderInfo(UpdateDeliveryRiderInfoRequest request, HttpSession session) {
+  public void updateDeliveryRiderInfo(@RequestBody UpdateDeliveryRiderInfoRequest request,
+      HttpSession session) {
+    log.info("포지션 : {}", request.getPosition());
     String riderId = SessionUtil.getLoginRiderId(session);
-    
+
     if (riderInfoService.hasDelivery(riderId)) {
       throw new DuplicateException("이미 진행중인 배달이 있습니다. 한번에 하나의 배달만 가능합니다.");
     }
