@@ -4,6 +4,7 @@ import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.MemberDTO;
 import com.delfood.dto.OrderBillDTO;
 import com.delfood.dto.OrderDTO;
@@ -92,7 +93,7 @@ public class OrderService {
     }
     
     // 사장님에게 알림(푸시)
-    PushMessage pushMsg = PushMessage.getMessasge(PushMessage.Type.addOrderRequest);
+    PushMessage pushMsg = PushMessage.ADD_ORDER_REQUEST;
     String ownerId = shopService.getShop(shopId).getOwnerId();
     pushService.sendMessageToOwner(pushMsg, ownerId); // Exception이 발생하지 않는다.
     
@@ -292,5 +293,25 @@ public class OrderService {
         "사장님이 주문을 승인했어요! 도착 예정 시간 " + minute + "분 후");
     pushService.sendMessageToMember(messageInfo, memberId);
   }
+
+  public OrderStatus getOrderStatus(Long orderId) {
+    return orderMapper.getOrderStatus(orderId);
+  }
+
+  /**
+   * 해당 주문에 라이더를 배치한다.
+   * @param orderId 주문번호
+   * @param riderId 라이더 아이디
+   */
+  public void setRider(Long orderId, String riderId) {
+    log.info("주문번호 '{}'번에 라이더 '{}'가 매칭되었습니다.", orderId, riderId);
+    orderMapper.updateRider(orderId, riderId);
+  }
+
+  public void completeOrder(@NonNull Long orderId, LocalDateTime completeTime) {
+    log.info("주문번호 '{}'번 완료되었습니다.", orderId);
+    orderMapper.updateStatusAndArrivalTime(orderId, completeTime);
+  }
+
 
 }

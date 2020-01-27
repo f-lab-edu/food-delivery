@@ -22,6 +22,9 @@ public class FcmDao {
   
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Value("#{expire.fcm.rider}")
+  private static Long riderTokenExpireSecond;
   
   @Value("${expire.fcm.member}")
   private static Long memberTokenExpireSecond;
@@ -85,6 +88,35 @@ public class FcmDao {
     }
   }
   
+  public void addRiderToken(String riderId, String token) {
+    String key = RedisKeyFactory.generateFcmRiderKey(riderId);
+    redisTemplate.watch(key);
+    try {
+      if (getRiderTokens(riderId).contains(token)) { // 토큰이 이미 있을 경우
+        return;
+      }
+      redisTemplate.multi();
+      
+      redisTemplate.opsForList().rightPush(key, token);
+      redisTemplate.expire(key, riderTokenExpireSecond, TimeUnit.SECONDS);
+      
+      redisTemplate.exec();
+    } catch (Exception e) {
+      log.error("Redis Add Rider Token ERROR! key : {}", key);
+      log.error("ERROR Info : {} ", e.getMessage());
+      redisTemplate.discard();
+      throw new RuntimeException(
+          "Cannot add rider token. key : " + key + ", ERROR Info " + e.getMessage());
+    }
+  }
+  
+  public List<String> getRiderTokens(String riderId) {
+    return redisTemplate.opsForList().range(RedisKeyFactory.generateFcmRiderKey(riderId), 0, -1)
+        .stream()
+        .map(e -> objectMapper.convertValue(e, String.class))
+        .collect(Collectors.toList());
+  }
+
   /**
    * 해당 고객의 토큰 리스트를 조회한다.
    * @author jun

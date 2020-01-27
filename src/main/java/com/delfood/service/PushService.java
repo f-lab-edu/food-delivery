@@ -222,4 +222,35 @@ public class PushService {
   public void addErrorOwnerPush(String ownerId, List<Message> messages) {
     fcmDao.addMemberErrorPush(ownerId, messages);
   }
+
+  /**
+   * 라이더에게 메세지를 전송한다.
+   * @author jun
+   * @param messageInfo 전송할 메세지
+   * @param riderId 라이더 아이디
+   */
+  public void sendMessageToRider(PushMessage messageInfo, String riderId) {
+    List<String> tokens = fcmDao.getRiderTokens(riderId);
+    
+    if (tokens.size() == 0) {
+      log.debug("해당 라이더의 FCM 토큰이 없습니다. 라이더 아이디 : {}, 메세지 정보 : {}", riderId, messageInfo);
+      return;
+    }
+    
+    List<Message> messages = tokens.stream().map(token -> Message.builder()
+        .putData("title", messageInfo.getTitle())
+        .putData("message", messageInfo.getMessage())
+        .putData("time", LocalDateTime.now().toString())
+        .setToken(token)
+        .build()).collect(Collectors.toList());
+    
+    BatchResponse response;
+    try {
+      response = FirebaseMessaging.getInstance().sendAll(messages);
+      log.info("Sent message: " + response);
+    } catch (FirebaseMessagingException e) {
+      log.error("cannot send message to rider. error info : {}", e.getMessage());
+      addErrorOwnerPush(riderId, messages);
+    }
+  }
 }

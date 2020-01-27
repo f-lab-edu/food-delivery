@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Position {
-  private double xPos;
-  private double yPos;
+  private double coordinateX;
+  private double coordinateY;
   
   @Builder
-  public Position(double xPos, double yPos) {
-    this.xPos = xPos;
-    this.yPos = yPos;
+  public Position(double coordinateX, double coordinateY) {
+    this.coordinateX = coordinateX;
+    this.coordinateY = coordinateY;
   }
   
   /**
@@ -23,7 +23,7 @@ public class Position {
    * @return
    */
   public double distanceMeter(Position position) {
-    return Math.sqrt(
-        Math.pow(this.xPos - position.getXPos(), 2) + Math.pow(this.yPos - position.getYPos(), 2));
+    return Math.sqrt(Math.pow(this.coordinateX - position.getCoordinateX(), 2)
+        + Math.pow(this.coordinateY - position.getCoordinateY(), 2));
   }
 }

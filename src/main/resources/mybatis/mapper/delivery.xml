@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.DeliveryMapper">
+    <resultMap type="com.delfood.dto.rider.DeliveryInfoDTO" id="deliveryInfo">
+      <result column="riderId" property="riderId"/>
+      <result column="arrivalTime" property="arrivalTime"/>
+      <association property="addressInfo">
+        <id property="buildingManagementNumber" column="buildingManagementNumber"/>
+        <result property="cityName" column="cityName"/>
+        <result property="cityCountryName" column="cityCountryName"/>
+        <result property="townName" column="townName"/>
+        <result property="roadName" column="roadName"/>
+        <result property="buildingNumber" column="buildingNumber"/>
+        <result property="buildingSideNumber" column="buildingSideNumber"/>
+        <result property="addressDetail" column="addressDetail"/>
+      </association>
+      <association property="shopInfo">
+        <id property="id" column="shopId"/>
+        <result property="name" column="shopName"/>
+      </association>
+      <association property="orderInfo">
+        <id property="orderId" column="orderId"/>
+        <result property="deliveryCost" column="deliveryCost"/>
+        <result property="orderStatus" column="orderStatus"/>
+      </association>
+    </resultMap>
+    
+    
+    <select id="findByRiderId" resultMap="deliveryInfo">
+      SELECT  odr.rider_id riderId,
+              odr.arrival_time arrivalTime,
+              addr.building_management_number buildingManagementNumber,
+              addr.city_name cityName,
+              addr.city_country_name cityCountryName,
+              addr.town_name townName,
+              addr.road_name roadName,
+              addr.building_number buildingNumber,
+              addr.building_side_number buildingSideNumber,
+              odr.address_detail addressDetail,
+              shop.id shopId,
+              shop.name shopName,
+              odr.id orderId,
+              odr.delivery_cost deliveryCost,
+              odr.order_status orderStatus
+      FROM    ORDERS odr INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+                         INNER JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
+      WHERE   odr.rider_id = #{riderId}
+      <if test="lastViewedOrderId != null">
+      AND     odr.id > #{lastViewedOrderId}
+      </if>
+      ORDER BY odr.id DESC
+    </select>
+    
+    <select id="findCurrentDeliveryByRiderId" resultMap="deliveryInfo">
+      SELECT  odr.rider_id riderId,
+              odr.arrival_time arrivalTime,
+              addr.building_management_number buildingManagementNumber,
+              addr.city_name cityName,
+              addr.city_country_name cityCountryName,
+              addr.town_name townName,
+              addr.road_name roadName,
+              addr.building_number buildingNumber,
+              addr.building_side_number buildingSideNumber,
+              odr.address_detail addressDetail,
+              shop.id shopId,
+              shop.name shopName,
+              odr.id orderId,
+              odr.delivery_cost deliveryCost,
+              odr.order_status orderStatus
+      FROM    ORDERS odr INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+                         INNER JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
+      WHERE   odr.rider_id = #{riderId}
+      AND     odr.order_status = 'IN_DELIVERY'
+      ORDER BY odr.id DESC
+    </select>
+    
+    <select id="findTodayBillsByRiderId" resultType="com.delfood.dto.rider.DeliveryOrderInfo">
+      SELECT odr.id orderId, odr.delivery_cost deliveryCost, odr.order_status orderStatus
+      FROM   ORDERS odr INNER JOIN PAYMENT pay ON (odr.id = pay.order_id)
+      WHERE  odr.rider_id = #{riderId}
+      AND    start_time >= curdate()
+    </select>
+</mapper>
