@@ -62,12 +62,13 @@ public class OrderDTO {
   
   @Builder
   public OrderDTO(String memberId, String addressCode, String addressDetail, Long shopId,
-      long deliveryCost) {
+      long deliveryCost, long id) {
     this.orderStatus = OrderStatus.BEFORE_PAYMENT;
     this.memberId = memberId;
     this.addressCode = addressCode;
     this.addressDetail = addressDetail;
     this.shopId = shopId;
     this.deliveryCost = deliveryCost;
+    this.id = id;
   }
 }
