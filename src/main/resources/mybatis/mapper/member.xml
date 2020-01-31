@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.MemberMapper">
 
-    <resultMap type="com.delfood.dto.MemberDTO" id="memberDTO">
+    <resultMap type="com.delfood.dto.member.MemberDTO" id="memberDTO">
         <result property="id" column="id"/>
         <result property="password" column="password"/>
         <result property="name" column="name"/>
@@ -13,10 +13,10 @@
         <result property="updatedAt" column="updated_at"/>
         <result property="addressCode" column="address_code"/>
         <result property="addressDetail" column="address_detail"/>
-        <association property="addressInfo" column="address_code" javaType="com.delfood.dto.AddressDTO" select="findAddressByAddressCode"></association>
+        <association property="addressInfo" column="address_code" javaType="com.delfood.dto.address.AddressDTO" select="findAddressByAddressCode"></association>
     </resultMap>
     
-    <select id="findAddressByAddressCode" resultType="com.delfood.dto.AddressDTO">
+    <select id="findAddressByAddressCode" resultType="com.delfood.dto.address.AddressDTO">
         SELECT  town_code townCode,
                 city_name cityName,
                 city_country_name cityCountryName,
@@ -45,12 +45,12 @@
         AND status != 'DELETE'
     </select>
     
-    <insert id="insertMember" parameterType="com.delfood.dto.MemberDTO">
+    <insert id="insertMember" parameterType="com.delfood.dto.member.MemberDTO">
         INSERT INTO MEMBER(id, password, name, tel, mail, address_code, address_detail)
         VALUES(#{id}, #{password}, #{name}, #{tel}, #{mail}, #{addressCode}, #{addressDetail})
     </insert>
     
-    <select id="findByIdAndPassword" resultType="com.delfood.dto.MemberDTO">
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.member.MemberDTO">
         SELECT *
         FROM MEMBER
         WHERE  id = #{id}

@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.member;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
+import com.delfood.dto.address.AddressDTO;
 
 // 고객
 @Getter

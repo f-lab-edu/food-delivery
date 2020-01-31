@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.address;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

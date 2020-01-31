@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.address;
 
 import lombok.Getter;
 import lombok.Setter;

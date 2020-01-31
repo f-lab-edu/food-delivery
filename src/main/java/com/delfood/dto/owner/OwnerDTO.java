@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.owner;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

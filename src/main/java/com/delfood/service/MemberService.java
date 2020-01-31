@@ -1,6 +1,6 @@
 package com.delfood.service;
 
-import com.delfood.dto.MemberDTO;
+import com.delfood.dto.member.MemberDTO;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;

@@ -2,8 +2,8 @@ package com.delfood.controller;
 
 import com.delfood.aop.LoginCheck;
 import com.delfood.aop.LoginCheck.UserType;
+import com.delfood.dto.member.MemberDTO;
 import com.delfood.aop.MemberLoginCheck;
-import com.delfood.dto.MemberDTO;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.MemberService;
 import com.delfood.service.PushService;

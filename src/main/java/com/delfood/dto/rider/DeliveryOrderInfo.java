@@ -1,6 +1,6 @@
 package com.delfood.dto.rider;
 
-import com.delfood.dto.OrderDTO.OrderStatus;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
 import lombok.Getter;
 
 @Getter

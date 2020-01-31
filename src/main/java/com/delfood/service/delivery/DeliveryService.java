@@ -1,8 +1,8 @@
 package com.delfood.service.delivery;
 
 import com.delfood.dao.deliveery.DeliveryDao;
-import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
 import com.delfood.dto.push.PushMessage;
 import com.delfood.dto.rider.AcceptDeliveryRequestDTO;
 import com.delfood.dto.rider.DeliveryInfoDTO;

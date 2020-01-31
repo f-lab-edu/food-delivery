@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.order.bill;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import com.delfood.dto.address.AddressDTO;
+import com.delfood.dto.order.coupon.CouponDTO;
+import com.delfood.dto.order.item.OrderItemDTO;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

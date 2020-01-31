@@ -2,8 +2,7 @@ package com.delfood.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-
-import com.delfood.dto.MemberDTO;
+import com.delfood.dto.member.MemberDTO;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.utils.SHA256Util;
 import java.time.LocalDateTime;

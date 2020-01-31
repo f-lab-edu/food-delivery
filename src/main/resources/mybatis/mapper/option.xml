@@ -33,7 +33,7 @@
         WHERE  opt.id IN (<foreach collection="list" separator="," item="option">#{option.optionId}</foreach>)
     </select>
     
-    <select id="findById" resultType="com.delfood.dto.OptionDTO">
+    <select id="findById" resultType="com.delfood.dto.menu.OptionDTO">
         SELECT id, name, price, status, menu_id menuId
         FROM   OPTION
         WHERE  id = #{id}

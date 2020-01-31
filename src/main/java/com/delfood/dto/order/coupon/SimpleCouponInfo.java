@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.order.coupon;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

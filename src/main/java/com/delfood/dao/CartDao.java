@@ -1,6 +1,6 @@
 package com.delfood.dao;
 
-import com.delfood.dto.ItemDTO;
+import com.delfood.dto.order.item.ItemDTO;
 import com.delfood.utils.RedisKeyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;

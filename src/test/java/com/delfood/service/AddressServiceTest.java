@@ -6,7 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.delfood.controller.reqeust.GetAddressByZipRequest;
 import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
-import com.delfood.dto.AddressDTO;
+import com.delfood.dto.address.AddressDTO;
 import com.delfood.dto.address.Position;
 import com.delfood.mapper.AddressMapper;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package com.delfood.controller;
 
-import com.delfood.dto.MenuGroupDTO;
-import com.delfood.dto.ShopDTO;
+import com.delfood.dto.menu.MenuGroupDTO;
+import com.delfood.dto.shop.ShopDTO;
 import com.delfood.service.MenuGroupService;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;

@@ -1,6 +1,4 @@
-package com.delfood.dto;
-
-import com.delfood.dto.MenuDTO.Status;
+package com.delfood.dto.menu;
 
 import java.time.LocalDateTime;
 import lombok.EqualsAndHashCode;
@@ -10,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import org.apache.ibatis.type.Alias;
+import com.delfood.dto.menu.MenuDTO.Status;
 
 @Getter
 @Setter

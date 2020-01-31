@@ -1,7 +1,7 @@
 package com.delfood.dao.deliveery;
 
-import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.address.Position;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.service.OrderService;
 import lombok.extern.log4j.Log4j2;

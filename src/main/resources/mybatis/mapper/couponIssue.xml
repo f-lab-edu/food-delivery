@@ -35,7 +35,7 @@
         AND i.status = 'DEFAULT'
     </select>
     
-    <select id="findInfoById" resultType="com.delfood.dto.ItemsBillDTO$CouponInfo">
+    <select id="findInfoById" resultType="com.delfood.dto.order.bill.ItemsBillDTO$CouponInfo">
         SELECT i.id couponIssueId,
                c.id couponId,
                i.member_id memberId,
@@ -49,7 +49,7 @@
         AND    i.id = #{couponIssueId}
     </select>
     
-    <select id="findById" resultType="com.delfood.dto.CouponIssueDTO">
+    <select id="findById" resultType="com.delfood.dto.order.coupon.CouponIssueDTO">
         SELECT  id, member_id memberId, coupon_id couponId, created_at createdAt, status, payment_id paymentId
         FROM    COUPON_ISSUE
         WHERE   id = #{id}

@@ -3,9 +3,9 @@ package com.delfood.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-import com.delfood.dto.PaymentDTO;
-import com.delfood.dto.PaymentDTO.Status;
-import com.delfood.dto.PaymentDTO.Type;
+import com.delfood.dto.pay.PaymentDTO;
+import com.delfood.dto.pay.PaymentDTO.Status;
+import com.delfood.dto.pay.PaymentDTO.Type;
 import com.delfood.error.exception.mockPay.MockPayException;
 
 public class MockPayServiceTest {

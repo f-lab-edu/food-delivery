@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.shop;
 
 import lombok.Builder;
 import lombok.Getter;

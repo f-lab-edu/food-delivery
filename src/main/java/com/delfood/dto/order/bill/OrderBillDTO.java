@@ -1,7 +1,9 @@
-package com.delfood.dto;
+package com.delfood.dto.order.bill;
 
-import com.delfood.dto.ItemsBillDTO.MenuInfo;
-import com.delfood.dto.OrderDTO.OrderStatus;
+import com.delfood.dto.order.OrderDTO;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
+import com.delfood.dto.order.bill.ItemsBillDTO.MenuInfo;
+import com.delfood.dto.order.coupon.SimpleCouponInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;

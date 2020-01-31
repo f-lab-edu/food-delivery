@@ -1,8 +1,8 @@
-package com.delfood.dto;
+package com.delfood.dto.order.item;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import com.delfood.dto.OrderDTO.OrderStatus;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;

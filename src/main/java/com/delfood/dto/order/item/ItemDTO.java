@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.order.item;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

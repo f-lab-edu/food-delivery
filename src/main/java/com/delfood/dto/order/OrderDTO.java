@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.order;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +11,8 @@ import lombok.ToString;
 
 import org.apache.ibatis.type.Alias;
 import org.codehaus.commons.nullanalysis.Nullable;
+import com.delfood.dto.order.coupon.SimpleCouponInfo;
+import com.delfood.dto.order.item.OrderItemDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter

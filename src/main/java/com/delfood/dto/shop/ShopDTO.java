@@ -1,4 +1,4 @@
-package com.delfood.dto;
+package com.delfood.dto.shop;
 
 import java.time.LocalDateTime;
 import java.util.List;
