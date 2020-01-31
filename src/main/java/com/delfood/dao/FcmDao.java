@@ -23,14 +23,14 @@ public class FcmDao {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @Value("#{expire.fcm.rider}")
-  private static Long riderTokenExpireSecond;
+  @Value("${expire.fcm.rider}")
+  private Long riderTokenExpireSecond;
   
   @Value("${expire.fcm.member}")
-  private static Long memberTokenExpireSecond;
+  private Long memberTokenExpireSecond;
   
   @Value("${expire.fcm.owner}")
-  private static Long ownerTokenExpireSecond;
+  private Long ownerTokenExpireSecond;
   
   /**
    * 고객이 발급받은 토큰을 저장한다.

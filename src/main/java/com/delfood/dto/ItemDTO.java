@@ -52,6 +52,7 @@ public class ItemDTO {
   
   @Getter
   @EqualsAndHashCode
+  @NoArgsConstructor
   @AllArgsConstructor
   public static class CacheOptionDTO {
     private Long id;

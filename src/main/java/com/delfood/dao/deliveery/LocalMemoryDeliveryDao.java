@@ -28,8 +28,8 @@ public class LocalMemoryDeliveryDao implements DeliveryDao{
   private ConcurrentHashMap<String, DeliveryRiderDTO> riders;
   private ConcurrentHashMap<Long, OrderStatus> orders;
   
-  @Value("rider.expire")
-  private static Long expireTime;
+  @Value("${rider.expire}")
+  private Long expireTime;
   
   @Autowired
   private OrderService orderService;
