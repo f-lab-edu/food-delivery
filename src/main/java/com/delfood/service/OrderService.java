@@ -110,7 +110,7 @@ public class OrderService {
    * @return
    */
   @Transactional(propagation = Propagation.NESTED)
-  private Long doOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
+  public Long doOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
     MemberDTO memberInfo = memberService.getMemberInfo(memberId);
     OrderDTO order = OrderDTO
         .builder()

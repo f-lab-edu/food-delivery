@@ -4,6 +4,7 @@ import static org.mockito.BDDMockito.given;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 import org.assertj.core.util.Arrays;
@@ -15,14 +16,17 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import com.delfood.controller.response.OrderResponse;
 import com.delfood.dto.AddressDTO;
 import com.delfood.dto.ItemsBillDTO;
 import com.delfood.dto.ItemsBillDTO.MenuInfo;
 import com.delfood.dto.ItemsBillDTO.ShopInfo;
 import com.delfood.dto.MemberDTO;
 import com.delfood.dto.OrderDTO;
+import com.delfood.dto.OrderDTO.OrderStatus;
 import com.delfood.dto.OrderItemDTO;
 import com.delfood.dto.OrderItemOptionDTO;
+import com.delfood.dto.PaymentDTO;
 import com.delfood.dto.ShopDTO;
 import com.delfood.dto.ShopDTO.DeliveryType;
 import com.delfood.dto.ShopDTO.OrderType;
@@ -31,6 +35,7 @@ import com.delfood.dto.address.Position;
 import com.delfood.mapper.AddressMapper;
 import com.delfood.mapper.MemberMapper;
 import com.delfood.mapper.OrderMapper;
+import com.delfood.mapper.PaymentMapper;
 import com.delfood.utils.OrderUtil;
 import com.delfood.utils.SHA256Util;
 
@@ -51,6 +56,15 @@ public class OrderServiceTest {
 
   @Mock
   AddressService addressService;
+  
+  @Mock
+  PaymentService paymentService;
+  
+  @Mock
+  MockPayService mockPayService;
+  
+  @Mock
+  PushService pushService;
 
   public static String MEMBER_ID = "testMemberId";
 
@@ -126,7 +140,7 @@ public class OrderServiceTest {
   }
 
   @Test
-  public void getBillTest_계산서_검증() {
+  public void getBillTest_주문_테스트() {
     OrderItemDTO item = new OrderItemDTO();
     item.setId(OrderUtil.generateOrderItemKey(MEMBER_ID, 0));
     item.setMenuId(MENU_ID);
@@ -143,12 +157,18 @@ public class OrderServiceTest {
     orderItems.add(item);
 
     given(orderMapper.findItemsBill(orderItems)).willReturn(menus);
-
+    given(orderService.doOrder(MEMBER_ID, orderItems, SHOP_ID)).willReturn(ORDER_ID);
+    given(shopService.getShop(SHOP_ID)).willReturn(ShopDTO.builder().id(SHOP_ID).ownerId("testOwner").name("").build());
+    
+    OrderResponse order = orderService.order(MEMBER_ID, orderItems, SHOP_ID, null);
     ItemsBillDTO bill = orderService.getBill(MEMBER_ID, orderItems, null);
+    
     assertThat(bill.getTotalPrice(), equalTo(13000L));
     assertThat(bill.getDeliveryInfo().getDeliveryPrice(), equalTo(3000L));
     assertThat(bill.getItemsPrice(), equalTo(10000L));
     
+    assertThat(order.getBill().getMenus(), equalTo(menus));
+    assertThat(order.getBill().getItemsPrice(), equalTo(10000L));
   }
 
 }
