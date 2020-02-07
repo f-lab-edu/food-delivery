@@ -32,7 +32,7 @@ public class DeliveryService {
   private static final long SCHEDULE_DELETE_DELIVERY_RIDER_SECOND = 300000;
   
   @Autowired
-  @Qualifier("multiThreadDeliveryDao")
+  @Qualifier("localMemoryDeliveryDao")
   private DeliveryDao deliveryDao;
   
   @Autowired

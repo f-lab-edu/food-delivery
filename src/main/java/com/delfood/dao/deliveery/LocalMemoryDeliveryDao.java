@@ -1,25 +1,19 @@
 package com.delfood.dao.deliveery;
 
-import com.delfood.dto.address.Position;
-import com.delfood.dto.order.OrderDTO.OrderStatus;
-import com.delfood.dto.rider.DeliveryRiderDTO;
-import com.delfood.service.OrderService;
-import lombok.extern.log4j.Log4j2;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.concurrent.ThreadSafe;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
+import com.delfood.dto.rider.DeliveryRiderDTO;
+import com.delfood.service.OrderService;
+import lombok.extern.log4j.Log4j2;
 
 @Repository("localMemoryDeliveryDao")
 @ThreadSafe
