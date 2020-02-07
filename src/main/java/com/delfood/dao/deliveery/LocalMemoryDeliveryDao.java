@@ -21,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-@Repository("multiThreadDeliveryDao")
+@Repository("localMemoryDeliveryDao")
 @ThreadSafe
 @Log4j2
 public class LocalMemoryDeliveryDao implements DeliveryDao{
   private ConcurrentHashMap<String, DeliveryRiderDTO> riders;
   private ConcurrentHashMap<Long, OrderStatus> orders;
   
-  @Value("${rider.expire}")
+  @Value("${expire.fcm.rider}")
   private Long expireTime;
   
   @Autowired
