@@ -1,6 +1,5 @@
 package com.delfood.dao;
 
-import com.delfood.dto.push.PushMessageForOne;
 import com.delfood.utils.RedisKeyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.Message;
