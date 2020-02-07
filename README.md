@@ -4,6 +4,14 @@ DelFood
 Rest API형 서버로써 클라이언트는 프로토타입으로 제작하여 서버 공부에 좀 더 집중할 수 있도록 하고 있습니다.<br>
 자세한 구현 내용은 PR에서 확인하실 수 있습니다. Business Rule, 기술적인 문제에 대한 해결 방법은 WIKI에서 확인할 수 있습니다.<br>
 
+## 프로젝트의 전체적인 구조
+![image](https://user-images.githubusercontent.com/46917538/74034708-2cc64900-49fc-11ea-820c-0acbbc646823.png)
+- github hook을 받아 Jenkins에서 CI/CD를 진행합니다.
+- 모든 서버는 Naver Cloud Platform에 올라가 있습니다.<br>
+- 구동중인 서버 : Main Delfood Server, Redis Server, MariaDB Server
+- public IP는 Main Server에만 할당되어 있습니다.
+
+
 ## 프로젝트의 주요 관심사
 <b>공통사항</b><br>
 - 지속적인 성능 개선
