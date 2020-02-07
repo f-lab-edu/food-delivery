@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.CouponMapper">
 
-    <insert id="insertCoupon" parameterType="coupon">
+    <insert id="insertCoupon" parameterType="com.delfood.dto.order.coupon.CouponDTO">
         INSERT INTO COUPON(name, discount_type, discount_value, end_at)
         VALUES(#{name}, #{discountType}, #{discountValue}, #{endAt})
         <selectKey keyProperty="createdAt" resultType="java.time.LocalDateTime" order="AFTER">
