@@ -1,8 +1,13 @@
 package com.delfood.utils;
 
 public class RedisKeyFactory {
+  
+  public static final String DELIVERY_KEY = "DELIVERIES";
+  
+  public static final String ORDER_KEY = "ORDERS";
+  
   public enum Key {
-    CART, FCM_MEMBER, FCM_OWNER, FCM_MEMBER_ERROR, FCM_OWNER_ERROR, FCM_RIDER 
+    CART, FCM_MEMBER, FCM_OWNER, FCM_MEMBER_ERROR, FCM_OWNER_ERROR, FCM_RIDER, DELIVERIES 
   }
   
   // 인스턴스화 방지
