@@ -1,16 +1,17 @@
 package com.delfood.service;
 
 import com.delfood.controller.response.OrderResponse;
-import com.delfood.dto.AddressDTO;
-import com.delfood.dto.ItemsBillDTO;
-import com.delfood.dto.ItemsBillDTO.ShopInfo;
-import com.delfood.dto.MemberDTO;
-import com.delfood.dto.OrderBillDTO;
-import com.delfood.dto.OrderDTO;
-import com.delfood.dto.OrderItemDTO;
-import com.delfood.dto.OrderItemOptionDTO;
-import com.delfood.dto.PaymentDTO;
-import com.delfood.dto.PaymentDTO.Type;
+import com.delfood.dto.address.AddressDTO;
+import com.delfood.dto.member.MemberDTO;
+import com.delfood.dto.order.OrderDTO;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
+import com.delfood.dto.order.bill.ItemsBillDTO;
+import com.delfood.dto.order.bill.OrderBillDTO;
+import com.delfood.dto.order.bill.ItemsBillDTO.ShopInfo;
+import com.delfood.dto.order.item.OrderItemDTO;
+import com.delfood.dto.order.item.OrderItemOptionDTO;
+import com.delfood.dto.pay.PaymentDTO;
+import com.delfood.dto.pay.PaymentDTO.Type;
 import com.delfood.dto.push.PushMessage;
 import com.delfood.mapper.OrderMapper;
 import com.delfood.utils.OrderUtil;
@@ -109,7 +110,7 @@ public class OrderService {
    * @return
    */
   @Transactional(propagation = Propagation.NESTED)
-  private Long doOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
+  public Long doOrder(String memberId, List<OrderItemDTO> items, Long shopId) {
     MemberDTO memberInfo = memberService.getMemberInfo(memberId);
     OrderDTO order = OrderDTO
         .builder()
@@ -292,5 +293,25 @@ public class OrderService {
         "사장님이 주문을 승인했어요! 도착 예정 시간 " + minute + "분 후");
     pushService.sendMessageToMember(messageInfo, memberId);
   }
+
+  public OrderStatus getOrderStatus(Long orderId) {
+    return orderMapper.getOrderStatus(orderId);
+  }
+
+  /**
+   * 해당 주문에 라이더를 배치한다.
+   * @param orderId 주문번호
+   * @param riderId 라이더 아이디
+   */
+  public void setRider(Long orderId, String riderId) {
+    log.info("주문번호 '{}'번에 라이더 '{}'가 매칭되었습니다.", orderId, riderId);
+    orderMapper.updateRider(orderId, riderId);
+  }
+
+  public void completeOrder(@NonNull Long orderId, LocalDateTime completeTime) {
+    log.info("주문번호 '{}'번 완료되었습니다.", orderId);
+    orderMapper.updateStatusAndArrivalTime(orderId, completeTime);
+  }
+
 
 }

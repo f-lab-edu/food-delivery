@@ -1,7 +1,7 @@
 package com.delfood.service;
 
-import com.delfood.dto.ShopCategoryDTO;
-import com.delfood.dto.ShopDTO;
+import com.delfood.dto.shop.ShopCategoryDTO;
+import com.delfood.dto.shop.ShopDTO;
 import com.delfood.mapper.ShopSearchMapper;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

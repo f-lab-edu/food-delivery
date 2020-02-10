@@ -2,8 +2,8 @@ package com.delfood.mapper;
 
 import java.util.List;
 import org.springframework.stereotype.Repository;
-import com.delfood.dto.CouponIssueDTO;
-import com.delfood.dto.ItemsBillDTO.CouponInfo;
+import com.delfood.dto.order.bill.ItemsBillDTO.CouponInfo;
+import com.delfood.dto.order.coupon.CouponIssueDTO;
 
 @Repository
 public interface CouponIssueMapper {

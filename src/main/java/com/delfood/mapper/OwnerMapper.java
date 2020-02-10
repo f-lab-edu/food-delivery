@@ -1,8 +1,7 @@
 package com.delfood.mapper;
 
-import com.delfood.dto.OwnerDTO;
-
 import org.springframework.stereotype.Repository;
+import com.delfood.dto.owner.OwnerDTO;
 
 @Repository
 public interface OwnerMapper {

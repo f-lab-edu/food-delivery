@@ -1,6 +1,6 @@
 package com.delfood.service;
 
-import com.delfood.dto.MenuGroupDTO;
+import com.delfood.dto.menu.MenuGroupDTO;
 import com.delfood.error.exception.DuplicateException;
 import com.delfood.error.exception.TargetNotFoundException;
 import com.delfood.error.exception.TooManyModifiedException;

@@ -1,6 +1,5 @@
 package com.delfood.dto.push;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import org.joda.time.LocalDateTime;
@@ -18,7 +17,7 @@ public class PushMessage {
   public static final PushMessage DELIVERY_MATCH = new PushMessage("DelFood 배달원 매칭", "배달원이 매칭되었습니다");
   public static final PushMessage DELIVERY_START = new PushMessage("DelFood 배달 시작", "음식 배달이 시작되었습니다");
   public static final PushMessage DELIVERY_SUCCESS = new PushMessage("DelFood 배달 완료", "배달이 완료되었습니다");
-  
+  public static final PushMessage DELIVERY_REQUEST = new PushMessage("DelFood 배달 요청", "근처 매장에서 배달을 요청했습니다.");
   
   private LocalDateTime generatedTime;
   
@@ -28,6 +27,7 @@ public class PushMessage {
     this.generatedTime = LocalDateTime.now();
   }
   
+
   
   
 }

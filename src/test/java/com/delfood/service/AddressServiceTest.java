@@ -6,7 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.delfood.controller.reqeust.GetAddressByZipRequest;
 import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
-import com.delfood.dto.AddressDTO;
+import com.delfood.dto.address.AddressDTO;
 import com.delfood.dto.address.Position;
 import com.delfood.mapper.AddressMapper;
 import java.util.ArrayList;
@@ -111,13 +111,13 @@ public class AddressServiceTest {
   @Test
   public void getDistanceMeterTest_거리_계산() {
     Position startPosition = Position.builder()
-        .xPos(0.0)
-        .yPos(0.0)
+        .coordinateX(0.0)
+        .coordinateY(0.0)
         .build();
     
     Position endPosition = Position.builder()
-        .xPos(300.0)
-        .yPos(400.0)
+        .coordinateX(300.0)
+        .coordinateY(400.0)
         .build();
     
     given(addressMapper.findPositionByAddressCode("11111111")).willReturn(startPosition);
@@ -146,13 +146,13 @@ public class AddressServiceTest {
   @Test
   public void deliveryPriceTest_아이디기반_배달료_계산() {
     Position memberPosition = Position.builder()
-        .xPos(0.0)
-        .yPos(0.0)
+        .coordinateX(0.0)
+        .coordinateY(0.0)
         .build();
     
     Position shopPosition = Position.builder()
-        .xPos(3000.0)
-        .yPos(4000.0)
+        .coordinateX(3000.0)
+        .coordinateY(4000.0)
         .build();
     
     given(addressMapper.findPositionByMemberId("eric")).willReturn(memberPosition);

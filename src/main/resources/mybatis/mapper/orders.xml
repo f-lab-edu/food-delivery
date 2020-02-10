@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OrderMapper">
-    <resultMap type="com.delfood.dto.OrderDTO" id="orderDTO">
+    <resultMap type="com.delfood.dto.order.OrderDTO" id="orderDTO">
         <id property="id" column="orderId"/>
         <result property="startTime" column="orderStartTime"/>
         <result property="orderStatus" column="orderStatus"/>
@@ -22,13 +22,13 @@
             <result property="discountValue" column="discountValue"/>
             <result property="discountPrice" column="discountPrice"/>
         </association>
-        <collection property="items" ofType="com.delfood.dto.OrderItemDTO">
+        <collection property="items" ofType="com.delfood.dto.order.item.OrderItemDTO">
             <id property="id" column="itemId"/>
             <result property="menuId" column="menuId"/>
             <result property="menuName" column="menuName"/>
             <result property="menuPrice" column="menuPrice"/>
             <result property="count" column="itemCount"/>
-            <collection property="options" ofType="com.delfood.dto.OrderItemOptionDTO">
+            <collection property="options" ofType="com.delfood.dto.order.item.OrderItemOptionDTO">
                 <id property="id" column="itemOptionId"/>
                 <result property="optionId" column="optionId"/>
                 <result property="optionName" column="optionName"/>
@@ -39,7 +39,7 @@
     
     
     
-    <select id="findAddressInfoByAddressCode" resultType="com.delfood.dto.AddressDTO">
+    <select id="findAddressInfoByAddressCode" resultType="com.delfood.dto.address.AddressDTO">
         SELECT  A.town_code townCode,
                 A.city_name cityName,
                 A.city_country_name cityCountryName,
@@ -175,7 +175,7 @@
     </select>
     
     
-    <resultMap type="com.delfood.dto.OrderBillDTO" id="preOrderBill">
+    <resultMap type="com.delfood.dto.order.bill.OrderBillDTO" id="preOrderBill">
         <id property="orderId" column="orderId"/>
         <result property="startTime" column="orderStartTime"/>
         <result property="orderStatus" column="orderStatus"/>
@@ -199,11 +199,11 @@
             <result property="discountValue" column="discountValue"/>
             <result property="discountPrice" column="discountPrice"/>
         </association>
-        <collection property="menus" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo">
+        <collection property="menus" ofType="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo">
             <id property="id" column="menuId"/>
             <result property="name" column="menuName"/>
             <result property="price" column="menuPrice"/>
-            <collection property="options" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo$OptionInfo">
+            <collection property="options" ofType="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo$OptionInfo">
                 <id property="id" column="optionId"/>
                 <result property="name" column="optionName"/>
                 <result property="price" column="optionPrice"/>
@@ -263,11 +263,11 @@
                 </foreach>
     </select>
     
-    <resultMap type="com.delfood.dto.ItemsBillDTO$MenuInfo" id="menuInfo">
+    <resultMap type="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo" id="menuInfo">
         <id property="id" column="menuId"/>
         <result property="name" column="menuName"/>
         <result property="price" column="menuPrice"/>
-        <collection property="options" ofType="com.delfood.dto.ItemsBillDTO$MenuInfo$OptionInfo">
+        <collection property="options" ofType="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo$OptionInfo">
             <id property="id" column="optionId"/>
             <result property="name" column="optionName"/>
             <result property="price" column="optionPrice"/>
@@ -369,5 +369,25 @@
         FROM    ORDERS odr
         WHERE   odr.id = #{orderId}
     </select>
+    
+    <select id="getOrderStatus" resultType="com.delfood.dto.order.OrderDTO$OrderStatus">
+        SELECT  odr.order_status orderStatus
+        FROM    ORDERS odr
+        WHERE   odr.id = #{orderId}
+    </select>
+    
+    <update id="updateRider">
+      UPDATE ORDERS
+      SET    rider_id = #{riderId},
+             order_status = 'IN_DELIVERY'
+      WHERE  id = #{orderId}
+    </update>
+    
+    <update id="updateStatusAndArrivalTime">
+      UPDATE ORDERS
+      SET    order_status = 'DELIVERY_COMPLETE',
+             arrival_time = #{completeTime}
+      WHERE  id = #{orderId}
+    </update>
     
 </mapper>

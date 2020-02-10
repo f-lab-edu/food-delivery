@@ -1,11 +1,11 @@
 package com.delfood.mapper;
 
-import com.delfood.dto.OrderDTO;
-import com.delfood.dto.OrderDTO.OrderStatus;
-import com.delfood.dto.OrderItemDTO;
-import com.delfood.dto.OrderItemOptionDTO;
-import com.delfood.dto.ItemsBillDTO.MenuInfo;
-import com.delfood.dto.OrderBillDTO;
+import com.delfood.dto.order.OrderDTO;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
+import com.delfood.dto.order.bill.OrderBillDTO;
+import com.delfood.dto.order.bill.ItemsBillDTO.MenuInfo;
+import com.delfood.dto.order.item.OrderItemDTO;
+import com.delfood.dto.order.item.OrderItemOptionDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.NonNull;
@@ -41,4 +41,10 @@ public interface OrderMapper {
   void updateOrderStatusAndExArrivalTime(Long orderId, LocalDateTime exArrivalTime);
 
   String findMemberIdByOrderId(Long orderId);
+
+  OrderStatus getOrderStatus(Long orderId);
+
+  void updateRider(Long orderId, String riderId);
+
+  void updateStatusAndArrivalTime(@NonNull Long orderId, LocalDateTime completeTime);
 }

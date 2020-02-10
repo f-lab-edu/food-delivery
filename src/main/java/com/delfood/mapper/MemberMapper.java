@@ -1,9 +1,8 @@
 package com.delfood.mapper;
 
-import java.util.List;
-import java.util.Map;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-import com.delfood.dto.MemberDTO;
+import com.delfood.dto.member.MemberDTO;
 
 @Repository
 public interface MemberMapper {
@@ -12,13 +11,13 @@ public interface MemberMapper {
 
   public int insertMember(MemberDTO memberInfo);
 
-  public MemberDTO findByIdAndPassword(String id, String password);
+  public MemberDTO findByIdAndPassword(@Param("id") String id, @Param("password") String password);
 
   public int updateMemberPassword(String id, String password);
 
   public int deleteMember(String id);
 
-  int updateMemberAddress(String id, String addressCode, String addressDetail);
+  int updateMemberAddress(@Param("id") String id, @Param("addressCode") String addressCode, @Param("addressDetail") String addressDetail);
 
   int idCheck(String id);
 

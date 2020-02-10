@@ -21,4 +21,8 @@ public interface RiderInfoMapper {
       @NonNull String password);
 
   public long updateMail(@NonNull String id, @NonNull String mail);
+
+  public boolean isRiderOrder(@NonNull String riderId, @NonNull Long orderId);
+
+  public boolean hasDelivery(String riderId);
 }

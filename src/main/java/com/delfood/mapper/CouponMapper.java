@@ -1,9 +1,9 @@
 package com.delfood.mapper;
 
-import com.delfood.dto.CouponDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;
+import com.delfood.dto.order.coupon.CouponDTO;
 
 @Repository
 public interface CouponMapper {

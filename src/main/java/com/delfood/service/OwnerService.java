@@ -1,6 +1,6 @@
 package com.delfood.service;
 
-import com.delfood.dto.OwnerDTO;
+import com.delfood.dto.owner.OwnerDTO;
 import com.delfood.error.exception.DuplicateException;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.mapper.OwnerMapper;

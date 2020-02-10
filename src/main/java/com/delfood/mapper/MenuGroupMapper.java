@@ -2,7 +2,7 @@ package com.delfood.mapper;
 
 import java.util.List;
 import org.springframework.stereotype.Repository;
-import com.delfood.dto.MenuGroupDTO;
+import com.delfood.dto.menu.MenuGroupDTO;
 
 @Repository
 public interface MenuGroupMapper {

@@ -7,10 +7,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 
-
-import com.delfood.dto.MenuDTO;
-import com.delfood.dto.MenuDTO.Status;
-import com.delfood.dto.OptionDTO;
+import com.delfood.dto.menu.MenuDTO;
+import com.delfood.dto.menu.OptionDTO;
+import com.delfood.dto.menu.MenuDTO.Status;
 import com.delfood.mapper.MenuMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -82,16 +81,18 @@ public class MenuServiceTest {
     service.checkMenu(1L, 1L);
   }
   
-  @Test(expected = RuntimeException.class)
+  @Test
   public void checkMenuTest_메뉴존재_체크_없음() {
     given(mapper.checkMenu(1L, 1L)).willReturn(0);
-    service.checkMenu(1L, 1L);
+    boolean checkMenu = service.checkMenu(1L, 1L);
+    assertThat(checkMenu).isFalse();
   }
   
-  @Test(expected = RuntimeException.class)
+  @Test
   public void checkMenuTest_메뉴존재_체크_실패() {
     given(mapper.checkMenu(1L, 1L)).willReturn(999);
-    service.checkMenu(1L, 1L);
+    boolean checkMenu = service.checkMenu(1L, 1L);
+    assertThat(checkMenu).isFalse();
   }
   
   @Test
@@ -106,15 +107,6 @@ public class MenuServiceTest {
   @Test(expected = RuntimeException.class)
   public void updateMenuPriorityTest_메뉴_순서_변경_실패() {
     given(mapper.totalCount(1L)).willReturn(0);
-    List<Long> idList = LongStream.of(1,2,3).boxed().collect(Collectors.toList());
-    
-    service.updateMenuPriority(1L, idList);
-  }
-  
-  @Test(expected = RuntimeException.class)
-  public void updateMenuPriorityTest_메뉴_순서_변경_실패2() {
-    given(mapper.totalCount(1L)).willReturn(3);
-    given(mapper.updateMenuPriority(anyLong(), anyList())).willReturn(0);
     List<Long> idList = LongStream.of(1,2,3).boxed().collect(Collectors.toList());
     
     service.updateMenuPriority(1L, idList);

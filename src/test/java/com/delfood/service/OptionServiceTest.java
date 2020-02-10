@@ -2,9 +2,8 @@ package com.delfood.service;
 
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
-
-import com.delfood.dto.OptionDTO;
-import com.delfood.dto.OptionDTO.Status;
+import com.delfood.dto.menu.OptionDTO;
+import com.delfood.dto.menu.OptionDTO.Status;
 import com.delfood.mapper.OptionMapper;
 import java.util.ArrayList;
 import java.util.List;

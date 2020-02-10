@@ -23,7 +23,7 @@
                 exit_y_coordinate exitYCoordinate
         FROM    ADDRESS
     </sql>
-    <select id="findByTownCode" resultType="com.delfood.dto.AddressDTO">
+    <select id="findByTownCode" resultType="com.delfood.dto.address.AddressDTO">
         SELECT DISTINCT
                 A.town_code townCode,
                 A.city_name cityName,
@@ -37,7 +37,7 @@
         LIMIT   10
     </select>
     
-    <select id="findByShopId" resultType="com.delfood.dto.AddressDTO">
+    <select id="findByShopId" resultType="com.delfood.dto.address.AddressDTO">
         SELECT DISTINCT
                 A.town_code townCode,
                 A.city_name cityName,
@@ -51,7 +51,7 @@
         LIMIT   10
     </select>
     
-    <select id="findByZipName" resultType="com.delfood.dto.AddressDTO">
+    <select id="findByZipName" resultType="com.delfood.dto.address.AddressDTO">
         <include refid="selectAll"></include>
         WHERE   1 = 1
         AND town_name LIKE CONCAT(IFNULL(#{townName}, ''), '%')
@@ -63,7 +63,7 @@
         LIMIT   10
     </select>
     
-    <select id="findByRoadName" resultType="com.delfood.dto.AddressDTO">
+    <select id="findByRoadName" resultType="com.delfood.dto.address.AddressDTO">
         <include refid="selectAll"></include>
         WHERE   1 = 1
         AND road_name LIKE CONCAT(IFNULL(#{roadName}, ''), '%')

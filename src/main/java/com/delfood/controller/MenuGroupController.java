@@ -2,8 +2,8 @@ package com.delfood.controller;
 
 import com.delfood.aop.OwnerLoginCheck;
 import com.delfood.aop.OwnerShopCheck;
-import com.delfood.dto.MenuGroupDTO;
-import com.delfood.dto.ShopDTO;
+import com.delfood.dto.menu.MenuGroupDTO;
+import com.delfood.dto.shop.ShopDTO;
 import com.delfood.service.MenuGroupService;
 import com.delfood.service.ShopService;
 import com.delfood.utils.SessionUtil;
@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,9 +67,7 @@ public class MenuGroupController {
   @OwnerShopCheck("shopId")
   public ResponseEntity<ShopMenuInfoResponse> shopMenuInfo(@PathVariable("shopId") long shopId) {
 
-    ShopDTO shopInfo = shopService.getMyShopInfo(shopId);
-    
-    if (shopInfo == null) {
+    ShopDTO shopInfo = shopService.getMyShopInfo(shopId);    if (shopInfo == null) {
       return new ResponseEntity<MenuGroupController.ShopMenuInfoResponse>(HttpStatus.NOT_FOUND); 
     }
     
