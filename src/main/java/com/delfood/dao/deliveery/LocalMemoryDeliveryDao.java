@@ -19,11 +19,11 @@ import org.springframework.stereotype.Repository;
 @Repository("localMemoryDeliveryDao")
 @ThreadSafe
 @Log4j2
-public class LocalMemoryDeliveryDao implements DeliveryDao{
+public class LocalMemoryDeliveryDao implements DeliveryDao {
   private ConcurrentHashMap<String, DeliveryRiderDTO> riders;
   private ConcurrentHashMap<Long, OrderStatus> orders;
   
-  @Value("${expire.fcm.rider}")
+  @Value("${expire.rider}")
   private Long expireTime;
   
   @Autowired
