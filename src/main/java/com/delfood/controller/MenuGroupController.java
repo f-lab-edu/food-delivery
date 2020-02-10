@@ -63,7 +63,7 @@ public class MenuGroupController {
    * @param shopId 매장 아이디
    */
   @GetMapping("/shops/{shopId}/menuGroups/all")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public ResponseEntity<ShopMenuInfoResponse> shopMenuInfo(@PathVariable("shopId") long shopId) {
 
     ShopDTO shopInfo = shopService.getMyShopInfo(shopId);
@@ -92,7 +92,7 @@ public class MenuGroupController {
    * @return
    */
   @PostMapping("/shops/{shopId}/menuGroups")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public HttpStatus addMenuGroup(@RequestBody MenuGroupDTO menuGroupInfo,
       @PathVariable long shopId) {
     
@@ -108,7 +108,7 @@ public class MenuGroupController {
    * @return
    */
   @GetMapping("/shops/{shopId}/menuGroups")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public ResponseEntity<List<MenuGroupDTO>> menuGroups(@PathVariable("shopId") long shopId) {
     
     List<MenuGroupDTO> menuGroups = menuGroupService.getMenuGroups(shopId);
@@ -129,7 +129,7 @@ public class MenuGroupController {
    * @return
    */
   @PatchMapping("/shops/{shopId}/menuGroups")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public ResponseEntity<String> updateMenuGroup(
       @RequestBody UpdateMenuGroupRequest request) {
     
@@ -158,7 +158,7 @@ public class MenuGroupController {
    * @return
    */
   @PutMapping("/shops/{shopId}/menuGroups/priority")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public void updateMenuGroupPriority(
       @PathVariable Long shopId, @RequestBody List<Long> iddList) {
     
@@ -175,7 +175,7 @@ public class MenuGroupController {
    * @return
    */
   @DeleteMapping("/shops/{shopId}/menuGroups/{menuGroupId}")
-  @OwnerShopCheck
+  @OwnerShopCheck("shopId")
   public HttpStatus deleteMenuGroup(@PathVariable("menuGroupId") Long menuGroupId) {
     menuGroupService.deleteMenuGroup(menuGroupId);
     return HttpStatus.OK;
@@ -183,9 +183,11 @@ public class MenuGroupController {
   
   // ==================== static =====================
   
-  private static final ResponseEntity<String> EMPTY_ID = new ResponseEntity<>("id is empty.", HttpStatus.BAD_REQUEST);
-  private static final ResponseEntity<String> EMPTY_NAME = new ResponseEntity<>("name is empty.", HttpStatus.BAD_REQUEST);
-  
+  private static final ResponseEntity<String> EMPTY_ID =
+      new ResponseEntity<>("id is empty.", HttpStatus.BAD_REQUEST);
+  private static final ResponseEntity<String> EMPTY_NAME =
+      new ResponseEntity<>("name is empty.", HttpStatus.BAD_REQUEST);
+
   // ===================== resopnse 객체 =====================
   
   @Getter

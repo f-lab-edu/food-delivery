@@ -85,6 +85,13 @@
 		    <version>3.4</version>
 		</dependency>
 		
+		<!-- FCM -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>6.8.1</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

@@ -2,16 +2,16 @@ package com.delfood.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.EqualsAndHashCode;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
-@Builder
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode(of = {"id"})
 @ToString
 public class ShopDTO {

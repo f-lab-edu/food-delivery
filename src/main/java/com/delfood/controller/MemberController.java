@@ -1,9 +1,12 @@
 package com.delfood.controller;
 
+import com.delfood.aop.LoginCheck;
+import com.delfood.aop.LoginCheck.UserType;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.dto.MemberDTO;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.MemberService;
+import com.delfood.service.PushService;
 import com.delfood.utils.SessionUtil;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
@@ -57,6 +60,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
   @Autowired
   private MemberService memberService;
+  
+  @Autowired
+  private PushService pushService;
 
   /**
    * 로그인한 사용자가 마이페이지를 눌렀을 때 보여줄 사용자 정보를 반환한다.
@@ -65,7 +71,7 @@ public class MemberController {
    * @return MemberDTO
    */
   @GetMapping("myInfo")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public MemberInfoResponse memberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     MemberDTO memberInfo = memberService.getMemberInfo(id);
@@ -145,7 +151,7 @@ public class MemberController {
    * @return 로그인 하지 않았을 시 401코드를 반환하고 result:NO_LOGIN 반환 로그아웃 성공시 200 코드를 반환
    */
   @GetMapping("logout")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void logout(HttpSession session) {
     SessionUtil.logoutMember(session);
   }
@@ -158,7 +164,7 @@ public class MemberController {
    * @return
    */
   @PatchMapping("password")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void updateMemberInfo(HttpSession session,
       @RequestBody @NotNull UpdateMemberPasswordRequest passwordRequest) {
     String passwordBeforeChange = passwordRequest.getPasswordBeforeChange();
@@ -179,7 +185,7 @@ public class MemberController {
    * @return
    */
   @DeleteMapping("myInfo")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public void deleteMemberInfo(HttpSession session) {
     String id = SessionUtil.getLoginMemberId(session);
     memberService.deleteMember(id);
@@ -194,7 +200,7 @@ public class MemberController {
    * @param session 현재 로그인한 고객의 세션
    */
   @PatchMapping("address")
-  @MemberLoginCheck
+  @LoginCheck(type = UserType.MEMBER)
   public ResponseEntity<UpdateMemberAddressResponse> updateMemberAddress(
       @RequestBody @NotNull UpdateMemberAddressRequest memberInfo, HttpSession session) {
     ResponseEntity<UpdateMemberAddressResponse> responseEntity = null;
@@ -218,6 +224,13 @@ public class MemberController {
 
     return responseEntity;
 
+  }
+  
+  @PostMapping("token")
+  @LoginCheck(type = UserType.MEMBER)
+  public void addToken(HttpSession session, String token) {
+    String memberId = SessionUtil.getLoginMemberId(session);
+    pushService.addMemberToken(memberId, token);
   }
 
 

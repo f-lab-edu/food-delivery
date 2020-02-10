@@ -1,11 +1,13 @@
 package com.delfood.utils;
 
 import javax.servlet.http.HttpSession;
+import lombok.NonNull;
 
 public class SessionUtil {
 
   private static final String LOGIN_MEMBER_ID = "LOGIN_MEMBER_ID";
   private static final String LOGIN_OWNER_ID = "LOGIN_OWNER_ID";
+  private static final String LOGIN_RIDER_ID = "LOGIN_RIDER_ID";
   
   // 인스턴스화 방지
   private SessionUtil() {}
@@ -80,6 +82,24 @@ public class SessionUtil {
    */
   public static void logoutOwner(HttpSession session) {
     session.removeAttribute(LOGIN_OWNER_ID);
+  }
+
+  /**
+   * 로그인한 라이더의 id를 세션에 저장한다.
+   * @author jun
+   * @param session 사용자의 세션
+   * @param id 저장할 라이더 아이디
+   */
+  public static void setLoginRiderId(HttpSession session, @NonNull String id) {
+    session.setAttribute(LOGIN_RIDER_ID, id);
+  }
+  
+  public static String getLoginRiderId(HttpSession session) {
+    return (String) session.getAttribute(LOGIN_RIDER_ID);
+  }
+  
+  public static void logoutRider(HttpSession session) {
+    session.removeAttribute(LOGIN_RIDER_ID);
   }
   
   
