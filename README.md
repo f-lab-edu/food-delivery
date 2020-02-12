@@ -57,6 +57,9 @@ DelFood PR : https://github.com/f-lab-edu/food-delivery/pulls
 - 협업하는 동료의 소스코드에 서로 테스트코드를 작성하여 서로의 소스코드를 알 수 있도록 하고 있습니다.
 <br><br>
 
+### 성능 테스트
+NGrinder를 설치하여 테스트하고있습니다.<br>
+
 
 ## 사용 기술 및 환경
 Spring boot, Maven, Mybatis, Redis, Docker, MariaDB, Jenkins, Java8, Naver Cloud Platform
@@ -71,6 +74,13 @@ Jenkins : <http://106.10.51.119:8080/job/Delfood/><br>
 Naver Cloud Platform(Cloud server)를 사용하고 있습니다.<br>
 PR시마다 자동 Build 및 Test 적용<br>
 비로그인 상태로도 확인이 가능합니다.<br>
+
+## CD
+Docker 이미지를 제작하여 배포합니다.<br>
+CI 서버에서 빌드 완료시 Shell script가 작동하여 빌드된 이미지가 docker hub에 저장됩니다.<br>
+Push 완료시 Delfood 메인 서버에서 docker hub에 올라간 이미지를 받아 실행시킵니다.<br>
+
+
 <br>
 ## Database
 - MariaDB<br>
