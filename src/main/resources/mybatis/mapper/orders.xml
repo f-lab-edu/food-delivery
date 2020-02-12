@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.OrderMapper">
+    <resultMap type="com.delfood.dto.order.OrderDTO" id="orderDTO">
+        <id property="id" column="orderId"/>
+        <result property="startTime" column="orderStartTime"/>
+        <result property="orderStatus" column="orderStatus"/>
+        <result property="exArrivalTime" column="orderExArrivalTime"/>
+        <result property="arrivalTime" column="orderArrivalTime"/>
+        <result property="riderId" column="orderRiderId"/>
+        <result property="addressCode" column="orderAddressCode"/>
+        <result property="addressDetail" column="orderAddressDetail"/>
+        <result property="memberId" column="memberId"/>
+        <result property="deliveryCost" column="deliveryCost"/>
+        <result property="shopId" column="shopId"/>
+        <result property="shopName" column="shopName"/>
+        <association property="couponInfo">
+            <result property="couponIssueId" column="couponIssueId"/>
+            <result property="couponId" column="couponId"/>
+            <result property="couponName" column="couponName"/>
+            <result property="discountType" column="discountType"/>
+            <result property="discountValue" column="discountValue"/>
+            <result property="discountPrice" column="discountPrice"/>
+        </association>
+        <collection property="items" ofType="com.delfood.dto.order.item.OrderItemDTO">
+            <id property="id" column="itemId"/>
+            <result property="menuId" column="menuId"/>
+            <result property="menuName" column="menuName"/>
+            <result property="menuPrice" column="menuPrice"/>
+            <result property="count" column="itemCount"/>
+            <collection property="options" ofType="com.delfood.dto.order.item.OrderItemOptionDTO">
+                <id property="id" column="itemOptionId"/>
+                <result property="optionId" column="optionId"/>
+                <result property="optionName" column="optionName"/>
+                <result property="optionPrice" column="optionPrice"/>
+            </collection>
+        </collection>
+    </resultMap>
+    
+    
+    
+    <select id="findAddressInfoByAddressCode" resultType="com.delfood.dto.address.AddressDTO">
+        SELECT  A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName,
+                A.road_name_code roadNameCode,
+                A.road_name roadName,
+                A.building_number buildingNumber,
+                A.building_side_number buildingSideNumber,
+                A.zip_code zipCode,
+                A.building_management_number buildingManagementNumber,
+                A.building_name_for_city buildingNameForCity,
+                A.administrative_town_code administrativeTownCode,
+                A.administrative_town_name administrativeTownName,
+                A.detail_building_name detailBuildingName,
+                A.building_center_point_x_coordinate buildingCenterPointXCoordinate,
+                A.building_center_point_y_coordinate buildingCenterPointYCoordinate
+        FROM    ADDRESS A
+        WHERE   building_management_number = #{addressCode}
+    </select>
+    
+    <insert id="addOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ORDERS
+        (member_id, address_code, address_detail, shop_id, delivery_cost)
+        VALUES
+        (#{memberId}, #{addressCode}, #{addressDetail}, #{shopId}, #{deliveryCost})
+    </insert>
+    
+    <insert id="addOrderItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ORDERS_ITEM
+        (menu_id, order_id, count)
+        VALUES
+        (#{menuId}, #{orderId}, #{count})
+    </insert>    
+    
+    <insert id="addOrderItems">
+        INSERT INTO ORDERS_ITEM
+        (id, menu_id, order_id, count)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.menuId}, #{item.orderId}, #{item.count})
+        </foreach>
+    </insert>
+    
+    <insert id="addOrderItemOptions">
+        INSERT INTO ORDERS_ITEM_OPTION
+        (id, option_id, order_item_id)
+        VALUES
+        <foreach collection="list" item="option" separator=",">
+            (#{option.id}, #{option.optionId}, #{option.orderItemId})
+        </foreach>
+    </insert>
+    
+    <select id="findById" resultMap="orderDTO">
+        SELECT odr.id orderId,
+               odr.start_time orderStartTime,
+               odr.order_status orderStatus,
+               odr.ex_arrival_time orderExArrivalTime,
+               odr.arrival_time orderArrivalTime,
+               odr.rider_id orderRiderId,
+               odr.address_code orderAddressCode,
+               odr.address_detail orderAddressDetail,
+               odr.member_id memberId,
+               odr.delivery_cost deliveryCost,
+               shop.id shopId,
+               shop.name shopName,
+               item.id itemId,
+               menu.name menuName,
+               menu.price menuPrice,
+               item.count itemCount,
+               item_opt.id itemOptionId,
+               opt.id optionId,
+               opt.name optionName,
+               opt.price optionPrice,
+               cpn_isu.id couponIssueId,
+               cpn.id couponId,
+               cpn.name couponName,
+               cpn.discount_type discountType,
+               cpn.discount_value discountValue,
+               pay.amount_discount discountPrice
+        FROM ORDERS odr LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+                        LEFT OUTER JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+                        INNER JOIN MENU menu ON (menu.id = item.menu_id)
+                        LEFT OUTER JOIN OPTION opt ON (opt.menu_id = menu.id)
+                        INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+                        INNER JOIN PAYMENT pay ON (pay.order_id = odr.id)
+                        LEFT OUTER JOIN COUPON_ISSUE cpn_isu ON (pay.id = cpn_isu.payment_id)
+                        LEFT OUTER JOIN COUPON cpn ON (cpn_isu.coupon_id = cpn.id)
+        WHERE odr.id = #{id}
+    </select>
+    
+    <select id="findByMemberId" resultMap="orderDTO">
+        SELECT odr.id orderId,
+               odr.start_time orderStartTime,
+               odr.order_status orderStatus,
+               odr.ex_arrival_time orderExArrivalTime,
+               odr.arrival_time orderArrivalTime,
+               odr.rider_id orderRiderId,
+               odr.address_code orderAddressCode,
+               odr.address_detail orderAddressDetail,
+               odr.member_id memberId,
+               odr.delivery_cost deliveryCost,
+               shop.id shopId,
+               shop.name shopName,
+               item.id itemId,
+               menu.id menuId,
+               menu.name menuName,
+               menu.price menuPrice,
+               item.count itemCount,
+               item_opt.id itemOptionId,
+               opt.id optionId,
+               opt.name optionName,
+               opt.price optionPrice,
+               cpn_isu.id couponIssueId,
+               cpn.id couponId,
+               cpn.name couponName,
+               cpn.discount_type discountType,
+               cpn.discount_value discountValue,
+               pay.amount_discount discountPrice
+        FROM ORDERS odr LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+                        LEFT OUTER JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+                        INNER JOIN MENU menu ON (menu.id = item.menu_id)
+                        LEFT OUTER JOIN OPTION opt ON (opt.menu_id = menu.id)
+                        INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+                        INNER JOIN MEMBER member ON (odr.member_id = member.id)
+                        INNER JOIN PAYMENT pay ON (pay.order_id = odr.id)
+                        LEFT OUTER JOIN COUPON_ISSUE cpn_isu ON (pay.id = cpn_isu.payment_id)
+                        LEFT OUTER JOIN COUPON cpn ON (cpn_isu.coupon_id = cpn.id)
+        WHERE member.id = #{memberId}
+        <if test="lastViewedOrderId != null">
+        AND   odr.id > #{lastViewedOrderId}
+        </if>
+        ORDER BY odr.id DESC
+    </select>
+    
+    
+    <resultMap type="com.delfood.dto.order.bill.OrderBillDTO" id="preOrderBill">
+        <id property="orderId" column="orderId"/>
+        <result property="startTime" column="orderStartTime"/>
+        <result property="orderStatus" column="orderStatus"/>
+        <result property="memberId" column="memberId"/>
+        <result property="deliveryCost" column="deliveryCost"/>
+        <association property="addressInfo" column="addressCode">
+            <id property="buildingManagementNumber" column="buildingManagementNumber"/>
+            <result property="cityName" column="cityName"/>
+            <result property="cityCountryName" column="cityCountryName"/>
+            <result property="townName" column="townName"/>
+            <result property="roadName" column="roadName"/>
+            <result property="buildingNumber" column="buildingNumber"/>
+            <result property="buildingSideNumber" column="buildingSideNumber"/>
+            <result property="addressDetail" column="addressDetail"/>
+        </association>
+        <association property="couponInfo">
+            <result property="couponIssueId" column="couponIssueId"/>
+            <result property="couponId" column="couponId"/>
+            <result property="couponName" column="couponName"/>
+            <result property="discountType" column="discountType"/>
+            <result property="discountValue" column="discountValue"/>
+            <result property="discountPrice" column="discountPrice"/>
+        </association>
+        <collection property="menus" ofType="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo">
+            <id property="id" column="menuId"/>
+            <result property="name" column="menuName"/>
+            <result property="price" column="menuPrice"/>
+            <collection property="options" ofType="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo$OptionInfo">
+                <id property="id" column="optionId"/>
+                <result property="name" column="optionName"/>
+                <result property="price" column="optionPrice"/>
+            </collection>
+        </collection>
+    </resultMap>
+    
+    <select id="findOrderBill" resultMap="preOrderBill">
+        SELECT odr.id orderId,
+               odr.start_time orderStartTime,
+               odr.delivery_cost deliveryCost,
+               odr.address_code addressCode,
+               m.id menuId,
+               m.name menuName,
+               m.price menuPrice,
+               m_opt.id optionId,
+               m_opt.name optionName,
+               m_opt.price optionPrice,
+               addr.building_management_number buildingManagementNumber,
+               addr.city_name cityName,
+               addr.city_country_name cityCountryName,
+               addr.town_name townName,
+               addr.road_name roadName,
+               addr.building_number buildingNumber,
+               addr.building_side_number buildingSideNumber,
+               odr.address_detail addressDetail,
+               odr.member_id memberId,
+               odr.order_status orderStatus,
+               cpn_isu.id couponIssueId,
+               cpn.id couponId,
+               cpn.name couponName,
+               cpn.discount_type discountType,
+               cpn.discount_value discountValue,
+               pay.amount_discount discountPrice
+        FROM   ORDERS odr LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+               JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+               JOIN MENU m ON (m.id = item.menu_id)
+               JOIN OPTION m_opt ON (item_opt.option_id = m_opt.id)
+               JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
+               INNER JOIN PAYMENT pay ON (pay.order_id = odr.id)
+               LEFT OUTER JOIN COUPON_ISSUE cpn_isu ON (pay.id = cpn_isu.payment_id)
+               LEFT OUTER JOIN COUPON cpn ON (cpn_isu.coupon_id = cpn.id)
+        WHERE  odr.id = #{orderId}
+    </select>
+    
+    <select id="findItemsPrice" resultType="long">
+        SELECT <foreach collection="list" item="item" separator="+">
+                (SELECT m.price <if test="item.options.isEmpty() == false">
+                                  +
+                                  (SELECT SUM(opt.price)
+                                   FROM OPTION opt
+                                   WHERE  opt.id IN (<foreach collection="item.options" item="option" separator=",">#{option.optionId}</foreach>))
+                                   </if>
+                 FROM MENU m
+                 WHERE  m.id = #{item.menuId}
+                ) * #{item.count}
+                </foreach>
+    </select>
+    
+    <resultMap type="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo" id="menuInfo">
+        <id property="id" column="menuId"/>
+        <result property="name" column="menuName"/>
+        <result property="price" column="menuPrice"/>
+        <collection property="options" ofType="com.delfood.dto.order.bill.ItemsBillDTO$MenuInfo$OptionInfo">
+            <id property="id" column="optionId"/>
+            <result property="name" column="optionName"/>
+            <result property="price" column="optionPrice"/>
+        </collection>
+    </resultMap>
+    
+    <select id="findItemsBill" resultMap="menuInfo">
+        SELECT m.id menuId, m.name menuName, m.price menuPrice,
+               opt.id optionId, opt.name optionName, opt.price optionPrice
+        FROM   MENU m LEFT OUTER JOIN OPTION opt
+                      ON (m.id = opt.menu_id)
+        WHERE  m.id IN (<foreach collection="list" item="menu" separator=",">#{menu.menuId}</foreach>)
+        AND    opt.id IN (
+        <foreach collection="list" item="menu" separator=",">
+            <foreach collection="menu.options" item="option" separator=",">
+                #{option.optionId}
+            </foreach>
+        </foreach>)
+    </select>
+    
+    
+    <select id="isShopItem" resultType="boolean">
+        SELECT MIN(shop.id = #{shopId})
+        FROM   MENU_GROUP menuGroup 
+               INNER JOIN SHOP shop ON (menuGroup.shop_id = shop.id)
+               LEFT OUTER JOIN MENU menu  ON (menu.menu_group_id = menuGroup.id)
+               LEFT OUTER JOIN OPTION opt ON (menu.id = opt.menu_id)
+        WHERE  menu.id IN(<foreach collection="items" item="item" separator=",">#{item.menuId}</foreach>)
+        AND    opt.id IN (
+               <foreach collection="items" item="item" separator=",">
+                   <foreach collection="item.options" item="option" separator=",">#{option.optionId}</foreach>
+               </foreach>)
+    </select>
+    
+    
+    <update id="updateStatus">
+        UPDATE ORDERS
+        SET order_status =  #{status}
+        WHERE id = #{orderId}
+    </update>
+    
+    <select id="findRequestByOwnerId" resultMap="preOrderBill">
+        SELECT odr.id orderId,
+               odr.start_time orderStartTime,
+               odr.delivery_cost deliveryCost,
+               odr.address_code addressCode,
+               m.id menuId,
+               m.name menuName,
+               m.price menuPrice,
+               m_opt.id optionId,
+               m_opt.name optionName,
+               m_opt.price optionPrice,
+               addr.building_management_number buildingManagementNumber,
+               addr.city_name cityName,
+               addr.city_country_name cityCountryName,
+               addr.town_name townName,
+               addr.road_name roadName,
+               addr.building_number buildingNumber,
+               addr.building_side_number buildingSideNumber,
+               odr.address_detail addressDetail,
+               odr.member_id memberId,
+               odr.order_status orderStatus,
+               cpn_isu.id couponIssueId,
+               cpn.id couponId,
+               cpn.name couponName,
+               cpn.discount_type discountType,
+               cpn.discount_value discountValue,
+               pay.amount_discount discountPrice
+        FROM   SHOP shop
+               INNER JOIN ORDERS odr ON (shop.id = odr.shop_id)
+               LEFT OUTER JOIN ORDERS_ITEM item ON (odr.id = item.order_id)
+               JOIN ORDERS_ITEM_OPTION item_opt ON (item.id = item_opt.order_item_id)
+               JOIN MENU m ON (m.id = item.menu_id)
+               JOIN OPTION m_opt ON (item_opt.option_id = m_opt.id)
+               JOIN ADDRESS addr ON (odr.address_code = addr.building_management_number)
+               INNER JOIN PAYMENT pay ON (pay.order_id = odr.id)
+               LEFT OUTER JOIN COUPON_ISSUE cpn_isu ON (pay.id = cpn_isu.payment_id)
+               LEFT OUTER JOIN COUPON cpn ON (cpn_isu.coupon_id = cpn.id)
+        WHERE  shop.owner_id = #{ownerId}
+        AND    odr.order_status = 'ORDER_REQUEST'
+    </select>
+    
+    <select id="findOwnerIdByOrderId" resultType="String">
+        SELECT  shop.owner_id ownerId
+        FROM    ORDERS odr
+                INNER JOIN SHOP shop ON (odr.shop_id = shop.id)
+        WHERE   odr.id = #{orderId}
+    </select>
+    
+    <update id="updateOrderStatusAndExArrivalTime">
+        UPDATE  ORDERS
+        SET     order_status = 'ORDER_APPROVAL',
+                ex_arrival_time = #{exArrivalTime}
+        WHERE   id = #{orderId}
+    </update>
+    
+    <select id="findMemberIdByOrderId" resultType="String">
+        SELECT  odr.memberId memberId
+        FROM    ORDERS odr
+        WHERE   odr.id = #{orderId}
+    </select>
+    
+    <select id="getOrderStatus" resultType="com.delfood.dto.order.OrderDTO$OrderStatus">
+        SELECT  odr.order_status orderStatus
+        FROM    ORDERS odr
+        WHERE   odr.id = #{orderId}
+    </select>
+    
+    <update id="updateRider">
+      UPDATE ORDERS
+      SET    rider_id = #{riderId},
+             order_status = 'IN_DELIVERY'
+      WHERE  id = #{orderId}
+    </update>
+    
+    <update id="updateStatusAndArrivalTime">
+      UPDATE ORDERS
+      SET    order_status = 'DELIVERY_COMPLETE',
+             arrival_time = #{completeTime}
+      WHERE  id = #{orderId}
+    </update>
+    
+</mapper>

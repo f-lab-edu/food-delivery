@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.PaymentMapper">
+    <insert id="insertPayment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO PAYMENT 
+        (type, amount_payment, pay_time, order_id, status, amount_discount) 
+        VALUES 
+        (#{type}, #{amountPayment}, #{payTime}, #{orderId}, #{status}, #{amountDiscount})
+    </insert>
+</mapper>

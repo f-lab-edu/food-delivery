@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.RiderInfoMapper">
+    <select id="isExistById" resultType="boolean">
+        SELECT  COUNT(*) > 0
+        FROM    RIDER
+        WHERE   id = #{id}
+    </select>
+    
+    <insert id="insertRider">
+        INSERT INTO RIDER(id, password, name, tel, mail)
+        VALUES (#{id}, #{password}, #{name}, #{tel}, #{mail})
+    </insert>
+    
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.rider.RiderDTO">
+        SELECT  id, password, name, tel, mail, status, created_at createdAt, updated_at updatedAt
+        FROM    RIDER
+        WHERE   id = #{id}
+        AND     password = #{password}
+    </select>
+    
+    <update id="updatePassword">
+        UPDATE  RIDER
+        SET     password = #{password},
+                updated_at = NOW()
+        WHERE   id = #{id}
+    </update>
+    
+    <update id="updateStatusAsDeleted">
+        UPDATE  RIDER
+        SET     status = 'DELETED',
+                updated_at = NOW()
+        WHERE   id = #{id}
+    </update>
+    
+    <select id="isExistAndEffectiveByIdAndPassword" resultType="boolean">
+        SELECT  COUNT(*) > 0
+        FROM    RIDER
+        WHERE   id = #{id}
+        AND     password = #{password}
+        AND     status = 'DEFAULT'
+    </select>
+    
+    <update id="updateMail">
+        UPDATE  RIDER
+        SET     mail = #{mail},
+                updated_at = NOW()
+        WHERE   id = #{id}
+    </update>
+    
+    <select id="isRiderOrder" resultType="boolean">
+      SELECT COUNT(*) = 1
+      FROM   ORDERS
+      WHERE  id = #{orderId}
+      AND    rider_id = #{riderId}
+    </select>
+    
+    <select id="hasDelivery" resultType="boolean">
+      SELECT COUNT(*) > 0
+      FROM   ORDERS
+      WHERE  rider_id = #{riderId}
+      AND    order_status = 'IN_DELIVERY'
+    </select>
+</mapper>

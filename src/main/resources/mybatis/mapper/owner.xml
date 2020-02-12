@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.OwnerMapper">
+    <insert id="insertOwner" parameterType="com.delfood.dto.owner.OwnerDTO">
+        INSERT INTO OWNER(id, password, name, mail, tel)
+        VALUES (#{id}, #{password}, #{name}, #{mail}, #{tel})
+    </insert>
+    
+    <select id="idCheck" resultType="int">
+        SELECT  COUNT(id)
+        FROM    OWNER
+        WHERE   id = #{id}
+    </select>
+
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.owner.OwnerDTO">
+      SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
+      FROM OWNER
+      WHERE id = #{id}
+       AND password = #{password}
+    </select>
+    
+    <select id="findById" resultType="com.delfood.dto.owner.OwnerDTO">
+      SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
+      FROM OWNER
+      WHERE id = #{id}
+    </select>
+    
+    <update id="updatePassword">
+      UPDATE OWNER
+      SET password = #{password}
+      WHERE id = #{id}
+    </update>
+    
+    <update id="updateMailAndTel">
+      UPDATE OWNER
+      SET
+      <if test="mail != null">
+      mail = #{mail},
+      </if>
+      <if test="tel != null">
+      tel = #{tel},
+      </if>
+      updated_at = NOW()
+      WHERE id = #{id}
+    </update>
+    
+
+
+</mapper>

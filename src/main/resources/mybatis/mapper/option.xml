@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.OptionMapper">
+    
+    <select id="findOptionbyMenuId" resultType="com.delfood.dto.menu.OptionDTO">
+		SELECT id, name, price, status, menu_id menuId
+		FROM OPTION
+		WHERE id = #{id}
+	</select>
+    
+    <insert id="insertOption">
+		INSERT INTO OPTION(name, price, menu_id)
+		VALUES(#{name}, #{price}, #{menuId})
+    </insert>
+    
+    <insert id="insertOptionList">
+		INSERT INTO OPTION(name, price, menu_id)
+		VALUES
+		<foreach collection="optionList" item="optionDTO" separator=",">
+			(#{optionDTO.name}, #{optionDTO.price}, #{menuId})
+		</foreach>
+    </insert>
+    
+    <delete id="deleteOption">
+    	UPDATE OPTION
+    	SET status = "DELETE"
+    	WHERE id = #{id}
+    </delete>
+    
+    <select id="totalPrice" resultType="long">
+        SELECT SUM(opt.price)
+        FROM   OPTION opt
+        WHERE  opt.id IN (<foreach collection="list" separator="," item="option">#{option.optionId}</foreach>)
+    </select>
+    
+    <select id="findById" resultType="com.delfood.dto.menu.OptionDTO">
+        SELECT id, name, price, status, menu_id menuId
+        FROM   OPTION
+        WHERE  id = #{id}
+    </select>
+
+</mapper>

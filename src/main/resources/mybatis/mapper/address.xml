@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.AddressMapper">
+    <sql id="selectAll">
+        SELECT  town_code townCode,
+                city_name cityName,
+                city_country_name cityCountryName,
+                town_name townName,
+                road_name_code roadNameCode,
+                road_name roadName,
+                building_number buildingNumber,
+                building_side_number buildingSideNumber,
+                zip_code zipCode,
+                building_management_number buildingManagementNumber,
+                building_name_for_city buildingNameForCity,
+                administrative_town_code administrativeTownCode,
+                administrative_town_name administrativeTownName,
+                classification_apartment_buildings classificationApartmentBuildings,
+                detail_building_name detailBuildingName,
+                building_center_point_x_coordinate buildingCenterPointXCoordinate,
+                building_center_point_y_coordinate buildingCenterPointYCoordinate,
+                exit_x_coordinate exitXCoordinate,
+                exit_y_coordinate exitYCoordinate
+        FROM    ADDRESS
+    </sql>
+    <select id="findByTownCode" resultType="com.delfood.dto.address.AddressDTO">
+        SELECT DISTINCT
+                A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName
+        FROM    ADDRESS A JOIN DELIVERY_LOCATION B
+        ON      A.town_code = B.town_code
+        WHERE   A.town_code = #{townCode}
+        AND     A.town_code > #{lastTownCode}
+        ORDER BY A.town_code ASC
+        LIMIT   10
+    </select>
+    
+    <select id="findByShopId" resultType="com.delfood.dto.address.AddressDTO">
+        SELECT DISTINCT
+                A.town_code townCode,
+                A.city_name cityName,
+                A.city_country_name cityCountryName,
+                A.town_name townName
+        FROM    ADDRESS A JOIN DELIVERY_LOCATION B
+        ON      A.town_code = B.town_code
+        WHERE   B.shop_id = #{shopId}
+        AND     A.town_code > #{lastTownCode}
+        ORDER BY A.town_code ASC
+        LIMIT   10
+    </select>
+    
+    <select id="findByZipName" resultType="com.delfood.dto.address.AddressDTO">
+        <include refid="selectAll"></include>
+        WHERE   1 = 1
+        AND town_name LIKE CONCAT(IFNULL(#{townName}, ''), '%')
+        AND building_number LIKE CONCAT(IFNULL(#{buildingNumber}, ''), '%')
+        AND building_side_number LIKE CONCAT(IFNULL(#{buildingSideNumber}, ''), '%')
+        AND building_name_for_city LIKE CONCAT(IFNULL(#{buildingNameForCity}, ''), '%')
+        AND building_management_number > IFNULL(#{lastSearchBuildingManagementNumber}, '0')
+        ORDER BY building_management_number
+        LIMIT   10
+    </select>
+    
+    <select id="findByRoadName" resultType="com.delfood.dto.address.AddressDTO">
+        <include refid="selectAll"></include>
+        WHERE   1 = 1
+        AND road_name LIKE CONCAT(IFNULL(#{roadName}, ''), '%')
+        AND building_number LIKE CONCAT(IFNULL(#{buildingNumber}, ''), '%')
+        AND building_side_number LIKE CONCAT(IFNULL(#{buildingSideNumber}, ''), '%')
+        AND building_name_for_city LIKE CONCAT(IFNULL(#{buildingNameForCity}, ''), '%')
+        AND building_management_number > IFNULL(#{lastSearchBuildingManagementNumber}, '0')
+        ORDER BY building_management_number
+        LIMIT   10
+    </select>
+    
+    <select id="findPositionByMemberId" resultType="com.delfood.dto.address.Position">
+        SELECT building_center_point_x_coordinate xPos, building_center_point_y_coordinate yPos
+        FROM   ADDRESS
+        WHERE  building_management_number = (SELECT MEMBER.address_code
+                                             FROM   MEMBER
+                                             WHERE  MEMBER.id = #{memberId})
+    </select>
+    
+    <select id="findPositionByShopId" resultType="com.delfood.dto.address.Position">
+        SELECT building_center_point_x_coordinate xPos, building_center_point_y_coordinate yPos
+        FROM   ADDRESS
+        WHERE  building_management_number = (SELECT SHOP.address_code
+                                             FROM   SHOP
+                                             WHERE  SHOP.id = #{shopId})
+    </select>
+    
+    <select id="findPositionByAddressCode" resultType="com.delfood.dto.address.Position">
+        SELECT building_center_point_x_coordinate xPos, building_center_point_y_coordinate yPos
+        FROM   ADDRESS
+        WHERE  building_management_number = #{addressCode} 
+    </select>
+</mapper>

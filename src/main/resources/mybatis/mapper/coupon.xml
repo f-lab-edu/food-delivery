@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.CouponMapper">
+
+    <insert id="insertCoupon" parameterType="com.delfood.dto.order.coupon.CouponDTO">
+        INSERT INTO COUPON(name, discount_type, discount_value, end_at)
+        VALUES(#{name}, #{discountType}, #{discountValue}, #{endAt})
+        <selectKey keyProperty="createdAt" resultType="java.time.LocalDateTime" order="AFTER">
+        SELECT created_at FROM COUPON
+        WHERE id = (SELECT LAST_INSERT_ID())
+        </selectKey>
+    </insert>
+    
+    <update id="updateCouponNameAndEndAt">
+        UPDATE COUPON
+        SET name = #{name}
+        AND end_at = #{endAt}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="deleteCoupon">
+        UPDATE COUPON
+        SET status = "DELETED"
+        WHERE id = #{id}
+    </update>
+    
+    <select id="findByEndAtGreaterThanNow" resultType="com.delfood.dto.order.coupon.CouponDTO">
+        SELECT id, name, discount_type, discount_value, created_at, end_at
+        FROM COUPON
+        WHERE end_at &gt; NOW()
+        AND status != 'DELETED'
+    </select>
+    
+</mapper>

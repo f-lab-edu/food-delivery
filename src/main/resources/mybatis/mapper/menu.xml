@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delfood.mapper.MenuMapper">
+
+	<resultMap type="com.delfood.dto.menu.MenuDTO" id="menuResult">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="price" column="price"/>
+		<result property="photo" column="photo"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
+		<result property="status" column="status"/>
+		<result property="priority" column="priority"/>
+		<result property="contcent" column="contcent"/>
+		<result property="menuGroupId" column="menuGroupId"/>
+		<collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="com.delfood.dto.menu.OptionDTO" select="findOptionbyMenuId"></collection>
+	</resultMap>
+
+	<sql id="selectMenu">
+		SELECT id, name, price, photo, created_at createdAt,
+		updated_at updatedAt, status, priority, content, menuGroupId
+		FROM MENU
+	</sql>
+	
+	<insert id="insertMenu">
+		INSERT INTO MENU(name, price, photo, priority, content, menu_group_id)
+		VALUES(#{name}, #{price}, #{photo},
+		(SELECT MAX(priority)+1 FROM MENU MENUS WHERE menu_group_id = #{menuGroupId}),
+		 #{content}, #{menuGroupId})
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+        SELECT LAST_INSERT_ID()
+    	</selectKey> 
+	</insert>
+	
+	<update id="deleteMenu">
+		UPDATE MENU
+		SET status = "DELETED"
+		WHERE id = #{id}
+	</update>
+	
+	<select id="checkMenu" resultType="integer">
+		SELECT COUNT(id)
+		FROM MENU
+		WHERE menu_Group_id = #{menuGroupId}
+		AND id = #{menuId}
+	</select>
+	
+	<update id="updateMenuPriority">
+		UPDATE MENU
+		SET priority = #{priority}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateMenu">
+		UPDATE MENU
+		SET name = #{name},
+		price = #{price},
+		photo = #{photo},
+		content = #{content}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findById" resultType="com.delfood.dto.menu.MenuDTO">
+		SELECT id, name, price, photo, content
+		FROM MENU
+		WHERE id = #{id}
+	</select>
+	
+	<select id="totalCount" resultType="integer">
+		SELECT COUNT(id)
+		FROM MENU
+		WHERE status != "DELETED"
+		AND menu_group_id = #{menuGroupId}
+	</select>
+	
+	<select id="findMenuWithOptionsById" resultMap="menuResult">
+        SELECT *
+        FROM MENU
+        WHERE id = #{id}
+    </select>
+    
+    <select id="findOptionbyMenuId" resultType="com.delfood.dto.menu.OptionDTO">
+        SELECT id, name, price, status, menu_id menuId
+        FROM OPTION
+        WHERE menu_id = #{id}
+    </select>
+	
+</mapper>
