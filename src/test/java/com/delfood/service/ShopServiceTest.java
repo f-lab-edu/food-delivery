@@ -1,11 +1,10 @@
 package com.delfood.service;
 
 import static org.mockito.BDDMockito.given;
-
-import com.delfood.dto.ShopDTO;
-import com.delfood.dto.ShopDTO.DeliveryType;
-import com.delfood.dto.ShopDTO.OrderType;
-import com.delfood.dto.ShopDTO.Status;
+import com.delfood.dto.shop.ShopDTO;
+import com.delfood.dto.shop.ShopDTO.DeliveryType;
+import com.delfood.dto.shop.ShopDTO.OrderType;
+import com.delfood.dto.shop.ShopDTO.Status;
 import com.delfood.mapper.DeliveryLocationMapper;
 import com.delfood.mapper.ShopMapper;
 

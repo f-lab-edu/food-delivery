@@ -2,7 +2,7 @@ package com.delfood.mapper;
 
 import com.delfood.controller.reqeust.GetAddressByZipRequest;
 import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
-import com.delfood.dto.AddressDTO;
+import com.delfood.dto.address.AddressDTO;
 import com.delfood.dto.address.Position;
 import java.util.List;
 import org.springframework.stereotype.Repository;

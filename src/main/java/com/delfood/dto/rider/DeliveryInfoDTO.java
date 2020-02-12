@@ -1,7 +1,7 @@
 package com.delfood.dto.rider;
 
-import com.delfood.dto.OrderBillDTO.SimpleAddressInfo;
-import com.delfood.dto.SimpleShopInfo;
+import com.delfood.dto.order.bill.OrderBillDTO.SimpleAddressInfo;
+import com.delfood.dto.shop.SimpleShopInfo;
 import java.time.LocalDateTime;
 import javax.annotation.Nullable;
 import lombok.Builder;

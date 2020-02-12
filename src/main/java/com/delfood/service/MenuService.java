@@ -1,6 +1,6 @@
 package com.delfood.service;
 
-import com.delfood.dto.MenuDTO;
+import com.delfood.dto.menu.MenuDTO;
 import com.delfood.mapper.MenuMapper;
 import java.util.List;
 

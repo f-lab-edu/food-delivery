@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OwnerMapper">
-    <insert id="insertOwner" parameterType="com.delfood.dto.OwnerDTO">
+    <insert id="insertOwner" parameterType="com.delfood.dto.owner.OwnerDTO">
         INSERT INTO OWNER(id, password, name, mail, tel)
         VALUES (#{id}, #{password}, #{name}, #{mail}, #{tel})
     </insert>
@@ -12,14 +12,14 @@
         WHERE   id = #{id}
     </select>
 
-    <select id="findByIdAndPassword" resultType="Owner">
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.owner.OwnerDTO">
       SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
       FROM OWNER
       WHERE id = #{id}
        AND password = #{password}
     </select>
     
-    <select id="findById" resultType="Owner">
+    <select id="findById" resultType="com.delfood.dto.owner.OwnerDTO">
       SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
       FROM OWNER
       WHERE id = #{id}

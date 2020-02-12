@@ -4,10 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-
-import com.delfood.dto.MenuDTO;
-import com.delfood.dto.MenuDTO.Status;
-import com.delfood.dto.OptionDTO;
+import com.delfood.dto.menu.MenuDTO;
+import com.delfood.dto.menu.OptionDTO;
+import com.delfood.dto.menu.MenuDTO.Status;
 import com.delfood.mapper.MenuMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

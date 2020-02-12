@@ -2,9 +2,8 @@ package com.delfood.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-
-import com.delfood.dto.MenuGroupDTO;
-import com.delfood.dto.MenuGroupDTO.Status;
+import com.delfood.dto.menu.MenuGroupDTO;
+import com.delfood.dto.menu.MenuGroupDTO.Status;
 import com.delfood.error.exception.TargetNotFoundException;
 import com.delfood.error.exception.TooManyModifiedException;
 import com.delfood.error.exception.menuGroup.InvalidMenuGroupCountException;

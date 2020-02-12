@@ -1,8 +1,7 @@
 package com.delfood.mapper;
 
-import com.delfood.dto.MenuDTO;
-
 import org.springframework.stereotype.Repository;
+import com.delfood.dto.menu.MenuDTO;
 
 @Repository
 public interface MenuMapper {

@@ -1,6 +1,6 @@
 package com.delfood.service;
 
-import com.delfood.dto.PaymentDTO;
+import com.delfood.dto.pay.PaymentDTO;
 import com.delfood.mapper.PaymentMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

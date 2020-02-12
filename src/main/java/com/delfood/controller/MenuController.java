@@ -1,7 +1,7 @@
 package com.delfood.controller;
 
-import com.delfood.dto.MenuDTO;
-import com.delfood.dto.OptionDTO;
+import com.delfood.dto.menu.MenuDTO;
+import com.delfood.dto.menu.OptionDTO;
 import com.delfood.service.MenuService;
 import com.delfood.service.OptionService;
 import java.util.List;

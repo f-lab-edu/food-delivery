@@ -2,7 +2,7 @@ package com.delfood.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-import com.delfood.dto.MemberDTO;
+import com.delfood.dto.member.MemberDTO;
 
 @Repository
 public interface MemberMapper {

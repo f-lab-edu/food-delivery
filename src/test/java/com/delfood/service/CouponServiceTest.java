@@ -2,10 +2,9 @@ package com.delfood.service;
 
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import com.delfood.dto.CouponDTO;
-import com.delfood.dto.CouponDTO.DiscountType;
-import com.delfood.dto.CouponDTO.Status;
+import com.delfood.dto.order.coupon.CouponDTO;
+import com.delfood.dto.order.coupon.CouponDTO.DiscountType;
+import com.delfood.dto.order.coupon.CouponDTO.Status;
 import com.delfood.error.exception.coupon.IssuedCouponExistException;
 import com.delfood.mapper.CouponMapper;
 import java.time.LocalDateTime;

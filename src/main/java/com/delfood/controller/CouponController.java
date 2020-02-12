@@ -1,6 +1,6 @@
 package com.delfood.controller;
 
-import com.delfood.dto.CouponDTO;
+import com.delfood.dto.order.coupon.CouponDTO;
 import com.delfood.service.CouponService;
 import lombok.extern.log4j.Log4j2;
 import java.time.LocalDateTime;
