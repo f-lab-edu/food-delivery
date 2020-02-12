@@ -1,9 +1,7 @@
 package com.delfood.dao.deliveery;
 
-import com.delfood.dto.address.Position;
 import com.delfood.dto.order.OrderDTO.OrderStatus;
 import com.delfood.dto.rider.DeliveryRiderDTO;
-import lombok.NonNull;
 import java.util.List;
 
 public interface DeliveryDao {

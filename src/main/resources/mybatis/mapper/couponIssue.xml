@@ -25,7 +25,7 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findByMemberId" resultType="couponIssue">
+    <select id="findByMemberId" resultType="com.delfood.dto.order.coupon.CouponIssueDTO">
         SELECT i.id, i.created_at createdAt, i.status, i.coupon_id couponId, i.member_id memberId, i.payment_id paymentId
         ,c.name, c.discount_type discountType, c.discount_value discountValue, c.end_at endAt
         FROM COUPON_ISSUE i

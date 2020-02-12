@@ -10,6 +10,7 @@ import lombok.NonNull;
 
 @Getter
 @EqualsAndHashCode(of = "id")
+@NoArgsConstructor
 public class DeliveryRiderDTO {
   @NonNull
   private String riderId;

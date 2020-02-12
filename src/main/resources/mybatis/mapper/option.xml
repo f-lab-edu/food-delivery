@@ -2,13 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.OptionMapper">
     
-    <select id="findOptionbyMenuId" resultType="option">
+    <select id="findOptionbyMenuId" resultType="com.delfood.dto.menu.OptionDTO">
 		SELECT id, name, price, status, menu_id menuId
 		FROM OPTION
 		WHERE id = #{id}
 	</select>
     
-    <insert id="insertOption" parameterType="option">
+    <insert id="insertOption">
 		INSERT INTO OPTION(name, price, menu_id)
 		VALUES(#{name}, #{price}, #{menuId})
     </insert>

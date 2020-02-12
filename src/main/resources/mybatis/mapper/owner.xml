@@ -12,14 +12,14 @@
         WHERE   id = #{id}
     </select>
 
-    <select id="findByIdAndPassword" resultType="Owner">
+    <select id="findByIdAndPassword" resultType="com.delfood.dto.owner.OwnerDTO">
       SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
       FROM OWNER
       WHERE id = #{id}
        AND password = #{password}
     </select>
     
-    <select id="findById" resultType="Owner">
+    <select id="findById" resultType="com.delfood.dto.owner.OwnerDTO">
       SELECT id, password, name, mail, tel, created_at createdAt, updated_at updatedAt, status
       FROM OWNER
       WHERE id = #{id}
