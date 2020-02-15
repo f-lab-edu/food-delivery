@@ -1,35 +1,30 @@
 package com.delfood.dao.deliveery;
 
-import com.delfood.dto.OrderDTO.OrderStatus;
-import com.delfood.dto.address.Position;
+import com.delfood.dto.order.OrderDTO.OrderStatus;
 import com.delfood.dto.rider.DeliveryRiderDTO;
 import com.delfood.service.OrderService;
-import lombok.extern.log4j.Log4j2;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.concurrent.ThreadSafe;
-
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-@Repository("multiThreadDeliveryDao")
+@Repository("localMemoryDeliveryDao")
 @ThreadSafe
 @Log4j2
 public class LocalMemoryDeliveryDao implements DeliveryDao{
   private ConcurrentHashMap<String, DeliveryRiderDTO> riders;
   private ConcurrentHashMap<Long, OrderStatus> orders;
   
-  @Value("rider.expire")
-  private static Long expireTime;
+  @Value("${expire.fcm.rider}")
+  private Long expireTime;
   
   @Autowired
   private OrderService orderService;

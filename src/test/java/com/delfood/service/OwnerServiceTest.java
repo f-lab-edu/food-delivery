@@ -2,8 +2,7 @@ package com.delfood.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-
-import com.delfood.dto.OwnerDTO;
+import com.delfood.dto.owner.OwnerDTO;
 import com.delfood.error.exception.DuplicateException;
 import com.delfood.mapper.OwnerMapper;
 import com.delfood.utils.SHA256Util;

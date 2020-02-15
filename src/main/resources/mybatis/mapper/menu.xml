@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.delfood.mapper.MenuMapper">
 
-	<resultMap type="menu" id="menuResult">
+	<resultMap type="com.delfood.dto.menu.MenuDTO" id="menuResult">
 		<result property="id" column="id"/>
 		<result property="name" column="name"/>
 		<result property="price" column="price"/>
@@ -13,7 +13,7 @@
 		<result property="priority" column="priority"/>
 		<result property="contcent" column="contcent"/>
 		<result property="menuGroupId" column="menuGroupId"/>
-		<collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="option" select="findOptionbyMenuId"></collection>
+		<collection property="optionList" column="id" javaType="java.util.ArrayList" ofType="com.delfood.dto.menu.OptionDTO" select="findOptionbyMenuId"></collection>
 	</resultMap>
 
 	<sql id="selectMenu">
@@ -22,7 +22,7 @@
 		FROM MENU
 	</sql>
 	
-	<insert id="insertMenu" parameterType="menu">
+	<insert id="insertMenu">
 		INSERT INTO MENU(name, price, photo, priority, content, menu_group_id)
 		VALUES(#{name}, #{price}, #{photo},
 		(SELECT MAX(priority)+1 FROM MENU MENUS WHERE menu_group_id = #{menuGroupId}),
@@ -51,7 +51,7 @@
 		WHERE id = #{id}
 	</update>
 	
-	<update id="updateMenu" parameterType="menu">
+	<update id="updateMenu">
 		UPDATE MENU
 		SET name = #{name},
 		price = #{price},
@@ -60,7 +60,7 @@
 		WHERE id = #{id}
 	</update>
 
-	<select id="findById" resultType="menu">
+	<select id="findById" resultType="com.delfood.dto.menu.MenuDTO">
 		SELECT id, name, price, photo, content
 		FROM MENU
 		WHERE id = #{id}
@@ -79,7 +79,7 @@
         WHERE id = #{id}
     </select>
     
-    <select id="findOptionbyMenuId" resultType="option">
+    <select id="findOptionbyMenuId" resultType="com.delfood.dto.menu.OptionDTO">
         SELECT id, name, price, status, menu_id menuId
         FROM OPTION
         WHERE menu_id = #{id}

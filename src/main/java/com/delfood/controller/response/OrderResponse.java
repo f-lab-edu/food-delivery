@@ -1,6 +1,6 @@
 package com.delfood.controller.response;
 
-import com.delfood.dto.ItemsBillDTO;
+import com.delfood.dto.order.bill.ItemsBillDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

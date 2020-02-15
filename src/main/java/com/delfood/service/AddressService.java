@@ -2,7 +2,7 @@ package com.delfood.service;
 
 import com.delfood.controller.reqeust.GetAddressByZipRequest;
 import com.delfood.controller.reqeust.GetAddressesByRoadRequest;
-import com.delfood.dto.AddressDTO;
+import com.delfood.dto.address.AddressDTO;
 import com.delfood.dto.address.Position;
 import com.delfood.mapper.AddressMapper;
 import lombok.extern.log4j.Log4j2;

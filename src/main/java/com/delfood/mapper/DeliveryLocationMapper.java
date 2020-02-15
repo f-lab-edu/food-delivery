@@ -1,9 +1,9 @@
 package com.delfood.mapper;
 
-import com.delfood.dto.DeliveryLocationDTO;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Repository;
+import com.delfood.dto.address.DeliveryLocationDTO;
 
 @Repository
 public interface DeliveryLocationMapper {

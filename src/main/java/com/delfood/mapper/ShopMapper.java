@@ -1,9 +1,9 @@
 package com.delfood.mapper;
 
-import com.delfood.dto.ItemsBillDTO.ShopInfo;
-import com.delfood.dto.ItemsBillDTO;
-import com.delfood.dto.ShopDTO;
-import com.delfood.dto.ShopUpdateDTO;
+import com.delfood.dto.order.bill.ItemsBillDTO;
+import com.delfood.dto.order.bill.ItemsBillDTO.ShopInfo;
+import com.delfood.dto.shop.ShopDTO;
+import com.delfood.dto.shop.ShopUpdateDTO;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 

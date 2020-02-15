@@ -27,7 +27,6 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableAsync // 메서드를 비동기 방식으로 실행할 수 있도록 설정한다.
 @EnableScheduling // 스케줄링을 허용한다.
 public class FoodDeliveryApplication {
-
   public static void main(String[] args) {
     SpringApplication.run(FoodDeliveryApplication.class, args);
   }

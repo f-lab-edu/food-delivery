@@ -1,9 +1,10 @@
 package com.delfood.service;
 
-import com.delfood.dto.AddressDTO;
-import com.delfood.dto.DeliveryLocationDTO;import com.delfood.dto.ItemsBillDTO;
-import com.delfood.dto.ShopDTO;
-import com.delfood.dto.ShopUpdateDTO;
+import com.delfood.dto.address.AddressDTO;
+import com.delfood.dto.address.DeliveryLocationDTO;
+import com.delfood.dto.order.bill.ItemsBillDTO;
+import com.delfood.dto.shop.ShopDTO;
+import com.delfood.dto.shop.ShopUpdateDTO;
 import com.delfood.error.exception.shop.CanNotCloseShopException;
 import com.delfood.error.exception.shop.CanNotOpenShopException;
 import com.delfood.mapper.DeliveryLocationMapper;

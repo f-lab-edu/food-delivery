@@ -1,7 +1,7 @@
 package com.delfood.service;
 
 import com.delfood.aop.MemberLoginCheck;
-import com.delfood.dto.PaymentDTO;
+import com.delfood.dto.pay.PaymentDTO;
 import com.delfood.error.exception.mockPay.MockPayException;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;

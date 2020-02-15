@@ -2,10 +2,10 @@ package com.delfood.controller;
 
 import com.delfood.aop.LoginCheck;
 import com.delfood.aop.LoginCheck.UserType;
+import com.delfood.dto.owner.OwnerDTO;
+import com.delfood.dto.owner.OwnerDTO.Status;
 import com.delfood.aop.MemberLoginCheck;
 import com.delfood.aop.OwnerLoginCheck;
-import com.delfood.dto.OwnerDTO;
-import com.delfood.dto.OwnerDTO.Status;
 import com.delfood.error.exception.DuplicateIdException;
 import com.delfood.service.OwnerService;
 import com.delfood.service.PushService;

@@ -25,7 +25,7 @@
     </sql>
 
 
-    <insert id="insertShop" parameterType="com.delfood.dto.ShopDTO">
+    <insert id="insertShop" parameterType="com.delfood.dto.shop.ShopDTO">
         INSERT INTO SHOP(
             name,
             delivery_type, 
@@ -67,7 +67,7 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findByOwnerId" resultType="com.delfood.dto.ShopDTO">
+    <select id="findByOwnerId" resultType="com.delfood.dto.shop.ShopDTO">
         <include refid="selectShop"></include>
         WHERE owner_id = #{ownerId}
         <if test="lastId != null">AND id > #{lastId}</if>
@@ -75,7 +75,7 @@
     </select>
     
     
-    <select id="findById" resultType="com.delfood.dto.ShopDTO">
+    <select id="findById" resultType="com.delfood.dto.shop.ShopDTO">
         <include refid="selectShop"></include>
         WHERE id = #{id}
     </select>
@@ -142,7 +142,7 @@
         AND    work_condition != 'OPEN'
     </select>
     
-    <select id="findByTownCode" resultType="com.delfood.dto.ShopDTO">
+    <select id="findByTownCode" resultType="com.delfood.dto.shop.ShopDTO">
         SELECT  A.id, 
                 A.name,
                 A.delivery_type deliveryType,
@@ -157,7 +157,7 @@
     </select>
     
     
-    <select id="findByBeOpen" resultType="com.delfood.dto.ShopDTO">
+    <select id="findByBeOpen" resultType="com.delfood.dto.shop.ShopDTO">
         SELECT  id, name
         FROM    SHOP
         WHERE   status != 'DELETE'
@@ -165,7 +165,7 @@
         AND     work_condition = 'CLOSE'
     </select>
     
-    <select id="findByBeClose" resultType="com.delfood.dto.ShopDTO">
+    <select id="findByBeClose" resultType="com.delfood.dto.shop.ShopDTO">
         SELECT  id, name
         FROM    SHOP
         WHERE   status != 'DELETE'
@@ -173,7 +173,7 @@
         AND     work_condition = 'OPEN'
     </select>
     
-    <select id="findIdAndNameByMenuId" resultType="com.delfood.dto.ItemsBillDTO$ShopInfo">
+    <select id="findIdAndNameByMenuId" resultType="com.delfood.dto.order.bill.ItemsBillDTO$ShopInfo">
         SELECT s.id, s.name, address_code addressCode
         FROM   SHOP s JOIN MENU_GROUP g ON (s.id = g.shop_id)
                       JOIN   MENU m ON (g.id = m.menu_group_id)
