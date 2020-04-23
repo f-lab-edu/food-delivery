@@ -1,3 +1,7 @@
+## DelFood 서버(CI/CD서버를 포함한 모든 서버)는 비용 문제로 2020-04-23일 이후로 비활성화하였습니다. 
+<br><br>
+
+
 DelFood
 =============
 전국에 있는 배달음식점과 소비자를 연결하는 중개 플랫폼 서버 입니다.<br>
@@ -70,7 +74,7 @@ Spring boot, Maven, Mybatis, Redis, Docker, MariaDB, Jenkins, Java8, Naver Cloud
 Wiki에 기술 이슈에 대한 고민과 해결 방법을 포스팅한 개인 블로그의 url이 포함되어있습니다.<br>
 <br>
 ## CI
-Jenkins : <http://106.10.51.119:8080/job/Delfood/><br>
+Jenkins : 서버 운영을 종료하였습니다.<br>
 Naver Cloud Platform(Cloud server)를 사용하고 있습니다.<br>
 PR시마다 자동 Build 및 Test 적용<br>
 비로그인 상태로도 확인이 가능합니다.<br>
